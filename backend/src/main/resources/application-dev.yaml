@@ -1,0 +1,20 @@
+# DEV profile configuration
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${POSTGRES_DB:wteam_db}
+    username: ${POSTGRES_USER:admin}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+    com.mog_academy.backend: DEBUG
+    org.springframework: INFO
+    org.springframework.jdbc.core: DEBUG
