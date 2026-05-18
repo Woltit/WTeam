@@ -21,11 +21,11 @@ CREATE TABLE user_profiles (
                                last_name VARCHAR(100) NOT NULL,
                                first_name VARCHAR(100) NOT NULL,
                                middle_name VARCHAR(100),
-                               birth_date DATE NOT NULL,
-                               phone VARCHAR(15) NOT NULL,
+                               birth_date DATE,
+                               phone_number VARCHAR(15),
                                bio TEXT,
-                               passport_id VARCHAR(50) UNIQUE NOT NULL,
-                               verification_status verification_status NOT NULL DEFAULT 'PENDING',
+--                                passport_id VARCHAR(50) UNIQUE ,
+                               verification_status verification_status DEFAULT 'PENDING',
                                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                                updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -102,7 +102,7 @@ CREATE TABLE transactions (
                               created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-8CREATE TABLE chat_rooms (
+CREATE TABLE chat_rooms (
                             id BIGSERIAL PRIMARY KEY,
                             booking_id BIGINT UNIQUE REFERENCES bookings(id) ON DELETE CASCADE,
                             created_at TIMESTAMP NOT NULL DEFAULT NOW()

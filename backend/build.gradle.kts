@@ -38,9 +38,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.flywaydb:flyway-database-postgresql")
-    implementation("io.jsonwebtoken:jjwt-api:${jwtVersion}")
-    implementation("me.paulschwarz:spring-dotenv:${dotenvVersion}")
-
+    implementation("io.jsonwebtoken:jjwt-api:$jwtVersion")
+    implementation("me.paulschwarz:spring-dotenv:$dotenvVersion")
 
     compileOnly("org.projectlombok:lombok")
 

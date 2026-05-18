@@ -13,13 +13,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "categories")
 @SuperBuilder
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 public class Category extends BaseEntity {
 
     @Column(name = "name", length = 255, nullable = false)
     private String name;
-    }
-
+}
