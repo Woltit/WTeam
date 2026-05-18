@@ -1,18 +1,14 @@
 package com.wteam.backend.user.dto;
 
 import com.wteam.backend.common.enums.Role;
-import com.wteam.backend.common.enums.VerificationStatus;
+import com.wteam.backend.user_profile.dto.UserProfileResponse;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 public record UserResponse(
+        Long id,
         String email,
         Role role,
-        String lastName,
-        String firstName,
-        String middleName,
-        LocalDate birthDate,
-        String phone,
-        String bio,
-        VerificationStatus verificationStatus
+        UserProfileResponse profile,
+        Instant createdAt
 ) {}

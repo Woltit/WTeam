@@ -11,6 +11,12 @@ spring:
     validate-on-migrate: true
 
 
+jwt:
+  token:
+    signing_key: ${JWT_SIGNING_KEY}
+    expiration: ${JWT_EXPIRATION}
+
+
 server:
   servlet:
     context-path: /api/v1

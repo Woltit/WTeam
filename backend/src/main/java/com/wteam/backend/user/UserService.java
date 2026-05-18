@@ -1,13 +1,21 @@
 package com.wteam.backend.user;
 
-import com.wteam.backend.exception.UserAlreadyExistsException;
-import com.wteam.backend.user.dto.UserRequest;
+import com.wteam.backend.common.enums.Role;
+import com.wteam.backend.common.enums.VerificationStatus;
+import com.wteam.backend.exception.user_profile.ProfileIncompleteException;
+import com.wteam.backend.exception.user_profile.ProfileNotFoundException;
+import com.wteam.backend.exception.user.UserNotFoundException;
 import com.wteam.backend.user.dto.UserResponse;
+import com.wteam.backend.user_profile.UserProfile;
+import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,26 +23,90 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    //
+    // USER
+    //
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAllWithProfile()
-                .stream()
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+        return userRepository.findAllWithProfile(pageable)
+                .map(userMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Long id) {
+        return userRepository.findById(id)
                 .map(userMapper::toResponse)
-                .toList();
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+        Assert.hasText(email, "Email must not be empty");
+
+        return userRepository.findByEmail(email)
+                .map(userMapper::toResponse)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     @Transactional
-    public UserResponse createUser(UserRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
-            throw new UserAlreadyExistsException("");
-        }
+    public void updateRole(Role role, Long id) {
+        Assert.notNull(role, "Role must not be null");
 
-        User user = userMapper.toEntity(request);
-
-        User savedUser = userRepository.save(user);
-
-        return userMapper.toResponse(savedUser);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        user.setRole(role);
     }
 
+    @Transactional
+    public void deleteUserById(Long id) {
+        User user = userRepository.findById(id)
+                        .orElseThrow(() -> new UserNotFoundException(id));
+
+        userRepository.delete(user);
+    }
+
+
+    // USER PROFILE
+    @Transactional
+    public UserResponse updateProfile(Long userId, UserProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
+                        .orElseThrow(() -> new ProfileNotFoundException(userId));
+
+        userMapper.updateProfileFromRequest(request, userProfile);
+        return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    public UserResponse updateVerificationStatus(Long userId, VerificationStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
+                        .orElseThrow(() -> new ProfileNotFoundException(userId));
+
+        userProfile.setVerificationStatus(status);
+        return userMapper.toResponse(user);
+    }
+
+
+
+
+    @Transactional(readOnly = true)
+    public void validateUserCanPlaceOffers(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        UserProfile profile = Optional.ofNullable(user.getUserProfile())
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
+
+        if (profile.getPhoneNumber() == null || profile.getBirthDate() == null ||
+            profile.getVerificationStatus() != VerificationStatus.VERIFIED
+        ) {
+            throw new ProfileIncompleteException(userId);
+        }
+    }
 
 }

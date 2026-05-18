@@ -1,21 +1,28 @@
 package com.wteam.backend.user.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record UserRequest(
-    @NotNull(message = "Email cannot be null")
-    @Email(message = "Invalid email")
-    String email,
+import static com.wteam.backend.common.constants.ValidationConstants.User.*;
+import static com.wteam.backend.common.constants.ValidationConstants.UserProfile.*;
 
-    @NotNull(message = "Password cannot be null")
-    @Size(min = 8, message = "Password cannot be less than 8 characters")
-    String password,
+public record UserRequest (
+        @NotBlank(message = EMAIL_BLANK_MSG)
+        @Email(message = EMAIL_INVALID_FORMAT)
+        @Size(max = EMAIL_MAX_LENGTH)
+        String email,
 
-    @NotNull(message = "LastName cannot be null")
-    String lastName,
+        @NotBlank(message = PASSWORD_BLANK_MSG)
+        @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH,
+            message = PASSWORD_INVALID_FORMAT)
+        String password,
 
-    @NotNull(message = "FirstName cannot be null")
-    String firstName
+        @NotBlank(message = LAST_NAME_BLANK_MSG)
+        @Size(max = NAME_MAX_LENGTH)
+        String lastName,
+
+        @NotBlank(message = FIRST_NAME_BLANK_MSG)
+        @Size(max = NAME_MAX_LENGTH)
+        String firstName
 ) {}

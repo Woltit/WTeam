@@ -42,9 +42,9 @@ TABLE user_profiles {
   first_name VARCHAR(100) [not null]
   middle_name VARCHAR(100)
   birth_date DATE [not null]
-  phone VARCHAR(15) [not null]
+  phone_number VARCHAR(15) [not null]
   bio TEXT
-  passport_id VARCHAR(50) [unique, not null]
+//  passport_id VARCHAR(50) [unique, not null]
   verification_status VerificationStatus [not null, default: 'PENDING']
 
   created_at timestamp [not null, default: `now()`]

@@ -1,7 +1,6 @@
 package com.wteam.backend.user_profile;
 
 import com.wteam.backend.common.entity.BaseEntity;
-import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.user.User;
 import jakarta.persistence.*;
@@ -32,10 +31,10 @@ public class UserProfile extends BaseEntity {
     @Column(name = "middle_name", length = 100)
     private String middleName;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "phone", length = 15, nullable = false)
+    @Column(name = "phoneNumber", length = 15)
     private String phoneNumber;
 
     @Column(name = "bio")

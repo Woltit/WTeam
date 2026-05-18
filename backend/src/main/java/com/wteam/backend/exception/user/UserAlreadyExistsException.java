@@ -1,4 +1,4 @@
-package com.wteam.backend.exception;
+package com.wteam.backend.exception.user;
 
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {
