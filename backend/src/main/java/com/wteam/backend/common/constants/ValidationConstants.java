@@ -61,7 +61,7 @@ public final class ValidationConstants {
         public static final int NAME_MAX_LENGTH = 100;
 
         /** Максимальна довжина номера телефону за стандартом E.164 (включаючи знак +). */
-        public static final int PHONE_NUMBER_LENGTH = 15;
+        public static final int PHONE_NUMBER_LENGTH = 20;
 
         // --- Messages ---
 

@@ -4,14 +4,12 @@ import com.wteam.backend.common.entity.BaseEntity;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static com.wteam.backend.common.constants.ValidationConstants.UserProfile.*;
@@ -92,7 +90,7 @@ public class UserProfile extends BaseEntity {
      * {@link com.wteam.backend.common.constants.ValidationConstants.UserProfile#PHONE_NUMBER_LENGTH PHONE_NUMBER_LENGTH}.
      * </p>
      */
-    @Column(name = "phoneNumber", length = PHONE_NUMBER_LENGTH)
+    @Column(name = "phone_number", length = PHONE_NUMBER_LENGTH)
     private String phoneNumber;
 
     /**
@@ -101,8 +99,11 @@ public class UserProfile extends BaseEntity {
      * Необов'язкове текстове поле довільної довжини.
      * </p>
      */
-    @Column(name = "bio")
+    @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
+
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
 
     /**
      * Статус верифікації профілю модератором.
@@ -117,4 +118,20 @@ public class UserProfile extends BaseEntity {
     @Column(name = "verification_status", nullable = false, columnDefinition = "verification_status")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private VerificationStatus verificationStatus;
+
+    @Column(name = "renter_trust_score", precision = 3, scale = 2)
+    private BigDecimal renterTrustScore;
+
+    @Column(name = "owner_trust_score", precision = 3, scale = 2)
+    private BigDecimal ownerTrustScore;
+
+    @Column(name = "total_successful_rents")
+    private Integer totalSuccessfulRents;
+
+    @PrePersist
+    private void setDefaults() {
+        if (renterTrustScore     == null) renterTrustScore     = BigDecimal.ZERO;
+        if (ownerTrustScore      == null) ownerTrustScore      = BigDecimal.ZERO;
+        if (totalSuccessfulRents == null) totalSuccessfulRents = 0;
+    }
 }

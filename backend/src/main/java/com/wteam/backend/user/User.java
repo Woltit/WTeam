@@ -4,13 +4,12 @@ import com.wteam.backend.common.entity.BaseEntity;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.user_profile.UserProfile;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.time.Instant;
 
 import static com.wteam.backend.common.constants.ValidationConstants.User.*;
 
@@ -77,4 +76,17 @@ public class User extends BaseEntity {
      */
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private UserProfile userProfile;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
+    @Column(name = "blocked_at")
+    private Instant blockedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "blocked_by", referencedColumnName = "id")
+    private User blockedBy;
+
+    @Column(name = "block_reason", columnDefinition = "TEXT")
+    private String blockReason;
 }
