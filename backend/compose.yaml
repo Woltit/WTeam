@@ -1,10 +1,27 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:latest-alpine'
     container_name: "wteam_container"
+    env_file:
+      - .env
+      - .env.local
     environment:
       - 'POSTGRES_DB=${DB_NAME}'
       - 'POSTGRES_USER=${DB_USERNAME}'
       - 'POSTGRES_PASSWORD=${DB_PASSWORD}'
+      - TZ=Europe/Kyiv
+      - PGTZ=Europe/Kyiv
+    volumes:
+      - postgres:/data/postgres
     ports:
       - '5432:5432'
+    networks:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres:
+
+networks:
+  postgres:
+    driver: bridge

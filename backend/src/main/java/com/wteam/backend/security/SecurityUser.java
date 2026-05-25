@@ -7,9 +7,11 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Адаптер (клас-обгортка) над сутністю {@link User} для інтеграції зі Spring Security.
@@ -23,8 +25,15 @@ import java.util.List;
  * @see User
  */
 @RequiredArgsConstructor
-public class SecurityUser implements UserDetails {
+public class SecurityUser implements UserDetails, OAuth2User {
     private final transient User user;
+    private transient Map<String, Object> attributes;
+
+    public static SecurityUser create(User user, Map<String, Object> attributes) {
+        SecurityUser securityUser = new SecurityUser(user);
+        securityUser.attributes = attributes;
+        return securityUser;
+    }
 
     /**
      * Повертає унікальний ідентифікатор користувача з бази даних.
@@ -42,6 +51,16 @@ public class SecurityUser implements UserDetails {
      */
     public Role getRole() {
         return user.getRole();
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public String getName() {
+        return String.valueOf(user.getId());
     }
 
     /**
@@ -91,13 +110,17 @@ public class SecurityUser implements UserDetails {
     }
 
     /**
-     * Перевіряє, чи не заблокований обліковий запис.
+     * Перевіряє, чи не заблокований обліковий запис адміністратором.
+     * <p>
+     * Статус визначається полем {@code isActive} сутності {@link User}.
+     * Якщо користувача заблоковано, він не зможе пройти автентифікацію.
+     * </p>
      *
-     * @return always {@code true} (система блокування користувачів поки відсутня).
+     * @return {@code true}, якщо користувач активний (не заблокований); {@code false} в іншому випадку.
      */
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return user.isActive();
     }
 
     /**
@@ -112,11 +135,15 @@ public class SecurityUser implements UserDetails {
 
     /**
      * Перевіряє, чи увімкнений (активний) обліковий запис користувача.
+     * <p>
+     * Відображає поточний статус доступу до системи (базується на полі {@code isActive}).
+     * Заблоковані користувачі вважаються неактивними.
+     * </p>
      *
-     * @return завжди {@code true} (всі створені користувачі активні за замовчуванням).
+     * @return {@code true}, якщо користувач активний; {@code false} в іншому випадку.
      */
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.isActive();
     }
 }

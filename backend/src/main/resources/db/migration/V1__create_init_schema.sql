@@ -12,7 +12,7 @@ CREATE TYPE item_condition          AS ENUM
 CREATE TYPE renting_status          AS ENUM
     ('ACTIVE', 'RENTED', 'INACTIVE', 'DELETED');
 CREATE TYPE verification_status     AS ENUM
-    ('PENDING', 'VERIFIED', 'REJECTED');
+    ('UNVERIFIED', 'PENDING', 'VERIFIED', 'REJECTED');
 CREATE TYPE booking_status          AS ENUM
     ('PENDING', 'APPROVED', 'REJECTED', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTE');
 CREATE TYPE transaction_type        AS ENUM
@@ -36,6 +36,8 @@ CREATE TYPE dispute_status          AS ENUM
     ('OPEN', 'UNDER_REVIEW', 'RESOLVED', 'CLOSED');
 CREATE TYPE dispute_reason          AS ENUM
     ('ITEM_DAMAGED', 'ITEM_NOT_RETURNED', 'PAYMENT_ISSUE', 'OTHER');
+CREATE TYPE auth_provider          AS ENUM
+    ('LOCAL', 'GOOGLE', 'APPLE');
 
 -- ================================================
 -- USERS
@@ -44,13 +46,14 @@ CREATE TABLE users (
     id              BIGSERIAL       PRIMARY KEY,
     email           VARCHAR(255)    UNIQUE NOT NULL,
     password        VARCHAR(255),
+    auth_provider   auth_provider   NOT NULL
+        DEFAULT 'LOCAL',
     role            role            NOT NULL
         DEFAULT 'USER',
     is_active       BOOLEAN         NOT NULL
         DEFAULT TRUE,
     blocked_at      TIMESTAMP,
-    blocked_by      BIGINT          REFERENCES users(id)
-        ON DELETE SET NULL,
+    blocked_by_id   BIGINT,
     block_reason    TEXT,
     created_at      TIMESTAMP       NOT NULL
         DEFAULT NOW(),
@@ -73,7 +76,7 @@ CREATE TABLE user_profiles (
     bio                     TEXT,
     avatar_url              TEXT,
     verification_status verification_status
-        NOT NULL DEFAULT 'PENDING',
+        NOT NULL DEFAULT 'UNVERIFIED',
     renter_trust_score      DECIMAL(3, 2)
         DEFAULT 0.00,
     owner_trust_score       DECIMAL(3, 2)
@@ -125,7 +128,7 @@ CREATE TABLE refresh_tokens (
 -- ================================================
 CREATE TABLE categories (
     id          BIGSERIAL       PRIMARY KEY,
-    parent_id   BIGINT REFERENCES categories(id)
+    parent_id   BIGINT          REFERENCES categories(id)
         ON DELETE SET NULL,
     name        VARCHAR(255)    NOT NULL,
     slug        VARCHAR(100)    UNIQUE NOT NULL,

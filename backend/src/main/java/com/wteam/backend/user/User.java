@@ -1,6 +1,7 @@
 package com.wteam.backend.user;
 
 import com.wteam.backend.common.entity.BaseEntity;
+import com.wteam.backend.common.enums.AuthProvider;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.user_profile.UserProfile;
 import jakarta.persistence.*;
@@ -51,6 +52,12 @@ public class User extends BaseEntity {
     @Column(name = "password", length = PASSWORD_MAX_LENGTH)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false, columnDefinition = "auth_provider")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Builder.Default
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
     /**
      * Системна роль користувача.
      * <p>
@@ -63,7 +70,8 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, columnDefinition = "role")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    private Role role;
+    @Builder.Default
+    private Role role = Role.USER;
 
     /**
      * Персональний профіль користувача.
@@ -78,14 +86,14 @@ public class User extends BaseEntity {
     private UserProfile userProfile;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private boolean isActive = true;
 
     @Column(name = "blocked_at")
     private Instant blockedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "blocked_by", referencedColumnName = "id")
-    private User blockedBy;
+    @Column(name = "blocked_by_id")
+    private Long blockedById;
 
     @Column(name = "block_reason", columnDefinition = "TEXT")
     private String blockReason;

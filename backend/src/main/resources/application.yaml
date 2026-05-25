@@ -16,8 +16,11 @@ jwt:
     signing_key: ${JWT_SIGNING_KEY}
     expiration: ${JWT_EXPIRATION}
 
-
 server:
   servlet:
     context-path: /api/v1
   port: 8080
+
+app:
+  frontend:
+    oauth2-redirect-uri: "http://localhost:5173/oauth2/redirect"

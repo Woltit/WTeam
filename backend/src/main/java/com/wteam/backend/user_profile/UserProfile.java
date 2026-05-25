@@ -117,7 +117,8 @@ public class UserProfile extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false, columnDefinition = "verification_status")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    private VerificationStatus verificationStatus;
+    @Builder.Default
+    private VerificationStatus verificationStatus = VerificationStatus.UNVERIFIED;
 
     @Column(name = "renter_trust_score", precision = 3, scale = 2)
     private BigDecimal renterTrustScore;

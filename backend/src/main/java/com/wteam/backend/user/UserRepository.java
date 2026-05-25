@@ -1,9 +1,12 @@
 package com.wteam.backend.user;
 
+import com.wteam.backend.common.enums.Role;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -32,7 +35,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param pageable об'єкт конфігурації пагінації та сортування (сторінка, розмір, напрямок сортування).
      * @return {@link Page} із сутностями {@link User}, у яких поле профілю вже ініціалізовано.
      */
-    @EntityGraph(attributePaths = {"userProfile"}) // Виправлено з "profile" на "userProfile"
+    @EntityGraph(attributePaths = {"userProfile"})
+    @Query("SELECT u FROM User u")
     Page<User> findAllWithProfile(Pageable pageable);
 
     /**
@@ -44,7 +48,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param email електронна пошта для пошуку.
      * @return {@link Optional}, що містить знайденого користувача, або порожній об'єкт, якщо користувача не знайдено.
      */
+    @EntityGraph(attributePaths = {"userProfile"})
     Optional<User> findByEmail(String email);
+
+    @EntityGraph(attributePaths = {"userProfile"})
+    Optional<User> findById(@NonNull Long id);
+
+    @EntityGraph(attributePaths = {"userProfile"})
+    Page<User> findAllByIsActiveTrue(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"userProfile"})
+    Page<User> findAllByIsActiveFalse(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"userProfile"})
+    Page<User> findAllByRole(Role role, Pageable pageable);
 
     /**
      * Перевіряє, чи існує в системі користувач із вказаним email.

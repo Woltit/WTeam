@@ -91,4 +91,9 @@ public final class ValidationConstants {
          */
         public static final String PHONE_REGEX = "^\\+[1-9]\\d{10,14}$";
     }
+
+    public static final class Category {
+        public static final int NAME_MAX_LENGTH = 255;
+        public static final int SLUG_MAX_LENGTH = 100;
+    }
 }

@@ -8,6 +8,7 @@ import com.wteam.backend.exception.user.UserNotFoundException;
 import com.wteam.backend.user.dto.UserResponse;
 import com.wteam.backend.user_profile.UserProfile;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
+import com.wteam.backend.user_profile.dto.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -48,6 +50,24 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(email));
     }
 
+    @Transactional(readOnly = true)
+    public Page<UserResponse> getAllUsersWhoIsActive(Pageable pageable) {
+        return userRepository.findAllByIsActiveTrue(pageable)
+                .map(userMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserResponse> getAllUsersWhoIsNotActive(Pageable pageable) {
+        return userRepository.findAllByIsActiveFalse(pageable)
+                .map(userMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserResponse> getAllUsersByRole(Role role, Pageable pageable) {
+        return userRepository.findAllByRole(role, pageable)
+                .map(userMapper::toResponse);
+    }
+
     @Transactional
     public void updateRole(Role role, Long id) {
         Assert.notNull(role, "Role must not be null");
@@ -65,8 +85,45 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    @Transactional
+    public void deactivateUser(Long id, Long adminId, String reason) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        user.setActive(false);
+        user.setBlockedAt(Instant.now());
+        user.setBlockedById(adminId);
+        user.setBlockReason(reason);
+    }
+
+    @Transactional
+    public void activateUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        user.setActive(true);
+        user.setBlockedAt(null);
+        user.setBlockedById(null);
+        user.setBlockReason(null);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
+    }
 
     // USER PROFILE
+    @Transactional(readOnly = true)
+    public UserProfileResponse getProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        UserProfile profile = Optional.ofNullable(user.getUserProfile())
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
+
+        return userMapper.toProfileResponse(profile);
+    }
+
     @Transactional
     public UserResponse updateProfile(Long userId, UserProfileRequest request) {
         User user = userRepository.findById(userId)
@@ -90,7 +147,6 @@ public class UserService {
         userProfile.setVerificationStatus(status);
         return userMapper.toResponse(user);
     }
-
 
 
 

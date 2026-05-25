@@ -10,6 +10,13 @@ package com.wteam.backend.common.enums;
  * @see com.wteam.backend.user_profile.UserProfile
  */
 public enum VerificationStatus {
+    /**
+     * Базовий статус після реєстрації.
+     * <p>
+     * Профіль не верифіковано, і користувач ще не подавав заявку на перевірку документів.
+     * </p>
+     */
+    UNVERIFIED,
 
     /**
      * Профіль очікує на перевірку.
