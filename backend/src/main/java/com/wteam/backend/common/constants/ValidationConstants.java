@@ -96,4 +96,21 @@ public final class ValidationConstants {
         public static final int NAME_MAX_LENGTH = 255;
         public static final int SLUG_MAX_LENGTH = 100;
     }
+
+    public static final class RefreshToken {
+        public static final int TOKEN_HASH_MAX_LENGTH = 255;
+    }
+
+    public static final class Item {
+        public static final int TITLE_MAX_LENGTH = 100;
+        public static final int PRICE_PRECISION = 10;
+        public static final int PRICE_SCALE = 2;
+        public static final int PLACE_PRECISION = 9;
+        public static final int PLACE_SCALE = 6;
+    }
+
+    public static final class Booking {
+        public static final int PRICE_PRECISION = 10;
+        public static final int PRICE_SCALE = 2;
+    }
 }

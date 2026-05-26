@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: backend
   profiles:
@@ -10,6 +12,13 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${OAUTH2_CLIENT_ID}
+            client-secret: ${OAUTH2_CLIENT_SECRET}
 
 jwt:
   token:

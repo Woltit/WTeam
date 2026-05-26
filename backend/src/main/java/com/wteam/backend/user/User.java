@@ -1,6 +1,6 @@
 package com.wteam.backend.user;
 
-import com.wteam.backend.common.entity.BaseEntity;
+import com.wteam.backend.common.entity.BaseEntityFull;
 import com.wteam.backend.common.enums.AuthProvider;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.user_profile.UserProfile;
@@ -22,7 +22,7 @@ import static com.wteam.backend.common.constants.ValidationConstants.User.*;
  * контролю доступу (авторизації).
  * </p>
  *
- * @see BaseEntity
+ * @see BaseEntityFull
  * @see UserProfile
  */
 @Entity
@@ -30,7 +30,7 @@ import static com.wteam.backend.common.constants.ValidationConstants.User.*;
 @SuperBuilder
 @NoArgsConstructor @AllArgsConstructor
 @Setter @Getter
-public class User extends BaseEntity {
+public class User extends BaseEntityFull {
     /**
      * Електронна пошта користувача.
      * <p>

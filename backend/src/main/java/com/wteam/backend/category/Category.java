@@ -1,6 +1,6 @@
 package com.wteam.backend.category;
 
-import com.wteam.backend.common.entity.BaseEntity;
+import com.wteam.backend.common.entity.BaseEntityFull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import static com.wteam.backend.common.constants.ValidationConstants.Category.*;
 @SuperBuilder
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-public class Category extends BaseEntity {
+public class Category extends BaseEntityFull {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", referencedColumnName = "id")

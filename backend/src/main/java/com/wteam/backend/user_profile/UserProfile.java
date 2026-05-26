@@ -1,6 +1,6 @@
 package com.wteam.backend.user_profile;
 
-import com.wteam.backend.common.entity.BaseEntity;
+import com.wteam.backend.common.entity.BaseEntityFull;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.user.User;
 import jakarta.persistence.*;
@@ -22,14 +22,14 @@ import static com.wteam.backend.common.constants.ValidationConstants.UserProfile
  * Сутність є власником зв'язку (owning side) у відносинах із {@link User}.
  * </p>
  *
- * @see BaseEntity
+ * @see BaseEntityFull
  * @see User
  */
 @Entity
 @Table(name = "user_profiles")
 @SuperBuilder
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class UserProfile extends BaseEntity {
+public class UserProfile extends BaseEntityFull {
 
     /**
      * Посилання на головну сутність користувача, якому належить цей профіль.

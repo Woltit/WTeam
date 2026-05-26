@@ -7,23 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
-/**
- * Абстрактний базовий клас для всіх JPA-сутностей у системі.
- * <p>
- * Використовує анотацію {@link MappedSuperclass}, завдяки чому його поля
- * (ідентифікатор та стовпці аудиту) автоматично успадковуються дочірніми сутностями
- * й додаються до їхніх таблиць. Окрема таблиця для цього класу в БД не створюється.
- * </p>
- */
 @MappedSuperclass
 @SuperBuilder
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public abstract class BaseEntity {
-
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+public abstract class BaseEntityPart {
     /**
      * Унікальний первинний ключ сутності.
      * <p>
@@ -47,15 +38,4 @@ public abstract class BaseEntity {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
-
-    /**
-     * Дата та час останньої модифікації запису в базі даних.
-     * <p>
-     * Автоматично перезаписується фреймворком за допомогою {@link UpdateTimestamp}
-     * під час кожної операції оновлення (UPDATE).
-     * </p>
-     */
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }

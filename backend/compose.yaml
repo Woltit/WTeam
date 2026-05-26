@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: 'postgres:latest-alpine'
+    image: 'postgres:latest'
     container_name: "wteam_container"
     env_file:
       - .env
