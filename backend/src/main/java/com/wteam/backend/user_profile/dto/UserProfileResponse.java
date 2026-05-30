@@ -18,8 +18,7 @@ import java.time.LocalDate;
  * @param birthDate          Дата народження користувача (може бути {@code null} на етапі швидкої реєстрації).
  * @param phoneNumber        Номер телефону користувача в міжнародному форматі (може бути {@code null} на етапі швидкої реєстрації).
  * @param bio                Коротка текстова біографія або інформація про себе (може бути {@code null}).
- * @param verificationStatus Поточний статус верифікації профілю модератором платформи, який визначає рівень доступу до функцій оренди.
- * * @see com.wteam.backend.user_profile.UserProfile
+ * @param verificationStatus Поточний статус верифікації профілю модератором платформи, який визначає рівень доступу до функцій оренди. * @see com.wteam.backend.user_profile.UserProfile
  * @see com.wteam.backend.common.enums.VerificationStatus
  */
 public record UserProfileResponse(

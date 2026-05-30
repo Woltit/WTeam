@@ -11,24 +11,51 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 
-import static com.wteam.backend.common.constants.ValidationConstants.RefreshToken.*;
+import static com.wteam.backend.common.constants.ValidationConstants.RefreshToken.TOKEN_HASH_MAX_LENGTH;
 
+/**
+ * Сутність, що представляє токен оновлення (Refresh Token) для сесії користувача.
+ * Використовується для отримання нових Access Token-ів без повторної автентифікації.
+ *
+ * @see com.wteam.backend.user.User
+ */
 @Entity
-@Table(name = "refresh_token")
+@Table(name = "refresh_tokens")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @SuperBuilder
 public class RefreshToken extends BaseEntityPart {
+    /**
+     * Унікальний ідентифікатор токена.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "refresh_tokens_gen")
+    @SequenceGenerator(name = "refresh_tokens_gen", sequenceName = "refresh_tokens_id_seq", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
+    
+    /**
+     * Користувач, якому належить токен.
+     */
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
+    /**
+     * Хеш токена оновлення.
+     */
     @Column(name = "token_hash", length = TOKEN_HASH_MAX_LENGTH, nullable = false, unique = true)
     private String tokenHash;
 
+    /**
+     * Час закінчення дії токена.
+     */
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    /**
+     * Час відкликання токена (якщо він був анульований раніше терміну).
+     */
     @Column(name = "revoked_at")
     private Instant revokedAt;
 }

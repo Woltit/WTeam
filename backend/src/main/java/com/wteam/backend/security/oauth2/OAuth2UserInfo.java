@@ -5,6 +5,9 @@ import com.wteam.backend.common.enums.AuthProvider;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * The type O auth 2 user info.
+ */
 public record OAuth2UserInfo(
     String email,
     String lastName,
@@ -12,6 +15,13 @@ public record OAuth2UserInfo(
     String avatarUrl,
     AuthProvider provider
 ) {
+    /**
+     * From provider o auth 2 user info.
+     *
+     * @param registrationId the registration id
+     * @param attributes     the attributes
+     * @return the o auth 2 user info
+     */
     public static OAuth2UserInfo fromProvider(final String registrationId, final Map<String, Object> attributes) {
         final AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase(Locale.ROOT));
 

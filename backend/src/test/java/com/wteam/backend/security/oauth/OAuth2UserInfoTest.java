@@ -8,8 +8,14 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * The type O auth 2 user info test.
+ */
 class OAuth2UserInfoTest {
 
+    /**
+     * Should successfully map google attributes.
+     */
     @Test
     void shouldSuccessfullyMapGoogleAttributes() {
         final String firstName = "John";
@@ -31,6 +37,9 @@ class OAuth2UserInfoTest {
         assertEquals(AuthProvider.GOOGLE, userInfo.provider());
     }
 
+    /**
+     * Should set default values if name is missing for google.
+     */
     @Test
     void shouldSetDefaultValuesIfNameIsMissingForGoogle() {
         Map<String, Object> attributes = Map.of("email", "no-name@gmail.com");
@@ -41,6 +50,9 @@ class OAuth2UserInfoTest {
         assertEquals("", userInfo.lastName());
     }
 
+    /**
+     * Should throw exception for apple stub.
+     */
     @Test
     void shouldThrowExceptionForAppleStub() {
         Map<String, Object> attributes = Map.of("email", "test@apple.com");
@@ -53,6 +65,9 @@ class OAuth2UserInfoTest {
         assertTrue(exception.getMessage().contains("is not supported yet"));
     }
 
+    /**
+     * Should throw exception for local provider.
+     */
     @Test
     void shouldThrowExceptionForLocalProvider() {
         Map<String, Object> attributes = Map.of("email", "local@test.com");

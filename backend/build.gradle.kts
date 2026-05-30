@@ -19,8 +19,9 @@ repositories {
     mavenCentral()
 }
 
-val jwtVersion = "0.13.0"
-val dotenvVersion = "4.0.0"
+val jwtVersion              = "0.13.0"
+val dotenvVersion           = "4.0.0"
+val apacheCommonsVersion    = "3.20.0"
 
 extra["snippetsDir"] = file("build/generated-snippets")
 
@@ -40,6 +41,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("io.jsonwebtoken:jjwt-api:$jwtVersion")
     implementation("me.paulschwarz:spring-dotenv:$dotenvVersion")
+    implementation("org.apache.commons:commons-lang3:$apacheCommonsVersion")
 
     compileOnly("org.projectlombok:lombok")
 

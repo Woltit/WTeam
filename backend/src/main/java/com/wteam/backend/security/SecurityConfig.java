@@ -55,7 +55,7 @@ public class SecurityConfig {
      * 6. Додавання {@link JwtAuthFilter} перед стандартним фільтром автентифікації користувачів.
      * </p>
      *
-     * @param http             об'єкт для конструювання ланцюжка фільтрів.
+     * @param http об'єкт для конструювання ланцюжка фільтрів.
      * @return змонтований об'єкт {@link SecurityFilterChain}.
      */
     @Bean

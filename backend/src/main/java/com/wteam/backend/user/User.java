@@ -12,7 +12,8 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
-import static com.wteam.backend.common.constants.ValidationConstants.User.*;
+import static com.wteam.backend.common.constants.ValidationConstants.User.EMAIL_MAX_LENGTH;
+import static com.wteam.backend.common.constants.ValidationConstants.User.PASSWORD_MAX_LENGTH;
 
 /**
  * JPA-сутність, що представляє користувача в системі.
@@ -31,6 +32,12 @@ import static com.wteam.backend.common.constants.ValidationConstants.User.*;
 @NoArgsConstructor @AllArgsConstructor
 @Setter @Getter
 public class User extends BaseEntityFull {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_gen")
+    @SequenceGenerator(name = "users_gen", sequenceName = "users_id_seq", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
+
     /**
      * Електронна пошта користувача.
      * <p>
@@ -85,16 +92,28 @@ public class User extends BaseEntityFull {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private UserProfile userProfile;
 
+    /**
+     * Статус активності користувача.
+     */
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean isActive = true;
 
+    /**
+     * Час блокування користувача.
+     */
     @Column(name = "blocked_at")
     private Instant blockedAt;
 
+    /**
+     * Ідентифікатор адміністратора, який заблокував користувача.
+     */
     @Column(name = "blocked_by_id")
     private Long blockedById;
 
+    /**
+     * Причина блокування користувача.
+     */
     @Column(name = "block_reason", columnDefinition = "TEXT")
     private String blockReason;
 }

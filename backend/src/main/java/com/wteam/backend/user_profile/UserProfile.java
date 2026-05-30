@@ -12,7 +12,8 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static com.wteam.backend.common.constants.ValidationConstants.UserProfile.*;
+import static com.wteam.backend.common.constants.ValidationConstants.UserProfile.NAME_MAX_LENGTH;
+import static com.wteam.backend.common.constants.ValidationConstants.UserProfile.PHONE_NUMBER_LENGTH;
 
 /**
  * JPA-сутність, що представляє персональний профіль користувача.
@@ -30,6 +31,11 @@ import static com.wteam.backend.common.constants.ValidationConstants.UserProfile
 @SuperBuilder
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class UserProfile extends BaseEntityFull {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_profiles_gen")
+    @SequenceGenerator(name = "user_profiles_gen", sequenceName = "user_profiles_id_seq", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
 
     /**
      * Посилання на головну сутність користувача, якому належить цей профіль.
@@ -39,7 +45,7 @@ public class UserProfile extends BaseEntityFull {
      * </p>
      */
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
     private User user;
 
     /**
@@ -102,6 +108,9 @@ public class UserProfile extends BaseEntityFull {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
+    /**
+     * URL аватару користувача.
+     */
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
@@ -120,14 +129,26 @@ public class UserProfile extends BaseEntityFull {
     @Builder.Default
     private VerificationStatus verificationStatus = VerificationStatus.UNVERIFIED;
 
-    @Column(name = "renter_trust_score", precision = 3, scale = 2)
-    private BigDecimal renterTrustScore;
+    /**
+     * Рейтинг довіри як орендаря.
+     */
+    @Column(name = "renter_trust_score", precision = 3, scale = 2, nullable = false)
+    @Builder.Default
+    private BigDecimal renterTrustScore = BigDecimal.ZERO;
 
-    @Column(name = "owner_trust_score", precision = 3, scale = 2)
-    private BigDecimal ownerTrustScore;
+    /**
+     * Рейтинг довіри як власника речей.
+     */
+    @Column(name = "owner_trust_score", precision = 3, scale = 2, nullable = false)
+    @Builder.Default
+    private BigDecimal ownerTrustScore = BigDecimal.ZERO;
 
-    @Column(name = "total_successful_rents")
-    private Integer totalSuccessfulRents;
+    /**
+     * Загальна кількість успішно завершених оренд.
+     */
+    @Column(name = "total_successful_rents", nullable = false)
+    @Builder.Default
+    private Integer totalSuccessfulRents = 0;
 
     @PrePersist
     private void setDefaults() {

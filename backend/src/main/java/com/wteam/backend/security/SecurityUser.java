@@ -29,6 +29,13 @@ public class SecurityUser implements UserDetails, OAuth2User {
     private final transient User user;
     private transient Map<String, Object> attributes;
 
+    /**
+     * Create security user.
+     *
+     * @param user       the user
+     * @param attributes the attributes
+     * @return the security user
+     */
     public static SecurityUser create(User user, Map<String, Object> attributes) {
         SecurityUser securityUser = new SecurityUser(user);
         securityUser.attributes = attributes;

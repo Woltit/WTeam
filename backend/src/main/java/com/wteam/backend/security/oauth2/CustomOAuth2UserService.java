@@ -1,6 +1,5 @@
 package com.wteam.backend.security.oauth2;
 
-import com.wteam.backend.common.enums.AuthProvider;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.security.SecurityUser;
@@ -15,8 +14,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
+/**
+ * The type Custom o auth 2 user service.
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {

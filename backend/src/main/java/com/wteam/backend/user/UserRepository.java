@@ -54,12 +54,31 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {"userProfile"})
     Optional<User> findById(@NonNull Long id);
 
+    /**
+     * Find all by is active true page.
+     *
+     * @param pageable the pageable
+     * @return the page
+     */
     @EntityGraph(attributePaths = {"userProfile"})
     Page<User> findAllByIsActiveTrue(Pageable pageable);
 
+    /**
+     * Find all by is active false page.
+     *
+     * @param pageable the pageable
+     * @return the page
+     */
     @EntityGraph(attributePaths = {"userProfile"})
     Page<User> findAllByIsActiveFalse(Pageable pageable);
 
+    /**
+     * Find all by role page.
+     *
+     * @param role     the role
+     * @param pageable the pageable
+     * @return the page
+     */
     @EntityGraph(attributePaths = {"userProfile"})
     Page<User> findAllByRole(Role role, Pageable pageable);
 

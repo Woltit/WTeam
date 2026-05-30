@@ -7,35 +7,68 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * The type Global exception handler.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 401
+    /**
+     * Handle bad credentials exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
+// 401
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException e) {
         return buildResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
-    // 401
+    /**
+     * Handle username not found exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
+// 401
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e) {
         return buildResponse(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
-    // 400
+    /**
+     * Handle illegal argument exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
+// 400
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
         return buildResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
 
-    // 409
+    /**
+     * Handle illegal state exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
+// 409
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException e) {
         return buildResponse(HttpStatus.CONFLICT, e.getMessage());
     }
 
-    // 500
+    /**
+     * Handle exception response entity.
+     *
+     * @param e the e
+     * @return the response entity
+     */
+// 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());

@@ -17,8 +17,7 @@ import java.time.Instant;
  * @param email     Електронна пошта користувача, яка також слугує його логіном.
  * @param role      Системна роль користувача, що визначає його рівень прав доступу на платформі.
  * @param profile   Вкладений об'єкт із детальною інформацією про персональний профіль користувача.
- * @param createdAt Точна дата та час створення облікового запису в системі.
- * * @see com.wteam.backend.common.enums.Role
+ * @param createdAt Точна дата та час створення облікового запису в системі. * @see com.wteam.backend.common.enums.Role
  * @see com.wteam.backend.user_profile.dto.UserProfileResponse
  */
 public record UserResponse(
