@@ -1,3 +1,7 @@
+// ================================================
+// RentGo — структура БД (на основі V1__create_init_schema.sql)
+// ================================================
+
 enum Role {
   ADMIN
   MODER
@@ -20,93 +24,21 @@ enum RentingStatus {
 }
 
 enum VerificationStatus {
+  UNVERIFIED
   PENDING
   VERIFIED
   REJECTED
 }
 
-TABLE users {
-  id BIGSERIAL [pk]
-  email VARCHAR(255) [unique, not null]
-  password VARCHAR(255)
-  role Role [not null, default: 'USER']
-
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-}
-
-TABLE user_profiles {
-  id BIGSERIAL [pk]
-  user_id BIGINT [ref: - users.id ]
-  last_name VARCHAR(100) [not |null]
-  first_name VARCHAR(100) [not null]
-  middle_name VARCHAR(100)
-  birth_date DATE [not null]
-  phone_number VARCHAR(15) [not null]
-  bio TEXT
-//  passport_id VARCHAR(50) [unique, not null]
-  verification_status VerificationStatus [not null, default: 'PENDING']
-
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-}
-
-TABLE user_reviews {
-  id BIGSERIAL [pk]
-  user_id BIGINT [ref: > users.id]
-  reviewer_id BIGINT [ref: > users.id]
-  trust_rating SMALLINT [not null, note: '1-5']
-  comment TEXT
-
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-}
-
-TABLE categories {
-  id BIGSERIAL [pk]
-  name VARCHAR(255) [not null]
-}
-
-TABLE items {
-  id BIGSERIAL [pk]
-  owner_id BIGINT [not null, ref: > users.id]
-  category_id BIGINT [not null, ref: > categories.id]
-  title VARCHAR(100) [not null]
-  description TEXT
-  condition ItemCondition [not null]
-  price_per_day decimal(10, 2) [not null]
-  deposit_amount_per_day decimal(10, 2) [not null]
-
-  status RentingStatus [not null]
-  city VARCHAR(100) [not null]
-  address TEXT [not null]
-  is_verified bool [not null, default: false]
-
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-
-enum BookingStatus
-  PENDING      // Очікує підтвердження власником
-  APPROVED     // Підтверджено власником
-  REJECTED     // Відхилено власником
-  PAID         // Оплачено орендарем
-  IN_PROGRESS  // Річ у орендаря (активна оренда)
-  COMPLETED    // Річ повернута
-  CANCELLED    // Скасовано
-  DISPUTE      // Відкрито суперечку
-
-TABLE bookings {
-  id BIGSERIAL [pk]
-  item_id BIGINT [ref: > items.id]
-  renter_id BIGINT [ref: > users.id]
-  start_date DATE [not null]
-  end_date DATE [not null]
-  total_price decimal(10, 2) [not null]
-  deposit_total decimal(10, 2) [not null]
-  status BookingStatus [not null, default: 'PENDING']
-
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTE
 }
 
 enum TransactionType {
@@ -116,48 +48,267 @@ enum TransactionType {
   COMPENSATION
 }
 
-TABLE transactions {
-  id BIGSERIAL [pk]
-  booking_id BIGINT [ref: > bookings.id]
-  amount decimal(10, 2) [not null]
-  type TransactionType [not null]
-  external_tx_id VARCHAR(255) // ID транзакції з платіжної системи (Stripe/Mono/WayForPay)
-  status VARCHAR(50) // success, pending, failed
-
-  created_at timestamp [default: `now()`]
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
 }
 
-TABLE item_images {
+enum DocumentType {
+  PASSPORT
+  ID_CARD
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+  IN_APP
+}
+
+enum NotificationType {
+  BOOKING_REQUEST
+  BOOKING_APPROVED
+  BOOKING_REJECTED
+  BOOKING_CANCELLED
+  PAYMENT_RECEIVED
+  REVIEW_LEFT
+  VERIFICATION_APPROVED
+  VERIFICATION_REJECTED
+  DISPUTE_OPENED
+}
+
+enum DeliveryMethod {
+  SELF_PICKUP
+  DELIVERY
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  RETURNED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum DisputeReason {
+  ITEM_DAMAGED
+  ITEM_NOT_RETURNED
+  PAYMENT_ISSUE
+  OTHER
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  APPLE
+}
+
+// ================================================
+// ТАБЛИЦІ
+// ================================================
+
+Table users {
   id BIGSERIAL [pk]
-  item_id BIGINT [ref: > items.id]
+  email VARCHAR(255) [unique, not null]
+  password VARCHAR(255)
+  auth_provider AuthProvider [not null, default: 'LOCAL']
+  role Role [not null, default: 'USER']
+  is_active BOOLEAN [not null, default: true]
+  blocked_at TIMESTAMP
+  blocked_by_id BIGINT
+  block_reason TEXT
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table user_profiles {
+  id BIGSERIAL [pk]
+  user_id BIGINT [unique, ref: - users.id]
+  last_name VARCHAR(100) [not null]
+  first_name VARCHAR(100) [not null]
+  middle_name VARCHAR(100)
+  birth_date DATE
+  phone_number VARCHAR(20)
+  bio TEXT
+  avatar_url TEXT
+  verification_status VerificationStatus [not null, default: 'UNVERIFIED']
+  renter_trust_score DECIMAL(3, 2) [default: 0.00]
+  owner_trust_score DECIMAL(3, 2) [default: 0.00]
+  total_successful_rents INT [default: 0]
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table user_verification_requests {
+  id BIGSERIAL [pk]
+  user_id BIGINT [not null, ref: > users.id]
+  document_type DocumentType [not null]
+  document_image_url TEXT [not null]
+  reviewed_by BIGINT [ref: > users.id]
+  rejection_reason TEXT
+  status VerificationStatus [not null, default: 'PENDING']
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table refresh_tokens {
+  id BIGSERIAL [pk]
+  user_id BIGINT [not null, ref: > users.id]
+  token_hash VARCHAR(255) [unique, not null]
+  expires_at TIMESTAMP [not null]
+  revoked_at TIMESTAMP
+  created_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table categories {
+  id BIGSERIAL [pk]
+  parent_id BIGINT [ref: > categories.id]
+  name VARCHAR(255) [not null]
+  slug VARCHAR(100) [unique, not null]
+  icon_url TEXT
+}
+
+Table items {
+  id BIGSERIAL [pk]
+  owner_id BIGINT [not null, ref: > users.id]
+  category_id BIGINT [not null, ref: > categories.id]
+  title VARCHAR(100) [not null]
+  description TEXT
+  tags "TEXT[]"
+  condition ItemCondition [not null]
+  price_per_day DECIMAL(10, 2) [not null]
+  price_per_week DECIMAL(10, 2)
+  deposit_amount DECIMAL(10, 2) [not null]
+  status RentingStatus [not null]
+  city VARCHAR(100) [not null]
+  address TEXT [not null]
+  latitude DECIMAL(9, 6)
+  longitude DECIMAL(9, 6)
+  is_verified BOOLEAN [not null, default: false]
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table item_images {
+  id BIGSERIAL [pk]
+  item_id BIGINT [not null, ref: > items.id]
   image_url TEXT [not null]
   is_main BOOLEAN [default: false]
-  created_at timestamp [default: `now()`]
+  created_at TIMESTAMP [not null, default: `now()`]
 }
 
-TABLE item_reviews {
+Table bookings {
   id BIGSERIAL [pk]
-  item_id BIGINT [ref: > items.id]
+  item_id BIGINT [not null, ref: > items.id]
+  renter_id BIGINT [not null, ref: > users.id]
+  start_date DATE [not null]
+  end_date DATE [not null]
+  total_price DECIMAL(10, 2) [not null]
+  deposit_total DECIMAL(10, 2) [not null]
+  price_per_day_snapshot DECIMAL(10, 2) [not null]
+  status BookingStatus [not null, default: 'PENDING']
+  cancellation_reason TEXT
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table booking_deliveries {
+  id BIGSERIAL [pk]
+  booking_id BIGINT [unique, not null, ref: - bookings.id]
+  method DeliveryMethod [not null]
+  tracking_number VARCHAR(100)
+  delivery_address TEXT
+  estimated_delivery_date DATE
+  status DeliveryStatus
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table transactions {
+  id BIGSERIAL [pk]
+  booking_id BIGINT [not null, ref: > bookings.id]
+  amount DECIMAL(10, 2) [not null]
+  type TransactionType [not null]
+  external_tx_id VARCHAR(255)
+  status TransactionStatus [not null, default: 'PENDING']
+  created_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table user_reviews {
+  id BIGSERIAL [pk]
+  user_id BIGINT [not null, ref: > users.id]
+  reviewer_id BIGINT [ref: > users.id]
+  booking_id BIGINT [ref: - bookings.id]
+  trust_rating SMALLINT [not null, note: '1-5']
+  comment TEXT
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table item_reviews {
+  id BIGSERIAL [pk]
+  item_id BIGINT [not null, ref: > items.id]
   renter_id BIGINT [ref: > users.id]
+  booking_id BIGINT [ref: - bookings.id]
   rating SMALLINT [not null, note: '1-5']
   comment TEXT
-  created_at timestamp [default: `now()`]
+  created_at TIMESTAMP [not null, default: `now()`]
 }
 
-TABLE chat_rooms {
+Table chat_rooms {
   id BIGSERIAL [pk]
-  booking_id BIGINT [ref: - bookings.id] // Опційно: прив'язка до конкретного замовлення
-  created_at timestamp [default: `now()`]
+  booking_id BIGINT [unique, ref: - bookings.id]
+  created_at TIMESTAMP [not null, default: `now()`]
 }
 
-TABLE messages {
+Table messages {
   id BIGSERIAL [pk]
-  room_id BIGINT [ref: > chat_rooms.id]
-  sender_id BIGINT [ref: > users.id]
+  room_id BIGINT [not null, ref: > chat_rooms.id]
+  sender_id BIGINT [not null, ref: > users.id]
   message_text TEXT [not null]
   is_read BOOLEAN [default: false]
-  created_at timestamp [default: `now()`]
+  created_at TIMESTAMP [not null, default: `now()`]
 }
+
+Table notifications {
+  id BIGSERIAL [pk]
+  user_id BIGINT [not null, ref: > users.id]
+  type NotificationType [not null]
+  channel NotificationChannel [not null, default: 'IN_APP']
+  title VARCHAR(255) [not null]
+  body TEXT
+  is_read BOOLEAN [default: false]
+  related_booking_id BIGINT [ref: > bookings.id]
+  created_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table disputes {
+  id BIGSERIAL [pk]
+  booking_id BIGINT [unique, not null, ref: - bookings.id]
+  initiator_id BIGINT [not null, ref: > users.id]
+  reason DisputeReason [not null]
+  description TEXT [not null]
+  resolution TEXT
+  resolved_by BIGINT [ref: > users.id]
+  status DisputeStatus [not null, default: 'OPEN']
+  created_at TIMESTAMP [not null, default: `now()`]
+  updated_at TIMESTAMP [not null, default: `now()`]
+}
+
+Table ai_sessions {
+  id BIGSERIAL [pk]
+  user_id BIGINT [ref: > users.id]
+  user_query TEXT [not null]
+  ai_response TEXT [not null]
+  recommended_item_ids "BIGINT[]"
+  created_at TIMESTAMP [not null, default: `now()`]
 }
 
 
