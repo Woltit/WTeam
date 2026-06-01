@@ -2,6 +2,7 @@ package com.wteam.backend.user_profile;
 
 import com.wteam.backend.common.entity.BaseEntityFull;
 import com.wteam.backend.common.enums.VerificationStatus;
+import com.wteam.backend.common.validation.ValidationConstants;
 import com.wteam.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,8 +13,8 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static com.wteam.backend.common.constants.ValidationConstants.UserProfile.NAME_MAX_LENGTH;
-import static com.wteam.backend.common.constants.ValidationConstants.UserProfile.PHONE_NUMBER_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.UserProfile.NAME_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.UserProfile.PHONE_NUMBER_LENGTH;
 
 /**
  * JPA-сутність, що представляє персональний профіль користувача.
@@ -52,7 +53,7 @@ public class UserProfile extends BaseEntityFull {
      * Прізвище користувача.
      * <p>
      * Обов'язкове поле для заповнення. Максимальна довжина обмежена константою
-     * {@link com.wteam.backend.common.constants.ValidationConstants.UserProfile#NAME_MAX_LENGTH NAME_MAX_LENGTH}.
+     * {@link ValidationConstants.UserProfile#NAME_MAX_LENGTH NAME_MAX_LENGTH}.
      * </p>
      */
     @Column(name = "last_name" , length = NAME_MAX_LENGTH , nullable = false)
@@ -62,7 +63,7 @@ public class UserProfile extends BaseEntityFull {
      * Ім'я користувача.
      * <p>
      * Обов'язкове поле для заповнення. Максимальна довжина обмежена константою
-     * {@link com.wteam.backend.common.constants.ValidationConstants.UserProfile#NAME_MAX_LENGTH NAME_MAX_LENGTH}.
+     * {@link ValidationConstants.UserProfile#NAME_MAX_LENGTH NAME_MAX_LENGTH}.
      * </p>
      */
     @Column(name = "first_name" , length = NAME_MAX_LENGTH, nullable = false)
@@ -72,7 +73,7 @@ public class UserProfile extends BaseEntityFull {
      * По батькові користувача.
      * <p>
      * Необов'язкове поле (може бути {@code null}). Максимальна довжина обмежена константою
-     * {@link com.wteam.backend.common.constants.ValidationConstants.UserProfile#NAME_MAX_LENGTH NAME_MAX_LENGTH}.
+     * {@link ValidationConstants.UserProfile#NAME_MAX_LENGTH NAME_MAX_LENGTH}.
      * </p>
      */
     @Column(name = "middle_name", length = NAME_MAX_LENGTH)
@@ -93,7 +94,7 @@ public class UserProfile extends BaseEntityFull {
      * <p>
      * Необов'язкове поле при швидкій реєстрації. Має міжнародний формат (включаючи префікс +).
      * Максимальна довжина обмежена константою
-     * {@link com.wteam.backend.common.constants.ValidationConstants.UserProfile#PHONE_NUMBER_LENGTH PHONE_NUMBER_LENGTH}.
+     * {@link ValidationConstants.UserProfile#PHONE_NUMBER_LENGTH PHONE_NUMBER_LENGTH}.
      * </p>
      */
     @Column(name = "phone_number", length = PHONE_NUMBER_LENGTH)

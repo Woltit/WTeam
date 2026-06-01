@@ -3,6 +3,7 @@ package com.wteam.backend.user;
 import com.wteam.backend.common.entity.BaseEntityFull;
 import com.wteam.backend.common.enums.AuthProvider;
 import com.wteam.backend.common.enums.Role;
+import com.wteam.backend.common.validation.ValidationConstants;
 import com.wteam.backend.user_profile.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,8 +13,8 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
-import static com.wteam.backend.common.constants.ValidationConstants.User.EMAIL_MAX_LENGTH;
-import static com.wteam.backend.common.constants.ValidationConstants.User.PASSWORD_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.User.EMAIL_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.User.PASSWORD_MAX_LENGTH;
 
 /**
  * JPA-сутність, що представляє користувача в системі.
@@ -42,7 +43,7 @@ public class User extends BaseEntityFull {
      * Електронна пошта користувача.
      * <p>
      * Використовується як унікальний ідентифікатор (логін) під час автентифікації.
-     * Обмеження максимальної довжини визначається константою {@link com.wteam.backend.common.constants.ValidationConstants.User#EMAIL_MAX_LENGTH EMAIL_MAX_LENGTH}.
+     * Обмеження максимальної довжини визначається константою {@link ValidationConstants.User#EMAIL_MAX_LENGTH EMAIL_MAX_LENGTH}.
      * </p>
      */
     @Column(name = "email", length = EMAIL_MAX_LENGTH, nullable = false, unique = true)
@@ -53,7 +54,7 @@ public class User extends BaseEntityFull {
      * <p>
      * Поле може залишатися порожнім ({@code null}), буде реалізовано
      * авторизацію через сторонні сервіси (OAuth2 / Google / Apple ID).
-     * Обмеження максимальної довжини визначається константою {@link com.wteam.backend.common.constants.ValidationConstants.User#PASSWORD_MAX_LENGTH PASSWORD_MAX_LENGTH}
+     * Обмеження максимальної довжини визначається константою {@link ValidationConstants.User#PASSWORD_MAX_LENGTH PASSWORD_MAX_LENGTH}
      * </p>
      */
     @Column(name = "password", length = PASSWORD_MAX_LENGTH)

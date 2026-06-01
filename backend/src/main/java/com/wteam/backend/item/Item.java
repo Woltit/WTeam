@@ -13,7 +13,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 
-import static com.wteam.backend.common.constants.ValidationConstants.Item.TITLE_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.Item.TITLE_MAX_LENGTH;
 
 /**
  * Сутність, що представляє товар або послугу для оренди.

@@ -1,8 +1,11 @@
 package com.wteam.backend.security;
 
 import com.wteam.backend.common.enums.Role;
+import com.wteam.backend.security.dto.UserPrincipalDto;
 import com.wteam.backend.user.User;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,6 +43,10 @@ public class SecurityUser implements UserDetails, OAuth2User {
         SecurityUser securityUser = new SecurityUser(user);
         securityUser.attributes = attributes;
         return securityUser;
+    }
+
+    public UserPrincipalDto getUser() {
+        return new UserPrincipalDto(user.getId(), user.getEmail());
     }
 
     /**

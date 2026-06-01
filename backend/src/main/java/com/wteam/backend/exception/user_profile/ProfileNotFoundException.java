@@ -1,9 +1,12 @@
 package com.wteam.backend.exception.user_profile;
 
+
+import com.wteam.backend.exception.base_with_status.ResourceNotFoundException;
+
 /**
  * The type Profile not found exception.
  */
-public class ProfileNotFoundException extends RuntimeException {
+public class ProfileNotFoundException extends ResourceNotFoundException {
     /**
      * Instantiates a new Profile not found exception.
      *

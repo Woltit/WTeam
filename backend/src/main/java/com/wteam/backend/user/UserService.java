@@ -38,8 +38,8 @@ public class UserService {
     // USER
     //
     @Transactional(readOnly = true)
-    public Page<UserResponse> getAllUsers(Pageable pageable) {
-        return userRepository.findAllWithProfile(pageable)
+    public Page<UserResponse> getAllUsers(Boolean isActive, Role role, Pageable pageable) {
+        return userRepository.findAllWithProfile(isActive, role, pageable)
                 .map(userMapper::toResponse);
     }
 
@@ -69,43 +69,6 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .map(userMapper::toResponse)
                 .orElseThrow(() -> new UserNotFoundException(email));
-    }
-
-    /**
-     * Gets all users who is active.
-     *
-     * @param pageable the pageable
-     * @return the all users who is active
-     */
-    @Transactional(readOnly = true)
-    public Page<UserResponse> getAllUsersWhoIsActive(Pageable pageable) {
-        return userRepository.findAllByIsActiveTrue(pageable)
-                .map(userMapper::toResponse);
-    }
-
-    /**
-     * Gets all users who is not active.
-     *
-     * @param pageable the pageable
-     * @return the all users who is not active
-     */
-    @Transactional(readOnly = true)
-    public Page<UserResponse> getAllUsersWhoIsNotActive(Pageable pageable) {
-        return userRepository.findAllByIsActiveFalse(pageable)
-                .map(userMapper::toResponse);
-    }
-
-    /**
-     * Gets all users by role.
-     *
-     * @param role     the role
-     * @param pageable the pageable
-     * @return the all users by role
-     */
-    @Transactional(readOnly = true)
-    public Page<UserResponse> getAllUsersByRole(Role role, Pageable pageable) {
-        return userRepository.findAllByRole(role, pageable)
-                .map(userMapper::toResponse);
     }
 
     /**
@@ -184,17 +147,17 @@ public class UserService {
     /**
      * Gets profile.
      *
-     * @param userId the user id
+     * @param id the user id
      * @return the profile
      */
 // USER PROFILE
     @Transactional(readOnly = true)
-    public UserProfileResponse getProfile(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+    public UserProfileResponse getProfile(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         UserProfile profile = Optional.ofNullable(user.getUserProfile())
-                .orElseThrow(() -> new ProfileNotFoundException(userId));
+                .orElseThrow(() -> new ProfileNotFoundException(id));
 
         return userMapper.toProfileResponse(profile);
     }
@@ -202,17 +165,17 @@ public class UserService {
     /**
      * Update profile user response.
      *
-     * @param userId  the user id
+     * @param id  the user id
      * @param request the request
      * @return the user response
      */
     @Transactional
-    public UserResponse updateProfile(Long userId, UserProfileRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+    public UserResponse updateProfile(Long id, UserProfileRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
-                        .orElseThrow(() -> new ProfileNotFoundException(userId));
+                        .orElseThrow(() -> new ProfileNotFoundException(id));
 
         userMapper.updateProfileFromRequest(request, userProfile);
         return userMapper.toResponse(user);
@@ -221,17 +184,17 @@ public class UserService {
     /**
      * Update verification status user response.
      *
-     * @param userId the user id
+     * @param id the user id
      * @param status the status
      * @return the user response
      */
     @Transactional
-    public UserResponse updateVerificationStatus(Long userId, VerificationStatus status) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+    public UserResponse updateVerificationStatus(Long id, VerificationStatus status) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
-                        .orElseThrow(() -> new ProfileNotFoundException(userId));
+                        .orElseThrow(() -> new ProfileNotFoundException(id));
 
         userProfile.setVerificationStatus(status);
         return userMapper.toResponse(user);

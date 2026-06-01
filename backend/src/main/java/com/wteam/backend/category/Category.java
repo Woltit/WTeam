@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import static com.wteam.backend.common.constants.ValidationConstants.Category.NAME_MAX_LENGTH;
-import static com.wteam.backend.common.constants.ValidationConstants.Category.SLUG_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.Category.NAME_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.Category.SLUG_MAX_LENGTH;
 
 /**
  * Сутність, що представляє категорію товарів.

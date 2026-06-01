@@ -64,7 +64,11 @@ public class UserMapper {
                 profile.getBirthDate(),
                 profile.getPhoneNumber(),
                 profile.getBio(),
-                profile.getVerificationStatus()
+                profile.getAvatarUrl(),
+                profile.getVerificationStatus(),
+                profile.getRenterTrustScore(),
+                profile.getOwnerTrustScore(),
+                profile.getTotalSuccessfulRents()
         );
     }
 

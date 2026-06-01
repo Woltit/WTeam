@@ -1,9 +1,11 @@
 package com.wteam.backend.exception.user;
 
+import com.wteam.backend.exception.base_with_status.ResourceAlreadyExistsException;
+
 /**
  * The type User already exists exception.
  */
-public class UserAlreadyExistsException extends RuntimeException {
+public class UserAlreadyExistsException extends ResourceAlreadyExistsException {
     /**
      * Instantiates a new User already exists exception.
      *

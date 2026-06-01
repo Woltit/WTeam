@@ -1,4 +1,4 @@
-package com.wteam.backend.common.constants;
+package com.wteam.backend.common.validation;
 
 /**
  * Глобальний клас констант для валідації вхідних даних додатка.
@@ -16,7 +16,7 @@ public final class ValidationConstants {
      * @throws UnsupportedOperationException якщо виконується спроба викликати конструктор через рефлексію.
      */
     private ValidationConstants() {
-        throw new UnsupportedOperationException("ValidationConstants class cannot be instantiated");
+        throw new UnsupportedOperationException("ValidationConstants cannot be instantiated - utility class");
     }
 
     /**
@@ -182,5 +182,14 @@ public final class ValidationConstants {
          * The constant PRICE_SCALE.
          */
         public static final int PRICE_SCALE = 2;
+    }
+
+
+
+    public static final class Constraints {
+        public static final int PASSWORD_MIN_LENGTH = 8;
+        public static final int PASSWORD_MAX_LENGTH = 20;
+
+        public static final String PASSWORD_INVALID_MSG = "Password must be between " + PASSWORD_MIN_LENGTH + " and " + PASSWORD_MAX_LENGTH;
     }
 }

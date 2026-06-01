@@ -1,10 +1,11 @@
 package com.wteam.backend.exception.user;
 
+import com.wteam.backend.exception.base_with_status.ResourceNotFoundException;
+
 /**
  * The type User not found exception.
  */
-public class UserNotFoundException extends RuntimeException {
-
+public class UserNotFoundException extends ResourceNotFoundException {
     /**
      * Instantiates a new User not found exception.
      *

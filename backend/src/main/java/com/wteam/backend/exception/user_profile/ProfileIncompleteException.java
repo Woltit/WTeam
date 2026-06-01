@@ -1,9 +1,11 @@
 package com.wteam.backend.exception.user_profile;
 
+import com.wteam.backend.exception.base_with_status.ForbiddenOperationException;
+
 /**
  * The type Profile incomplete exception.
  */
-public class ProfileIncompleteException extends RuntimeException {
+public class ProfileIncompleteException extends ForbiddenOperationException {
     /**
      * Instantiates a new Profile incomplete exception.
      *

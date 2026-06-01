@@ -1,9 +1,13 @@
 package com.wteam.backend.user;
 
 import com.wteam.backend.common.enums.Role;
+import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.security.SecurityUser;
+import com.wteam.backend.security.annotation.CurrentUser;
+import com.wteam.backend.security.dto.UserPrincipalDto;
 import com.wteam.backend.user.dto.BlockUserRequest;
 import com.wteam.backend.user.dto.UserResponse;
+import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,19 +18,21 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * The type User controller.
- */
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
+    // ADMIN endpoints
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserResponse>> getAllUsers(Pageable pageable) {
-        Page<UserResponse> users = userService.getAllUsers(pageable);
+    public ResponseEntity<Page<UserResponse>> getAllUsers(
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Role role,
+            Pageable pageable
+    ) {
+        Page<UserResponse> users = userService.getAllUsers(isActive, role, pageable);
         return ResponseEntity.ok(users);
     }
 
@@ -36,39 +42,28 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    private ResponseEntity<Page<UserResponse>> getAllUsersWhoIsActiveOrNot(Pageable pageable, boolean isActive) {
-        if (isActive) {
-            return ResponseEntity.ok(userService.getAllUsersWhoIsActive(pageable));
-        }
-        return ResponseEntity.ok(userService.getAllUsersWhoIsNotActive(pageable));
-    }
-
-    @GetMapping("/active")
+    @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserResponse>> getAllUsersWhoIsActive(Pageable pageable) {
-        return getAllUsersWhoIsActiveOrNot(pageable, true);
-    }
-
-    @GetMapping("/no-active")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserResponse>> getAllUsersWhoIsNotActive(Pageable pageable) {
-        return getAllUsersWhoIsActiveOrNot(pageable, false);
-    }
-
-    @GetMapping("/role")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserResponse>> getAllUsersByRole(
-            @RequestParam Role role,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(userService.getAllUsersByRole(role, pageable));
+    public ResponseEntity<UserResponse> getUserByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
 
-    @PostMapping("/activate/{id}")
+    @PostMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     public void activateUser(@PathVariable Long id) {
         userService.activateUser(id);
+    }
+
+    @PostMapping("/{id}/block")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void blockUser(
+            @PathVariable Long id,
+            @Valid @RequestBody BlockUserRequest request,
+            @CurrentUser UserPrincipalDto admin
+    ) {
+        Long adminId = admin.id();
+        userService.deactivateUser(id, adminId, request.reason());
     }
 
     @PatchMapping("/{id}/role")
@@ -86,26 +81,12 @@ public class UserController {
         userService.deleteUserById(id);
     }
 
-    /**
-     * Block user.
-     *
-     * @param userId  the user id
-     * @param request the request
-     * @param admin   the admin
-     */
-    @PostMapping("/block/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void blockUser(
-            @PathVariable Long userId,
-            @Valid @RequestBody BlockUserRequest request,
-            @AuthenticationPrincipal SecurityUser admin
+    // USER
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> getMyInfo(
+            @CurrentUser UserPrincipalDto user
     ) {
-        Long adminId = admin.getId();
-        userService.deactivateUser(userId, adminId, request.reason());
-    }
-
-    @GetMapping("/profile/{id}")
-    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getProfile(id));
+        return ResponseEntity.ok(userService.getUserById(user.id()));
     }
 }

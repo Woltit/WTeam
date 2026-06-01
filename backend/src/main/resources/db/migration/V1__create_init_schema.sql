@@ -58,7 +58,12 @@ CREATE TABLE users (
     created_at      TIMESTAMP       NOT NULL
         DEFAULT NOW(),
     updated_at      TIMESTAMP       NOT NULL
-        DEFAULT NOW()
+        DEFAULT NOW(),
+
+    CONSTRAINT chk_local_password   CHECK (
+        (auth_provider = 'LOCAL' AND password IS NOT NULL) OR
+        (auth_provider != 'LOCAL' AND password IS NULL)
+    )
 );
 
 -- ================================================

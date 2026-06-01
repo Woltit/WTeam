@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 
-import static com.wteam.backend.common.constants.ValidationConstants.RefreshToken.TOKEN_HASH_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.RefreshToken.TOKEN_HASH_MAX_LENGTH;
 
 /**
  * Сутність, що представляє токен оновлення (Refresh Token) для сесії користувача.
@@ -37,7 +37,7 @@ public class RefreshToken extends BaseEntityPart {
     /**
      * Користувач, якому належить токен.
      */
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 

@@ -1,7 +1,9 @@
 package com.wteam.backend.user_profile.dto;
 
 import com.wteam.backend.common.enums.VerificationStatus;
+import com.wteam.backend.user_profile.UserProfile;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -28,5 +30,9 @@ public record UserProfileResponse(
         LocalDate birthDate,
         String phoneNumber,
         String bio,
-        VerificationStatus verificationStatus
+        String avatarUrl,
+        VerificationStatus verificationStatus,
+        BigDecimal renterTrustScore,
+        BigDecimal ownerTrustScore,
+        Integer totalSuccessfulRents
 ) {}
