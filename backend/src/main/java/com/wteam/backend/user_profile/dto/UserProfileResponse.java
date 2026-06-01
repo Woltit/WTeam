@@ -1,7 +1,6 @@
 package com.wteam.backend.user_profile.dto;
 
 import com.wteam.backend.common.enums.VerificationStatus;
-import com.wteam.backend.user_profile.UserProfile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

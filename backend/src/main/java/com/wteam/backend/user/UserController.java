@@ -1,21 +1,16 @@
 package com.wteam.backend.user;
 
 import com.wteam.backend.common.enums.Role;
-import com.wteam.backend.common.enums.VerificationStatus;
-import com.wteam.backend.security.SecurityUser;
 import com.wteam.backend.security.annotation.CurrentUser;
 import com.wteam.backend.security.dto.UserPrincipalDto;
 import com.wteam.backend.user.dto.BlockUserRequest;
 import com.wteam.backend.user.dto.UserResponse;
-import com.wteam.backend.user_profile.dto.UserProfileRequest;
-import com.wteam.backend.user_profile.dto.UserProfileResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,10 +31,10 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @GetMapping("/search")
@@ -49,36 +44,36 @@ public class UserController {
     }
 
 
-    @PostMapping("/{id}/activate")
+    @PostMapping("/{userId}/activate")
     @PreAuthorize("hasRole('ADMIN')")
-    public void activateUser(@PathVariable Long id) {
-        userService.activateUser(id);
+    public void activateUser(@PathVariable Long userId) {
+        userService.activateUser(userId);
     }
 
-    @PostMapping("/{id}/block")
+    @PostMapping("/{userId}/block")
     @PreAuthorize("hasRole('ADMIN')")
     public void blockUser(
-            @PathVariable Long id,
+            @PathVariable Long userId,
             @Valid @RequestBody BlockUserRequest request,
             @CurrentUser UserPrincipalDto admin
     ) {
         Long adminId = admin.id();
-        userService.deactivateUser(id, adminId, request.reason());
+        userService.deactivateUser(userId, adminId, request.reason());
     }
 
-    @PatchMapping("/{id}/role")
+    @PatchMapping("/{userId}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public void updateRole(
-            @PathVariable Long id,
+            @PathVariable Long userId,
             @RequestParam Role role
     ) {
-        userService.updateRole(role, id);
+        userService.updateRole(role, userId);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUserById(id);
+    public void deleteUser(@PathVariable Long userId) {
+        userService.deleteUserById(userId);
     }
 
     // USER

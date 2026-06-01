@@ -1,14 +1,8 @@
 package com.wteam.backend.user;
 
 import com.wteam.backend.common.enums.Role;
-import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.exception.user.UserNotFoundException;
-import com.wteam.backend.exception.user_profile.ProfileIncompleteException;
-import com.wteam.backend.exception.user_profile.ProfileNotFoundException;
 import com.wteam.backend.user.dto.UserResponse;
-import com.wteam.backend.user_profile.UserProfile;
-import com.wteam.backend.user_profile.dto.UserProfileRequest;
-import com.wteam.backend.user_profile.dto.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,26 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.Instant;
-import java.util.Optional;
 
-/**
- * The type User service.
- */
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    /**
-     * Gets all users.
-     *
-     * @param pageable the pageable
-     * @return the all users
-     */
-//
-    // USER
-    //
+
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Boolean isActive, Role role, Pageable pageable) {
         return userRepository.findAllWithProfile(isActive, role, pageable)
@@ -44,16 +26,16 @@ public class UserService {
     }
 
     /**
-     * Gets user by id.
+     * Gets user by userId.
      *
-     * @param id the id
-     * @return the user by id
+     * @param userId the userId
+     * @return the user by userId
      */
     @Transactional(readOnly = true)
-    public UserResponse getUserById(Long id) {
-        return userRepository.findById(id)
+    public UserResponse getUserById(Long userId) {
+        return userRepository.findById(userId)
                 .map(userMapper::toResponse)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     /**
@@ -75,41 +57,36 @@ public class UserService {
      * Update role.
      *
      * @param role the role
-     * @param id   the id
+     * @param userId   the userId
      */
     @Transactional
-    public void updateRole(Role role, Long id) {
+    public void updateRole(Role role, Long userId) {
         Assert.notNull(role, "Role must not be null");
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+        User user = getUser(userId);
         user.setRole(role);
     }
 
     /**
-     * Delete user by id.
+     * Delete user by userId.
      *
-     * @param id the id
+     * @param userId the userId
      */
     @Transactional
-    public void deleteUserById(Long id) {
-        User user = userRepository.findById(id)
-                        .orElseThrow(() -> new UserNotFoundException(id));
-
-        userRepository.delete(user);
+    public void deleteUserById(Long userId) {
+        userRepository.delete(getUser(userId));
     }
 
     /**
      * Deactivate user.
      *
-     * @param id      the id
-     * @param adminId the admin id
+     * @param userId      the userId
+     * @param adminId the admin userId
      * @param reason  the reason
      */
     @Transactional
-    public void deactivateUser(Long id, Long adminId, String reason) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+    public void deactivateUser(Long userId, Long adminId, String reason) {
+        User user = getUser(userId);
 
         user.setActive(false);
         user.setBlockedAt(Instant.now());
@@ -120,12 +97,11 @@ public class UserService {
     /**
      * Activate user.
      *
-     * @param id the id
+     * @param userId the userId
      */
     @Transactional
-    public void activateUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+    public void activateUser(Long userId) {
+        User user = getUser(userId);
 
         user.setActive(true);
         user.setBlockedAt(null);
@@ -134,91 +110,19 @@ public class UserService {
     }
 
     /**
-     * Exists by id boolean.
+     * Exists by userId boolean.
      *
-     * @param id the id
+     * @param userId the userId
      * @return the boolean
      */
     @Transactional(readOnly = true)
-    public boolean existsById(Long id) {
-        return userRepository.existsById(id);
-    }
-
-    /**
-     * Gets profile.
-     *
-     * @param id the user id
-     * @return the profile
-     */
-// USER PROFILE
-    @Transactional(readOnly = true)
-    public UserProfileResponse getProfile(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        UserProfile profile = Optional.ofNullable(user.getUserProfile())
-                .orElseThrow(() -> new ProfileNotFoundException(id));
-
-        return userMapper.toProfileResponse(profile);
-    }
-
-    /**
-     * Update profile user response.
-     *
-     * @param id  the user id
-     * @param request the request
-     * @return the user response
-     */
-    @Transactional
-    public UserResponse updateProfile(Long id, UserProfileRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
-                        .orElseThrow(() -> new ProfileNotFoundException(id));
-
-        userMapper.updateProfileFromRequest(request, userProfile);
-        return userMapper.toResponse(user);
-    }
-
-    /**
-     * Update verification status user response.
-     *
-     * @param id the user id
-     * @param status the status
-     * @return the user response
-     */
-    @Transactional
-    public UserResponse updateVerificationStatus(Long id, VerificationStatus status) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
-                        .orElseThrow(() -> new ProfileNotFoundException(id));
-
-        userProfile.setVerificationStatus(status);
-        return userMapper.toResponse(user);
+    public boolean existsById(Long userId) {
+        return userRepository.existsById(userId);
     }
 
 
-    /**
-     * Validate user can place offers.
-     *
-     * @param userId the user id
-     */
-    @Transactional(readOnly = true)
-    public void validateUserCanPlaceOffers(Long userId) {
-        User user = userRepository.findById(userId)
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-
-        UserProfile profile = Optional.ofNullable(user.getUserProfile())
-                .orElseThrow(() -> new ProfileNotFoundException(userId));
-
-        if (profile.getPhoneNumber() == null || profile.getBirthDate() == null ||
-            profile.getVerificationStatus() != VerificationStatus.VERIFIED
-        ) {
-            throw new ProfileIncompleteException(userId);
-        }
     }
-
 }

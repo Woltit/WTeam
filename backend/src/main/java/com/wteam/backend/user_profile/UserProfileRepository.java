@@ -1,5 +1,8 @@
 package com.wteam.backend.user_profile;
 
+import com.wteam.backend.common.enums.VerificationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,4 +22,5 @@ import java.util.Optional;
 @Repository
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
     Optional<UserProfile> findByUserId(Long userId);
+    Page<UserProfile> findAllByVerificationStatus(VerificationStatus status, Pageable pageable);
 }

@@ -10,17 +10,17 @@ public enum RentingStatus {
     /**
      * Active renting status.
      */
-    ACTIVE,
+    AVAILABLE,
     /**
      * Rented renting status.
      */
     RENTED,
     /**
-     * Inactive renting status.
+     * Hidden renting status.
      */
-    INACTIVE,
+    HIDDEN,
     /**
-     * Deleted renting status.
+     * Archived renting status.
      */
-    DELETED
+    ARCHIVED
 }

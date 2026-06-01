@@ -3,6 +3,7 @@ package com.wteam.backend.user_profile;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.security.annotation.CurrentUser;
 import com.wteam.backend.security.dto.UserPrincipalDto;
+import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
 import jakarta.validation.Valid;
@@ -24,6 +25,12 @@ public class UserProfileController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileResponse> getMyProfile(@CurrentUser UserPrincipalDto user) {
         return ResponseEntity.ok(userProfileService.getProfile(user.id()));
+    }
+
+    @GetMapping("/public/{userId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PublicProfileResponse> getPublicProfile(@PathVariable Long userId) {
+        return ResponseEntity.ok(userProfileService.getPublicProfile(userId));
     }
 
     @PutMapping
@@ -57,6 +64,6 @@ public class UserProfileController {
     @GetMapping("/pending")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserProfileResponse>> getPendingProfiles(Pageable pageable) {
-        return ResponseEntity.ok(userProfileService.getProfilesByStatus(VerificationStatus.UNVERIFIED, pageable));
+        return ResponseEntity.ok(userProfileService.getPendingProfiles(pageable));
     }
 }

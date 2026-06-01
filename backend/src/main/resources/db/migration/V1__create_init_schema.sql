@@ -10,7 +10,7 @@ CREATE TYPE role                    AS ENUM
 CREATE TYPE item_condition          AS ENUM
     ('IDEAL', 'GOOD', 'NORM', 'BAD', 'NEEDS_REPAIRING');
 CREATE TYPE renting_status          AS ENUM
-    ('ACTIVE', 'RENTED', 'INACTIVE', 'DELETED');
+    ('AVAILABLE', 'RENTED', 'HIDDEN', 'ARCHIVED');
 CREATE TYPE verification_status     AS ENUM
     ('UNVERIFIED', 'PENDING', 'VERIFIED', 'REJECTED');
 CREATE TYPE booking_status          AS ENUM
@@ -293,10 +293,10 @@ CREATE TABLE item_reviews (
 -- ================================================
 CREATE TABLE chat_rooms (
     id          BIGSERIAL   PRIMARY KEY,
-    booking_id  BIGINT      UNIQUE REFERENCES bookings(id)
-        ON DELETE CASCADE,
-    created_at  TIMESTAMP   NOT NULL
-        DEFAULT NOW()
+    item_id     BIGINT      NOT NULL REFERENCES items(id),
+    renter_id   BIGINT      NOT NULL REFERENCES users(id),
+    -- booking_id може бути опціональним
+    CONSTRAINT uq_chat_room UNIQUE (item_id, renter_id)
 );
 
 -- ================================================

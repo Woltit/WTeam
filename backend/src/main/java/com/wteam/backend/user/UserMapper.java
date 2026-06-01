@@ -2,8 +2,10 @@ package com.wteam.backend.user;
 
 import com.wteam.backend.user.dto.UserResponse;
 import com.wteam.backend.user_profile.UserProfile;
+import com.wteam.backend.user_profile.UserProfileMapper;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,7 +22,10 @@ import org.springframework.stereotype.Component;
  * @see UserProfileRequest
  */
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
+    private final UserProfileMapper userProfileMapper;
+
 
     /**
      * Конвертує JPA-сутність {@link User} у вихідний об'єкт відповіді {@link UserResponse}.
@@ -45,50 +50,8 @@ public class UserMapper {
                 user.getId(),
                 user.getEmail(),
                 user.getRole(),
-                userProfile != null ? toProfileResponse(userProfile) : null,
+                userProfile != null ? userProfileMapper.toProfileResponse(userProfile) : null,
                 user.getCreatedAt()
         );
-    }
-
-    /**
-     * Конвертує сутність {@link UserProfile} у об'єкт відповіді {@link UserProfileResponse}.
-     *
-     * @param profile сутність профілю користувача для конвертації.
-     * @return об'єкт {@link UserProfileResponse} з публічними даними профілю.
-     */
-    public UserProfileResponse toProfileResponse(UserProfile profile) {
-        return new UserProfileResponse(
-                profile.getLastName(),
-                profile.getFirstName(),
-                profile.getMiddleName(),
-                profile.getBirthDate(),
-                profile.getPhoneNumber(),
-                profile.getBio(),
-                profile.getAvatarUrl(),
-                profile.getVerificationStatus(),
-                profile.getRenterTrustScore(),
-                profile.getOwnerTrustScore(),
-                profile.getTotalSuccessfulRents()
-        );
-    }
-
-    /**
-     * Оновлює існуючу сутність {@link UserProfile} даними з вхідного запиту {@link UserProfileRequest}.
-     * <p>
-     * Метод модифікує переданий об'єкт профілю на місці (in-place) шляхом виклику відповідних сетерів.
-     * Він не створює новий об'єкт профілю, що дозволяє Hibernate коректно відстежувати зміни (dirty checking)
-     * і оновлювати лише потрібні стовпці в базі даних під час транзакції.
-     * </p>
-     *
-     * @param request DTO запиту, що містить нові персональні дані від користувача.
-     * @param profile існуюча JPA-сутність профілю, яку необхідно оновити.
-     */
-    public void updateProfileFromRequest(UserProfileRequest request, UserProfile profile) {
-        profile.setLastName(request.lastName());
-        profile.setFirstName(request.firstName());
-        profile.setMiddleName(request.middleName());
-        profile.setBirthDate(request.birthDate());
-        profile.setPhoneNumber(request.phoneNumber());
-        profile.setBio(request.bio());
     }
 }

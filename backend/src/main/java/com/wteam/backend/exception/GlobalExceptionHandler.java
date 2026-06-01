@@ -2,6 +2,7 @@ package com.wteam.backend.exception;
 
 import com.wteam.backend.exception.base.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -117,6 +118,23 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException e) {
         return buildResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    /**
+     * Обробляє порушення цілісності даних бази (наприклад, Foreign Key Constraint).
+     * Спрацьовує, коли намагаються видалити сутність, на яку вже є посилання в інших таблицях
+     * (наприклад, видалення категорії, в якій є створені товари).
+     *
+     * @param e виняток {@link DataIntegrityViolationException}
+     * @return HTTP 409 (Conflict)
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation: {}", e.getMessage());
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "Operation failed: this record is in use and cannot be deleted."
+        );
     }
 
     /**
