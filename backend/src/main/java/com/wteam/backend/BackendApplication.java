@@ -17,7 +17,7 @@ public class BackendApplication {
      *
      * @param args the args
      */
-    static void main(String[] args) {
+    public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SpringApplication app = new SpringApplication(BackendApplication.class);
         app.addListeners(new PortAvailabilityListener());
