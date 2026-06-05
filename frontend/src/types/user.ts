@@ -19,8 +19,25 @@ export interface UserResponse {
   id: number
   email: string
   role: Role
-  profile: UserProfileResponse
+  isActive: boolean
+  blockReason: string | null
+  profile: UserProfileResponse | null
   createdAt: string
+}
+
+export interface PendingProfileResponse {
+  userId: number
+  email: string
+  lastName: string
+  firstName: string
+  middleName: string | null
+  birthDate: string | null
+  phoneNumber: string | null
+  verificationStatus: VerificationStatus
+}
+
+export interface BlockUserRequest {
+    reason: string
 }
 
 export interface PublicProfileResponse {

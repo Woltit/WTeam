@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
     const { user, isAdmin, logout } = useAuth();
@@ -19,39 +20,42 @@ const Navbar = () => {
 
             <div className="navbar-links">
                 <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                    Browse
+                    Каталог
                 </NavLink>
                 {user && (
                     <>
                         <NavLink to="/items/create" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                            List Item
+                            Додати оголошення
                         </NavLink>
                         <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                            Profile
+                            Профіль
                         </NavLink>
                     </>
                 )}
                 {isAdmin && (
                     <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        Admin
+                        Адмін
                     </NavLink>
                 )}
             </div>
 
             <div className="navbar-actions">
+                <ThemeToggle />
                 {user ? (
                     <div className="navbar-user">
                         <span className="navbar-user-name">
-                            {user.profile.firstName} {user.profile.lastName}
+                            {user.profile?.firstName || user.profile?.lastName
+                                ? `${user.profile.firstName ?? ''} ${user.profile.lastName ?? ''}`.trim()
+                                : user.email}
                         </span>
                         <button className="btn btn-outline btn-sm" onClick={handleLogout}>
-                            Logout
+                            Вийти
                         </button>
                     </div>
                 ) : (
                     <div className="navbar-auth">
-                        <Link to="/login" className="btn btn-outline btn-sm">Login</Link>
-                        <Link to="/register" className="btn btn-primary btn-sm">Sign Up</Link>
+                        <Link to="/login" className="btn btn-outline btn-sm">Увійти</Link>
+                        <Link to="/register" className="btn btn-primary btn-sm">Реєстрація</Link>
                     </div>
                 )}
             </div>

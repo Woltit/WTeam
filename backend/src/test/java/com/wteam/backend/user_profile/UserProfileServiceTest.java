@@ -3,6 +3,7 @@ package com.wteam.backend.user_profile;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.exception.user_profile.ProfileIncompleteException;
 import com.wteam.backend.exception.user_profile.ProfileNotFoundException;
+import com.wteam.backend.user_profile.dto.PendingProfileResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
@@ -127,18 +128,18 @@ class UserProfileServiceTest {
     @DisplayName("getPendingProfiles should return matching profiles page")
     void getPendingProfiles_shouldReturnPage() {
         UserProfile profile = new UserProfile();
-        UserProfileResponse response = mock(UserProfileResponse.class);
         Page<UserProfile> profilesPage = new PageImpl<>(List.of(profile));
         Pageable pageable = Pageable.unpaged();
 
         when(userProfileRepository.findAllByVerificationStatus(VerificationStatus.PENDING, pageable)).thenReturn(profilesPage);
-        when(userProfileMapper.toProfileResponse(profile)).thenReturn(response);
+        PendingProfileResponse pendingResponse = mock(PendingProfileResponse.class);
+        when(userProfileMapper.toPendingProfileResponse(profile)).thenReturn(pendingResponse);
 
-        Page<UserProfileResponse> result = userProfileService.getPendingProfiles(pageable);
+        Page<PendingProfileResponse> result = userProfileService.getPendingProfiles(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        assertEquals(response, result.getContent().getFirst());
+        assertEquals(pendingResponse, result.getContent().getFirst());
     }
 
     @Test

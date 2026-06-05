@@ -21,8 +21,21 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Boolean isActive, Role role, Pageable pageable) {
-        return userRepository.findAllWithProfile(isActive, role, pageable)
-                .map(userMapper::toResponse);
+        Page<User> users;
+
+        if (isActive == null && role == null) {
+            users = userRepository.findAll(pageable);
+        } else if (isActive != null && role == null) {
+            users = isActive
+                    ? userRepository.findAllByIsActiveTrue(pageable)
+                    : userRepository.findAllByIsActiveFalse(pageable);
+        } else if (isActive == null) {
+            users = userRepository.findAllByRole(role, pageable);
+        } else {
+            users = userRepository.findAllByIsActiveAndRole(isActive, role, pageable);
+        }
+
+        return users.map(userMapper::toResponse);
     }
 
     /**

@@ -10,5 +10,6 @@ export interface CategoryResponse {
     name: string
     slug: string
     iconUrl: string | null
+    parentId: number | null
     subcategories: CategoryResponse[]
 }

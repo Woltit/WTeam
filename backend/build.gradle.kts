@@ -100,6 +100,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("io.jsonwebtoken:jjwt-api:$jwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
     implementation("me.paulschwarz:spring-dotenv:$dotenvVersion")
     implementation("org.apache.commons:commons-lang3:$apacheCommonsVersion")
 

@@ -9,9 +9,15 @@ const login = async (data: LoginRequest) => {
 const register = async (data: RegisterRequest) => {
     const response = await api.post<AuthResponse>('/auth/register', data);
     return response.data;
-}
+};
+
+const refresh = async (refreshToken: string) => {
+    const response = await api.post<AuthResponse>('/auth/refresh', { refreshToken });
+    return response.data;
+};
 
 export default {
     login,
-    register
-}
+    register,
+    refresh,
+};

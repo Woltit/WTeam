@@ -33,6 +33,7 @@ public class CategoryMapper {
                 category.getName(),
                 category.getSlug(),
                 category.getIconUrl(),
+                category.getParent() != null ? category.getParent().getId() : null,
                 subcategories
         );
     }
@@ -43,6 +44,7 @@ public class CategoryMapper {
                 category.getName(),
                 category.getSlug(),
                 category.getIconUrl(),
+                category.getParent() != null ? category.getParent().getId() : null,
                 Collections.emptyList()
         );
     }

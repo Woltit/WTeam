@@ -11,7 +11,7 @@ const conditionLabel: Record<string, string> = {
 const ItemDetailPage = () => {
     const { itemId } = useParams<{ itemId: string }>();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const [item, setItem] = useState<ItemResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -114,14 +114,27 @@ const ItemDetailPage = () => {
                         </div>
                     </div>
 
-                    {isOwner && (
-                        <div className="item-detail-actions">
-                            <Link to={`/items/${item.id}/edit`} className="btn btn-outline">Edit Item</Link>
-                            <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
-                                {deleting ? <span className="spinner-sm" /> : 'Delete Item'}
-                            </button>
-                        </div>
-                    )}
+                    <div className="item-detail-actions">
+                        {isOwner ? (
+                            <>
+                                <Link to={`/items/${item.id}/edit`} className="btn btn-outline">Edit Item</Link>
+                                <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
+                                    {deleting ? <span className="spinner-sm" /> : 'Delete Item'}
+                                </button>
+                            </>
+                        ) : token ? (
+                            <div className="rent-cta">
+                                <p className="rent-cta-text">Зацікавив цей товар? Зв&apos;яжіться з власником через профіль.</p>
+                                <Link to="/profile" className="btn btn-primary">Перейти до профілю</Link>
+                            </div>
+                        ) : (
+                            <div className="rent-cta">
+                                <p className="rent-cta-text">Увійдіть, щоб орендувати цей товар</p>
+                                <Link to="/login" className="btn btn-primary">Увійти</Link>
+                                <Link to="/register" className="btn btn-outline">Зареєструватися</Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

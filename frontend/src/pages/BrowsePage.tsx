@@ -25,6 +25,8 @@ const BrowsePage = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [search, setSearch] = useState('');
+    const [cityFilter, setCityFilter] = useState('');
 
     useEffect(() => {
         setLoading(true);
@@ -37,11 +39,36 @@ const BrowsePage = () => {
             .finally(() => setLoading(false));
     }, [page]);
 
+    const filtered = items.filter(item => {
+        const q = search.toLowerCase().trim();
+        const matchesSearch = !q
+            || item.title.toLowerCase().includes(q)
+            || item.description?.toLowerCase().includes(q)
+            || item.tags?.some(t => t.toLowerCase().includes(q));
+        const matchesCity = !cityFilter || item.city.toLowerCase().includes(cityFilter.toLowerCase());
+        return matchesSearch && matchesCity;
+    });
+
     return (
         <div className="page">
             <div className="page-hero">
                 <h1 className="hero-title">Rent anything,<br /><span className="hero-accent">from anyone.</span></h1>
                 <p className="hero-sub">Browse thousands of items available for rent near you.</p>
+            </div>
+
+            <div className="browse-filters container">
+                <input
+                    className="form-input"
+                    placeholder="Пошук за назвою, описом або тегами…"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                />
+                <input
+                    className="form-input"
+                    placeholder="Місто…"
+                    value={cityFilter}
+                    onChange={e => setCityFilter(e.target.value)}
+                />
             </div>
 
             {loading && (
@@ -54,14 +81,14 @@ const BrowsePage = () => {
 
             {!loading && !error && (
                 <>
-                    {items.length === 0 ? (
+                    {filtered.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">📦</div>
-                            <p>No items available right now. Check back soon!</p>
+                            <p>{items.length === 0 ? 'No items available right now. Check back soon!' : 'Нічого не знайдено за вашим запитом.'}</p>
                         </div>
                     ) : (
                         <div className="items-grid">
-                            {items.map(item => (
+                            {filtered.map(item => (
                                 <Link to={`/items/${item.id}`} key={item.id} className="item-card">
                                     <div className="item-card-img-placeholder">
                                         <span className="item-card-icon">📦</span>

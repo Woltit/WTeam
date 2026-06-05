@@ -1,5 +1,6 @@
 package com.wteam.backend.user_profile;
 
+import com.wteam.backend.user_profile.dto.PendingProfileResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
@@ -26,6 +27,19 @@ public class UserProfileMapper {
                 profile.getRenterTrustScore(),
                 profile.getOwnerTrustScore(),
                 profile.getTotalSuccessfulRents()
+        );
+    }
+
+    public PendingProfileResponse toPendingProfileResponse(UserProfile profile) {
+        return new PendingProfileResponse(
+                profile.getUser().getId(),
+                profile.getUser().getEmail(),
+                profile.getLastName(),
+                profile.getFirstName(),
+                profile.getMiddleName(),
+                profile.getBirthDate(),
+                profile.getPhoneNumber(),
+                profile.getVerificationStatus()
         );
     }
 

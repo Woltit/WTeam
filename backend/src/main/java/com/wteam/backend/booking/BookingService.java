@@ -150,6 +150,24 @@ public class BookingService {
     }
 
 
+    @Transactional
+    public BookingResponse adminUpdateStatus(Long bookingId, BookingStatus newStatus, String cancellationReason) {
+        Booking booking = getBooking(bookingId);
+
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot change status of a cancelled booking");
+        }
+
+        booking.setStatus(newStatus);
+
+        if (newStatus == BookingStatus.CANCELLED) {
+            Assert.notNull(cancellationReason, "CancellationReason cannot be null");
+            booking.setCancellationReason(cancellationReason);
+        }
+
+        return bookingMapper.toResponse(bookingRepository.save(booking));
+    }
+
     private Booking getBooking(Long bookingId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));

@@ -24,6 +24,8 @@ public record UserResponse(
         Long id,
         String email,
         Role role,
+        boolean isActive,
+        String blockReason,
         UserProfileResponse profile,
         Instant createdAt
 ) {}

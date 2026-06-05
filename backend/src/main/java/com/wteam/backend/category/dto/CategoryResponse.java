@@ -7,5 +7,6 @@ public record CategoryResponse(
         String name,
         String slug,
         String iconUrl,
+        Long parentId,
         List<CategoryResponse> subcategories
 ) {}

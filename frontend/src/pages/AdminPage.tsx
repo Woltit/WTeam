@@ -3,12 +3,23 @@ import usersApi from '../api/users';
 import itemsApi from '../api/items';
 import profileApi from '../api/profile';
 import categoriesApi from '../api/categories';
-import type { UserResponse, Role, VerificationStatus } from '../types/user';
+import bookingsApi, { type BookingResponse, type BookingStatus } from '../api/bookings';
+import type { UserResponse, Role, VerificationStatus, PendingProfileResponse } from '../types/user';
 import type { ItemResponse } from '../types/item';
-import type { UserProfileResponse } from '../types/user';
 import type { CategoryResponse, CategoryRequest } from '../types/category';
 
-type Tab = 'users' | 'items' | 'verifications' | 'categories';
+type Tab = 'users' | 'items' | 'verifications' | 'categories' | 'bookings';
+
+const BOOKING_STATUSES: BookingStatus[] = [
+    'PENDING', 'APPROVED', 'REJECTED', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTE',
+];
+
+const verificationLabel: Record<VerificationStatus, string> = {
+    UNVERIFIED: 'Не верифіковано',
+    PENDING: 'Очікує',
+    VERIFIED: 'Верифіковано',
+    REJECTED: 'Відхилено',
+};
 
 // ── Users Tab ────────────────────────────────────────────
 const UsersTab = () => {
@@ -23,7 +34,7 @@ const UsersTab = () => {
         setLoading(true);
         usersApi.getAllUsers(p, 15)
             .then(data => { setUsers(data.content); setTotal(data.totalPages); setPage(p); })
-            .catch(() => setMsg('Failed to load users.'))
+            .catch(() => setMsg('Не вдалося завантажити користувачів.'))
             .finally(() => setLoading(false));
     };
 
@@ -37,20 +48,20 @@ const UsersTab = () => {
             const user = await usersApi.searchUserByEmail(search.trim());
             setUsers([user]);
             setTotal(1);
-        } catch { setMsg('User not found.'); setUsers([]); }
+        } catch { setMsg('Користувача не знайдено.'); setUsers([]); }
         finally { setLoading(false); }
     };
 
     const doAction = async (action: () => Promise<void>) => {
-        try { await action(); load(page); } catch { setMsg('Action failed.'); }
+        try { await action(); setMsg(''); load(page); } catch { setMsg('Дію не виконано.'); }
     };
 
     return (
         <div className="admin-tab">
             <form className="admin-search" onSubmit={handleSearch}>
-                <input className="form-input" placeholder="Search by email…" value={search} onChange={e => setSearch(e.target.value)} />
-                <button className="btn btn-outline btn-sm" type="submit">Search</button>
-                <button className="btn btn-outline btn-sm" type="button" onClick={() => { setSearch(''); load(); }}>Clear</button>
+                <input className="form-input" placeholder="Пошук за email…" value={search} onChange={e => setSearch(e.target.value)} />
+                <button className="btn btn-outline btn-sm" type="submit">Знайти</button>
+                <button className="btn btn-outline btn-sm" type="button" onClick={() => { setSearch(''); load(); }}>Скинути</button>
             </form>
 
             {msg && <div className="alert alert-error">{msg}</div>}
@@ -60,7 +71,8 @@ const UsersTab = () => {
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th>
+                                <th>ID</th><th>Email</th><th>Ім&apos;я</th><th>Роль</th>
+                                <th>Акаунт</th><th>Верифікація</th><th>Дії</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -68,7 +80,7 @@ const UsersTab = () => {
                                 <tr key={u.id}>
                                     <td>{u.id}</td>
                                     <td>{u.email}</td>
-                                    <td>{u.profile.firstName} {u.profile.lastName}</td>
+                                    <td>{u.profile?.firstName} {u.profile?.lastName}</td>
                                     <td>
                                         <select className="role-select"
                                             value={u.role}
@@ -77,28 +89,40 @@ const UsersTab = () => {
                                         </select>
                                     </td>
                                     <td>
-                                        <span className={`badge ${u.profile.verificationStatus === 'VERIFIED' ? 'badge-success' : 'badge-neutral'}`}>
-                                            {u.profile.verificationStatus}
+                                        <span className={`badge ${u.isActive ? 'badge-success' : 'badge-error'}`}>
+                                            {u.isActive ? 'Активний' : 'Заблокований'}
+                                        </span>
+                                        {!u.isActive && u.blockReason && (
+                                            <div className="admin-hint" title={u.blockReason}>Причина: {u.blockReason}</div>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <span className={`badge ${u.profile?.verificationStatus === 'VERIFIED' ? 'badge-success' : 'badge-neutral'}`}>
+                                            {verificationLabel[u.profile?.verificationStatus ?? 'UNVERIFIED']}
                                         </span>
                                     </td>
                                     <td className="action-cell">
-                                        <button className="btn btn-outline btn-xs"
-                                            onClick={() => doAction(() => usersApi.activateUser(u.id))}>
-                                            Activate
-                                        </button>
-                                        <button className="btn btn-warning btn-xs"
-                                            onClick={() => {
-                                                const reason = prompt('Block reason:');
-                                                if (reason) doAction(() => usersApi.blockUser(u.id, { reason }));
-                                            }}>
-                                            Block
-                                        </button>
+                                        {!u.isActive && (
+                                            <button className="btn btn-outline btn-xs"
+                                                onClick={() => doAction(() => usersApi.activateUser(u.id))}>
+                                                Активувати
+                                            </button>
+                                        )}
+                                        {u.isActive && (
+                                            <button className="btn btn-warning btn-xs"
+                                                onClick={() => {
+                                                    const reason = prompt('Причина блокування:');
+                                                    if (reason) doAction(() => usersApi.blockUser(u.id, { reason }));
+                                                }}>
+                                                Заблокувати
+                                            </button>
+                                        )}
                                         <button className="btn btn-danger btn-xs"
                                             onClick={() => {
-                                                if (confirm(`Delete user ${u.email}?`))
+                                                if (confirm(`Видалити користувача ${u.email}?`))
                                                     doAction(() => usersApi.deleteUser(u.id));
                                             }}>
-                                            Delete
+                                            Видалити
                                         </button>
                                     </td>
                                 </tr>
@@ -109,9 +133,9 @@ const UsersTab = () => {
             )}
             {total > 1 && (
                 <div className="pagination">
-                    <button className="btn btn-outline btn-sm" disabled={page === 0} onClick={() => load(page - 1)}>← Prev</button>
-                    <span className="pagination-info">Page {page + 1}</span>
-                    <button className="btn btn-outline btn-sm" disabled={page >= total - 1} onClick={() => load(page + 1)}>Next →</button>
+                    <button className="btn btn-outline btn-sm" disabled={page === 0} onClick={() => load(page - 1)}>← Назад</button>
+                    <span className="pagination-info">Сторінка {page + 1} з {total}</span>
+                    <button className="btn btn-outline btn-sm" disabled={page >= total - 1} onClick={() => load(page + 1)}>Далі →</button>
                 </div>
             )}
         </div>
@@ -130,15 +154,23 @@ const ItemsTab = () => {
         setLoading(true);
         itemsApi.getAllItems(p, 15)
             .then(data => { setItems(data.content); setTotal(data.totalPages); setPage(p); })
-            .catch(() => setMsg('Failed to load items.'))
+            .catch(() => setMsg('Не вдалося завантажити оголошення.'))
             .finally(() => setLoading(false));
     };
 
     useEffect(() => { load(); }, []);
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete this item?')) return;
-        try { await itemsApi.deleteItem(id); load(page); } catch { setMsg('Delete failed.'); }
+        if (!confirm('Видалити це оголошення?')) return;
+        try { await itemsApi.deleteItem(id); setMsg(''); load(page); } catch { setMsg('Не вдалося видалити.'); }
+    };
+
+    const toggleVerified = async (item: ItemResponse) => {
+        try {
+            await itemsApi.setItemVerified(item.id, !item.isVerified);
+            setMsg('');
+            load(page);
+        } catch { setMsg('Не вдалося змінити статус верифікації.'); }
     };
 
     return (
@@ -148,7 +180,10 @@ const ItemsTab = () => {
                 <div className="admin-table-wrap">
                     <table className="admin-table">
                         <thead>
-                            <tr><th>ID</th><th>Title</th><th>Owner</th><th>City</th><th>Status</th><th>Price/Day</th><th>Actions</th></tr>
+                            <tr>
+                                <th>ID</th><th>Назва</th><th>Власник</th><th>Місто</th>
+                                <th>Статус</th><th>Верифікація</th><th>Ціна/день</th><th>Дії</th>
+                            </tr>
                         </thead>
                         <tbody>
                             {items.map(item => (
@@ -158,9 +193,20 @@ const ItemsTab = () => {
                                     <td>{item.ownerProfile.firstName} {item.ownerProfile.lastName}</td>
                                     <td>{item.city}</td>
                                     <td><span className="badge badge-neutral">{item.status}</span></td>
-                                    <td>₴{item.pricePerDay}</td>
                                     <td>
-                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(item.id)}>Delete</button>
+                                        <span className={`badge ${item.isVerified ? 'badge-success' : 'badge-warning'}`}>
+                                            {item.isVerified ? 'Так' : 'Ні'}
+                                        </span>
+                                    </td>
+                                    <td>₴{item.pricePerDay}</td>
+                                    <td className="action-cell">
+                                        <button
+                                            className={`btn btn-xs ${item.isVerified ? 'btn-outline' : 'btn-success'}`}
+                                            onClick={() => toggleVerified(item)}
+                                        >
+                                            {item.isVerified ? 'Скасувати' : 'Схвалити'}
+                                        </button>
+                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(item.id)}>Видалити</button>
                                     </td>
                                 </tr>
                             ))}
@@ -170,9 +216,9 @@ const ItemsTab = () => {
             )}
             {total > 1 && (
                 <div className="pagination">
-                    <button className="btn btn-outline btn-sm" disabled={page === 0} onClick={() => load(page - 1)}>← Prev</button>
-                    <span className="pagination-info">Page {page + 1}</span>
-                    <button className="btn btn-outline btn-sm" disabled={page >= total - 1} onClick={() => load(page + 1)}>Next →</button>
+                    <button className="btn btn-outline btn-sm" disabled={page === 0} onClick={() => load(page - 1)}>← Назад</button>
+                    <span className="pagination-info">Сторінка {page + 1} з {total}</span>
+                    <button className="btn btn-outline btn-sm" disabled={page >= total - 1} onClick={() => load(page + 1)}>Далі →</button>
                 </div>
             )}
         </div>
@@ -181,15 +227,17 @@ const ItemsTab = () => {
 
 // ── Verifications Tab ────────────────────────────────────
 const VerificationsTab = () => {
-    const [profiles, setProfiles] = useState<UserProfileResponse[]>([]);
+    const [profiles, setProfiles] = useState<PendingProfileResponse[]>([]);
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [msg, setMsg] = useState('');
 
-    const load = () => {
+    const load = (p = 0) => {
         setLoading(true);
-        profileApi.getPendingProfiles()
-            .then(data => setProfiles(data.content))
-            .catch(() => setMsg('Failed to load pending profiles.'))
+        profileApi.getPendingProfiles(p, 20)
+            .then(data => { setProfiles(data.content); setTotal(data.totalPages); setPage(p); })
+            .catch(() => setMsg('Не вдалося завантажити запити.'))
             .finally(() => setLoading(false));
     };
 
@@ -198,31 +246,34 @@ const VerificationsTab = () => {
     const updateStatus = async (userId: number, status: VerificationStatus) => {
         try {
             await profileApi.updateVerificationStatus(userId, status);
-            load();
-        } catch { setMsg('Action failed.'); }
+            setMsg('');
+            load(page);
+        } catch { setMsg('Дію не виконано.'); }
     };
 
     return (
         <div className="admin-tab">
             {msg && <div className="alert alert-error">{msg}</div>}
             {loading ? <div className="spinner" /> : profiles.length === 0
-                ? <div className="empty-state"><div className="empty-icon">✅</div><p>No pending verifications.</p></div>
+                ? <div className="empty-state"><div className="empty-icon">✅</div><p>Немає запитів на верифікацію.</p></div>
                 : (
                     <div className="admin-table-wrap">
                         <table className="admin-table">
                             <thead>
-                                <tr><th>Name</th><th>Phone</th><th>Birth Date</th><th>Status</th><th>Actions</th></tr>
+                                <tr><th>ID</th><th>Email</th><th>Ім&apos;я</th><th>Телефон</th><th>Дата народж.</th><th>Статус</th><th>Дії</th></tr>
                             </thead>
                             <tbody>
-                                {profiles.map((p, i) => (
-                                    <tr key={i}>
-                                        <td>{p.firstName} {p.lastName} {p.middleName}</td>
-                                        <td>{p.phoneNumber}</td>
+                                {profiles.map(p => (
+                                    <tr key={p.userId}>
+                                        <td>{p.userId}</td>
+                                        <td>{p.email}</td>
+                                        <td>{p.firstName} {p.lastName} {p.middleName ?? ''}</td>
+                                        <td>{p.phoneNumber ?? '—'}</td>
                                         <td>{p.birthDate ? String(p.birthDate) : '—'}</td>
-                                        <td><span className="badge badge-warning">{p.verificationStatus}</span></td>
+                                        <td><span className="badge badge-warning">{verificationLabel[p.verificationStatus]}</span></td>
                                         <td className="action-cell">
-                                            <button className="btn btn-success btn-xs" onClick={() => updateStatus(i + 1, 'VERIFIED')}>Approve</button>
-                                            <button className="btn btn-danger btn-xs" onClick={() => updateStatus(i + 1, 'REJECTED')}>Reject</button>
+                                            <button className="btn btn-success btn-xs" onClick={() => updateStatus(p.userId, 'VERIFIED')}>Схвалити</button>
+                                            <button className="btn btn-danger btn-xs" onClick={() => updateStatus(p.userId, 'REJECTED')}>Відхилити</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -230,6 +281,13 @@ const VerificationsTab = () => {
                         </table>
                     </div>
                 )}
+            {total > 1 && (
+                <div className="pagination">
+                    <button className="btn btn-outline btn-sm" disabled={page === 0} onClick={() => load(page - 1)}>← Назад</button>
+                    <span className="pagination-info">Сторінка {page + 1} з {total}</span>
+                    <button className="btn btn-outline btn-sm" disabled={page >= total - 1} onClick={() => load(page + 1)}>Далі →</button>
+                </div>
+            )}
         </div>
     );
 };
@@ -247,7 +305,7 @@ const CategoriesTab = () => {
         setLoading(true);
         categoriesApi.getCategories()
             .then(setCategories)
-            .catch(() => setMsg('Failed to load categories.'))
+            .catch(() => setMsg('Не вдалося завантажити категорії.'))
             .finally(() => setLoading(false));
     };
 
@@ -256,7 +314,7 @@ const CategoriesTab = () => {
     const openCreate = () => { setEditing(null); setForm({ name: '', slug: '', iconUrl: null, parentId: null }); setShowForm(true); };
     const openEdit = (c: CategoryResponse) => {
         setEditing(c);
-        setForm({ name: c.name, slug: c.slug, iconUrl: c.iconUrl, parentId: null });
+        setForm({ name: c.name, slug: c.slug, iconUrl: c.iconUrl, parentId: c.parentId });
         setShowForm(true);
     };
 
@@ -266,13 +324,14 @@ const CategoriesTab = () => {
             if (editing) await categoriesApi.updateCategory(editing.id, form);
             else await categoriesApi.createCategory(form);
             setShowForm(false);
+            setMsg('');
             load();
-        } catch { setMsg('Save failed.'); }
+        } catch { setMsg('Не вдалося зберегти.'); }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete category?')) return;
-        try { await categoriesApi.deleteCategory(id); load(); } catch { setMsg('Delete failed.'); }
+        if (!confirm('Видалити категорію?')) return;
+        try { await categoriesApi.deleteCategory(id); setMsg(''); load(); } catch { setMsg('Не вдалося видалити.'); }
     };
 
     const flat = (cats: CategoryResponse[], depth = 0): { cat: CategoryResponse; depth: number }[] =>
@@ -283,16 +342,16 @@ const CategoriesTab = () => {
             {msg && <div className="alert alert-error">{msg}</div>}
 
             <button className="btn btn-primary btn-sm" style={{ marginBottom: '1rem' }} onClick={openCreate}>
-                + New Category
+                + Нова категорія
             </button>
 
             {showForm && (
                 <div className="cat-form-card">
-                    <h2 className="section-heading">{editing ? 'Edit' : 'Create'} Category</h2>
+                    <h2 className="section-heading">{editing ? 'Редагувати' : 'Створити'} категорію</h2>
                     <form className="item-form" onSubmit={handleSave}>
                         <div className="form-row">
                             <div className="form-group">
-                                <label className="form-label" htmlFor="cf-name">Name *</label>
+                                <label className="form-label" htmlFor="cf-name">Назва *</label>
                                 <input id="cf-name" className="form-input" value={form.name}
                                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
                             </div>
@@ -304,25 +363,27 @@ const CategoriesTab = () => {
                         </div>
                         <div className="form-row">
                             <div className="form-group">
-                                <label className="form-label" htmlFor="cf-icon">Icon URL</label>
+                                <label className="form-label" htmlFor="cf-icon">URL іконки</label>
                                 <input id="cf-icon" className="form-input" value={form.iconUrl ?? ''}
                                     onChange={e => setForm(f => ({ ...f, iconUrl: e.target.value || null }))} />
                             </div>
                             <div className="form-group">
-                                <label className="form-label" htmlFor="cf-parent">Parent Category</label>
+                                <label className="form-label" htmlFor="cf-parent">Батьківська категорія</label>
                                 <select id="cf-parent" className="form-input"
                                     value={form.parentId ?? ''}
                                     onChange={e => setForm(f => ({ ...f, parentId: e.target.value ? Number(e.target.value) : null }))}>
-                                    <option value="">None (top-level)</option>
-                                    {flat(categories).map(({ cat, depth }) => (
-                                        <option key={cat.id} value={cat.id}>{'  '.repeat(depth)}{cat.name}</option>
-                                    ))}
+                                    <option value="">Немає (верхній рівень)</option>
+                                    {flat(categories)
+                                        .filter(({ cat }) => cat.id !== editing?.id)
+                                        .map(({ cat, depth }) => (
+                                            <option key={cat.id} value={cat.id}>{'  '.repeat(depth)}{cat.name}</option>
+                                        ))}
                                 </select>
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.75rem' }}>
-                            <button type="submit" className="btn btn-primary btn-sm">Save</button>
-                            <button type="button" className="btn btn-outline btn-sm" onClick={() => setShowForm(false)}>Cancel</button>
+                            <button type="submit" className="btn btn-primary btn-sm">Зберегти</button>
+                            <button type="button" className="btn btn-outline btn-sm" onClick={() => setShowForm(false)}>Скасувати</button>
                         </div>
                     </form>
                 </div>
@@ -331,7 +392,7 @@ const CategoriesTab = () => {
             {loading ? <div className="spinner" /> : (
                 <div className="admin-table-wrap">
                     <table className="admin-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Subcategories</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Назва</th><th>Slug</th><th>Підкатегорії</th><th>Дії</th></tr></thead>
                         <tbody>
                             {flat(categories).map(({ cat, depth }) => (
                                 <tr key={cat.id}>
@@ -340,8 +401,8 @@ const CategoriesTab = () => {
                                     <td><code>{cat.slug}</code></td>
                                     <td>{cat.subcategories.length}</td>
                                     <td className="action-cell">
-                                        <button className="btn btn-outline btn-xs" onClick={() => openEdit(cat)}>Edit</button>
-                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(cat.id)}>Delete</button>
+                                        <button className="btn btn-outline btn-xs" onClick={() => openEdit(cat)}>Редагувати</button>
+                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(cat.id)}>Видалити</button>
                                     </td>
                                 </tr>
                             ))}
@@ -353,21 +414,104 @@ const CategoriesTab = () => {
     );
 };
 
+// ── Bookings Tab ─────────────────────────────────────────
+const BookingsTab = () => {
+    const [bookings, setBookings] = useState<BookingResponse[]>([]);
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [msg, setMsg] = useState('');
+
+    const load = (p = 0) => {
+        setLoading(true);
+        bookingsApi.getAllBookings(p, 15)
+            .then(data => { setBookings(data.content); setTotal(data.totalPages); setPage(p); })
+            .catch(() => setMsg('Не вдалося завантажити бронювання.'))
+            .finally(() => setLoading(false));
+    };
+
+    useEffect(() => { load(); }, []);
+
+    const changeStatus = async (booking: BookingResponse, status: BookingStatus) => {
+        let cancellationReason: string | undefined;
+        if (status === 'CANCELLED') {
+            cancellationReason = prompt('Причина скасування:') ?? undefined;
+            if (!cancellationReason) return;
+        }
+        try {
+            await bookingsApi.updateBookingStatus(booking.id, status, cancellationReason);
+            setMsg('');
+            load(page);
+        } catch { setMsg('Не вдалося змінити статус.'); }
+    };
+
+    return (
+        <div className="admin-tab">
+            {msg && <div className="alert alert-error">{msg}</div>}
+            {loading ? <div className="spinner" /> : bookings.length === 0
+                ? <div className="empty-state"><div className="empty-icon">📅</div><p>Бронювань поки немає.</p></div>
+                : (
+                    <div className="admin-table-wrap">
+                        <table className="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Оголошення</th><th>Орендар</th>
+                                    <th>Період</th><th>Сума</th><th>Статус</th><th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {bookings.map(b => (
+                                    <tr key={b.id}>
+                                        <td>{b.id}</td>
+                                        <td>#{b.itemId}</td>
+                                        <td>#{b.renterId}</td>
+                                        <td>{b.startDate} — {b.endDate}</td>
+                                        <td>₴{b.totalPrice}</td>
+                                        <td><span className="badge badge-neutral">{b.status}</span></td>
+                                        <td>
+                                            <select
+                                                className="role-select"
+                                                value={b.status}
+                                                onChange={e => changeStatus(b, e.target.value as BookingStatus)}
+                                            >
+                                                {BOOKING_STATUSES.map(s => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            {total > 1 && (
+                <div className="pagination">
+                    <button className="btn btn-outline btn-sm" disabled={page === 0} onClick={() => load(page - 1)}>← Назад</button>
+                    <span className="pagination-info">Сторінка {page + 1} з {total}</span>
+                    <button className="btn btn-outline btn-sm" disabled={page >= total - 1} onClick={() => load(page + 1)}>Далі →</button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 // ── Main Admin Page ───────────────────────────────────────
 const AdminPage = () => {
     const [tab, setTab] = useState<Tab>('users');
 
     const tabs: { key: Tab; label: string }[] = [
-        { key: 'users', label: '👤 Users' },
-        { key: 'items', label: '📦 Items' },
-        { key: 'verifications', label: '✅ Verifications' },
-        { key: 'categories', label: '🗂 Categories' },
+        { key: 'users', label: '👤 Користувачі' },
+        { key: 'items', label: '📦 Оголошення' },
+        { key: 'verifications', label: '✅ Верифікація' },
+        { key: 'categories', label: '🗂 Категорії' },
+        { key: 'bookings', label: '📅 Бронювання' },
     ];
 
     return (
         <div className="page">
             <div className="page-header">
-                <h1 className="page-title">Admin Panel</h1>
+                <h1 className="page-title">Панель адміністратора</h1>
             </div>
             <div className="admin-tabs">
                 {tabs.map(t => (
@@ -385,6 +529,7 @@ const AdminPage = () => {
                 {tab === 'items' && <ItemsTab />}
                 {tab === 'verifications' && <VerificationsTab />}
                 {tab === 'categories' && <CategoriesTab />}
+                {tab === 'bookings' && <BookingsTab />}
             </div>
         </div>
     );

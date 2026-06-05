@@ -6,8 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -36,16 +34,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param pageable об'єкт конфігурації пагінації та сортування (сторінка, розмір, напрямок сортування).
      * @return {@link Page} із сутностями {@link User}, у яких поле профілю вже ініціалізовано.
      */
+    @Override
     @EntityGraph(attributePaths = {"userProfile"})
-    @Query("SELECT u FROM User u WHERE " +
-            "(:isActive IS NULL OR u.isActive = :isActive) AND " +
-            "(:role IS NULL OR u.role = :role)"
-    )
-    Page<User> findAllWithProfile(
-            @Param("isActive") Boolean isActive,
-            @Param("role") Role role,
-            Pageable pageable
-    );
+    Page<User> findAll(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"userProfile"})
+    Page<User> findAllByIsActiveAndRole(boolean isActive, Role role, Pageable pageable);
 
     /**
      * Виконує пошук користувача за його електронною поштою (email).

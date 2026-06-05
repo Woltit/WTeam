@@ -1,5 +1,10 @@
 import api from './axios';
-import type { UserProfileResponse, PublicProfileResponse, VerificationStatus } from '../types/user';
+import type {
+    UserProfileResponse,
+    PublicProfileResponse,
+    VerificationStatus,
+    PendingProfileResponse,
+} from '../types/user';
 
 interface UserProfileRequest {
     lastName: string;
@@ -42,7 +47,12 @@ const uploadAvatar = async (file: File) => {
 };
 
 const getPendingProfiles = async (page = 0, size = 20) => {
-    const response = await api.get<Page<UserProfileResponse>>('/profile/pending', { params: { page, size } });
+    const response = await api.get<Page<PendingProfileResponse>>('/profile/pending', { params: { page, size } });
+    return response.data;
+};
+
+const submitForVerification = async () => {
+    const response = await api.post<UserProfileResponse>('/profile/submit-verification');
     return response.data;
 };
 
@@ -53,4 +63,12 @@ const updateVerificationStatus = async (userId: number, status: VerificationStat
     return response.data;
 };
 
-export default { getMyProfile, updateMyProfile, getPublicProfile, uploadAvatar, getPendingProfiles, updateVerificationStatus };
+export default {
+    getMyProfile,
+    updateMyProfile,
+    getPublicProfile,
+    uploadAvatar,
+    getPendingProfiles,
+    submitForVerification,
+    updateVerificationStatus,
+};

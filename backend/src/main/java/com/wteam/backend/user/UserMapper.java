@@ -50,6 +50,8 @@ public class UserMapper {
                 user.getId(),
                 user.getEmail(),
                 user.getRole(),
+                user.isActive(),
+                user.getBlockReason(),
                 userProfile != null ? userProfileMapper.toProfileResponse(userProfile) : null,
                 user.getCreatedAt()
         );

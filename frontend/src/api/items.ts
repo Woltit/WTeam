@@ -38,4 +38,11 @@ const deleteItem = async (itemId: number) => {
     await api.delete(`/items/${itemId}`);
 };
 
-export default { getAvailableItems, getItemById, getAllItems, createItem, updateItem, deleteItem };
+const setItemVerified = async (itemId: number, verified: boolean) => {
+    const response = await api.patch<ItemResponse>(`/items/${itemId}/verification`, null, {
+        params: { verified },
+    });
+    return response.data;
+};
+
+export default { getAvailableItems, getItemById, getAllItems, createItem, updateItem, deleteItem, setItemVerified };

@@ -131,9 +131,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         log.warn("Data integrity violation: {}", e.getMessage());
+        String root = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : e.getMessage();
+        if (root != null && root.toLowerCase().contains("email")) {
+            return buildResponse(HttpStatus.CONFLICT, "User with this email already exists");
+        }
         return buildResponse(
                 HttpStatus.CONFLICT,
-                "Operation failed: this record is in use and cannot be deleted."
+                "Operation failed: data constraint violation."
         );
     }
 
