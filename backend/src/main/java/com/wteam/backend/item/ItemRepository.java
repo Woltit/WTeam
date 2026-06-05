@@ -1,5 +1,6 @@
 package com.wteam.backend.item;
 
+import com.wteam.backend.category.Category;
 import com.wteam.backend.common.enums.RentingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Page<Item> findAllByCityAndStatus(String city, RentingStatus status, Pageable pageable);
 
-    Page<Item> findAllByCategoryAndStatusAndIsVerified(Long categoryId, RentingStatus status, Pageable pageable);
+    Page<Item> findAllByCategoryAndStatusAndIsVerified(Category category, RentingStatus status, boolean isVerified, Pageable pageable);
 
     @Query(
     """
