@@ -2,6 +2,7 @@ import {useState} from "react";
 import {useNavigate} from "react-router";
 import {useDispatch} from "react-redux";
 import {setCredentials} from "../store/slices/authSlice.ts";
+import authApi from "../api/auth";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,11 +12,11 @@ function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault();
     try {
-        const { user, token, refreshToken } = await login({ email, password });
-        dispatch(setCredentials({ user, token, refreshToken }));
+        const { token, refreshToken } = await authApi.login({ email, password });
+        dispatch(setCredentials({user: null, token, refreshToken }));
         navigate("/");
     } catch (error) {
       setError("Помилка входу. Перевірте email та пароль.");
