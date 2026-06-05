@@ -94,4 +94,25 @@ public class Booking extends BaseEntityFull {
      */
     @Column(name = "cancellation_reason", columnDefinition = "TEXT")
     private String cancellationReason;
+
+
+    public void calculatePrices(BigDecimal pricePerDay, BigDecimal depositPerDay) {
+        if (this.startDate == null || this.endDate == null) {
+            throw new IllegalStateException("Dates must be set before calculating price");
+        }
+        if (this.endDate.isBefore(this.startDate)) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
+
+        long days = java.time.temporal.ChronoUnit.DAYS.between(this.startDate, this.endDate);
+        if (days == 0) {
+            days = 1;
+        }
+
+        BigDecimal totalDays = BigDecimal.valueOf(days);
+
+        this.pricePerDaySnapshot = pricePerDay;
+        this.totalPrice = pricePerDay.multiply(totalDays);
+        this.depositTotal = depositPerDay.multiply(totalDays);
+    }
 }

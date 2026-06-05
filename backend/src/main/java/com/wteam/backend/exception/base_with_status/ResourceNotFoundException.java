@@ -9,4 +9,12 @@ public abstract class ResourceNotFoundException extends AppException {
     public ResourceNotFoundException(String message) {
         super(message, STATUS);
     }
+
+    public ResourceNotFoundException(String message, Throwable cause) {
+        super(message, cause, STATUS);
+    }
+
+    public ResourceNotFoundException(String entityName, Long id) {
+        super("%s with id %d was not found".formatted(entityName, id), STATUS);
+    }
 }
