@@ -93,15 +93,22 @@ public class ItemService {
     }
 
     @Transactional
-    public void deleteItem(Long itemId, Long userId) {
+    public void deleteItem(Long itemId, Long userId, boolean isAdmin) {
         Item item = getItem(itemId);
 
-        if (!item.getOwner().getId().equals(userId)) {
+        if (!isAdmin && !item.getOwner().getId().equals(userId)) {
             throw new IllegalArgumentException("You are not the owner of this item");
         }
 
         item.setStatus(RentingStatus.ARCHIVED);
         itemRepository.save(item);
+    }
+
+    @Transactional
+    public ItemResponse setItemVerified(Long itemId, boolean verified) {
+        Item item = getItem(itemId);
+        item.setVerified(verified);
+        return itemMapper.toItemResponse(itemRepository.save(item));
     }
 
     private Item getItem(Long itemId) {

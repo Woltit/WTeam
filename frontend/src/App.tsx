@@ -1,15 +1,63 @@
-import {Route, Routes} from "react-router";
-import HomePage from "./pages/HomePage.tsx";
-import LoginPage from "./pages/LoginPage.tsx";
-import RegisterPage from "./pages/RegisterPage.tsx";
+
+import { Route, Routes } from 'react-router';
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import BrowsePage from './pages/BrowsePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ItemDetailPage from './pages/ItemDetailPage';
+import CreateItemPage from './pages/CreateItemPage';
+import EditItemPage from './pages/EditItemPage';
+import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
+import OAuth2RedirectPage from './pages/OAuth2RedirectPage';
 
 function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-    </Routes>
-  )
+    return (
+        <Routes>
+            <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            <Route element={<Layout />}>
+                <Route path="/" element={<BrowsePage />} />
+                <Route path="/items/:itemId" element={<ItemDetailPage />} />
+                <Route
+                    path="/items/create"
+                    element={
+                        <ProtectedRoute>
+                            <CreateItemPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/items/:itemId/edit"
+                    element={
+                        <ProtectedRoute>
+                            <EditItemPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <ProfilePage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute requireAdmin>
+                            <AdminPage />
+                        </ProtectedRoute>
+                    }
+                />
+            </Route>
+        </Routes>
+    );
+
 }
-export default App
+
+export default App;

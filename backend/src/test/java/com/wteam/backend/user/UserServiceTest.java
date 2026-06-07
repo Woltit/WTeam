@@ -46,7 +46,7 @@ class UserServiceTest {
             Page<User> usersPage = new PageImpl<>(List.of(user));
             Pageable pageable = Pageable.unpaged();
 
-            when(userRepository.findAllWithProfile(true, Role.USER, pageable)).thenReturn(usersPage);
+            when(userRepository.findAllByIsActiveAndRole(true, Role.USER, pageable)).thenReturn(usersPage);
             when(userMapper.toResponse(user)).thenReturn(userResponse);
 
             Page<UserResponse> result = userService.getAllUsers(true, Role.USER, pageable);
@@ -55,7 +55,7 @@ class UserServiceTest {
             assertEquals(1, result.getTotalElements());
             assertEquals(userResponse, result.getContent().getFirst());
 
-            verify(userRepository).findAllWithProfile(true, Role.USER, pageable);
+            verify(userRepository).findAllByIsActiveAndRole(true, Role.USER, pageable);
             verify(userMapper).toResponse(user);
         }
 

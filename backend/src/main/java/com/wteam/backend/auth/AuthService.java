@@ -55,7 +55,11 @@ public class AuthService {
                 .isActive(true)
                 .build();
 
-        UserProfile userProfile = new UserProfile();
+        UserProfile userProfile = UserProfile.builder()
+                .firstName("")
+                .lastName("")
+                .user(user)
+                .build();
         user.setUserProfile(userProfile);
 
         userRepository.save(user);

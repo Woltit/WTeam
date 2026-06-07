@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -62,7 +64,19 @@ public class ItemController {
             @PathVariable Long itemId,
             @CurrentUser UserPrincipalDto user
     ) {
-        itemService.deleteItem(itemId, user.id());
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_ADMIN"::equals);
+        itemService.deleteItem(itemId, user.id(), isAdmin);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{itemId}/verification")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ItemResponse> setItemVerification(
+            @PathVariable Long itemId,
+            @RequestParam boolean verified
+    ) {
+        return ResponseEntity.ok(itemService.setItemVerified(itemId, verified));
     }
 }

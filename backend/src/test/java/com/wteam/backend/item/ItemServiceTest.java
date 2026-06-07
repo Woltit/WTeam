@@ -241,7 +241,7 @@ class ItemServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
-        itemService.deleteItem(itemId, userId);
+        itemService.deleteItem(itemId, userId, false);
 
         assertEquals(RentingStatus.ARCHIVED, item.getStatus());
         verify(itemRepository).save(item);
@@ -261,6 +261,6 @@ class ItemServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
-        assertThrows(IllegalArgumentException.class, () -> itemService.deleteItem(itemId, userId));
+        assertThrows(IllegalArgumentException.class, () -> itemService.deleteItem(itemId, userId, false));
     }
 }

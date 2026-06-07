@@ -3,6 +3,7 @@ package com.wteam.backend.user_profile;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.exception.user_profile.ProfileIncompleteException;
 import com.wteam.backend.exception.user_profile.ProfileNotFoundException;
+import com.wteam.backend.user_profile.dto.PendingProfileResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
@@ -51,9 +52,26 @@ public class UserProfileService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserProfileResponse> getPendingProfiles(Pageable pageable) {
+    public Page<PendingProfileResponse> getPendingProfiles(Pageable pageable) {
         return userProfileRepository.findAllByVerificationStatus(VerificationStatus.PENDING, pageable)
-                .map(userProfileMapper::toProfileResponse);
+                .map(userProfileMapper::toPendingProfileResponse);
+    }
+
+    @Transactional
+    public UserProfileResponse submitForVerification(Long userId) {
+        UserProfile userProfile = getUserProfile(userId);
+
+        if (userProfile.getPhoneNumber() == null || userProfile.getBirthDate() == null
+                || userProfile.getFirstName().isBlank() || userProfile.getLastName().isBlank()) {
+            throw new ProfileIncompleteException(userId);
+        }
+
+        if (userProfile.getVerificationStatus() == VerificationStatus.VERIFIED) {
+            throw new IllegalStateException("Profile is already verified");
+        }
+
+        userProfile.setVerificationStatus(VerificationStatus.PENDING);
+        return userProfileMapper.toProfileResponse(userProfileRepository.save(userProfile));
     }
 
     @Transactional(readOnly = true)
