@@ -69,7 +69,7 @@ description = "backend"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(24)
     }
 }
 
@@ -139,6 +139,7 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-Duser.timezone=UTC")
 }
 
 tasks.test {

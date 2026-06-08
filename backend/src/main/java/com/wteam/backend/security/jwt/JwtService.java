@@ -2,6 +2,7 @@ package com.wteam.backend.security.jwt;
 
 import com.wteam.backend.security.SecurityUser;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -84,8 +85,12 @@ public class JwtService {
      * @return {@code true}, якщо токен повністю валідний; {@code false} в іншому випадку.
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = userDetails.getUsername();
-        return (username.equals(extractUsername(token))) && !isTokenExpired(token);
+        try {
+            final String username = userDetails.getUsername();
+            return (username.equals(extractUsername(token))) && !isTokenExpired(token);
+        } catch (JwtException e) {
+            return false;
+        }
     }
 
     /**

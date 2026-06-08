@@ -15,7 +15,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @EntityGraph(attributePaths = {"sender"})
     List<Message> findByChatRoom_IdOrderByCreatedAtAsc(Long chatRoomId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
         UPDATE Message m SET m.isRead = true
         WHERE m.chatRoom.id = :roomId

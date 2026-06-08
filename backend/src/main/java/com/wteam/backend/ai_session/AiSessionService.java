@@ -103,7 +103,7 @@ public class AiSessionService {
                 """.formatted(itemsContext, userQuery);
     }
 
-    private String callOpenAi(String prompt) {
+    String callOpenAi(String prompt) {
         RestClient restClient = RestClient.create();
 
         Map<String, Object> body = Map.of(
