@@ -10,6 +10,9 @@ import EditItemPage from './pages/EditItemPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import OAuth2RedirectPage from './pages/OAuth2RedirectPage';
+import ChatsPage from './pages/ChatsPage';
+import ChatPage from './pages/ChatPage';
+import AiPage from './pages/AiPage';
 
 function App() {
     return (
@@ -53,6 +56,23 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path="/chats"
+                    element={
+                        <ProtectedRoute>
+                            <ChatsPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/chats/:roomId"
+                    element={
+                        <ProtectedRoute>
+                            <ChatPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route path="/ai" element={<AiPage />} />
             </Route>
         </Routes>
     );
