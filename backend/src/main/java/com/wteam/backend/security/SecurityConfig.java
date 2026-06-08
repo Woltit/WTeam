@@ -71,6 +71,10 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         // можна отримувати доступ до товарів без реєстрації
                         .requestMatchers(HttpMethod.GET, "/items/**").permitAll()
+                        // AI рекомендації доступні без авторизації (для гостей теж)
+                        .requestMatchers(HttpMethod.POST, "/ai/recommend").permitAll()
+                        // WebSocket handshake (аутентифікація відбувається через STOMP CONNECT)
+                        .requestMatchers("/ws/**").permitAll()
                         // всі інші запити вимагають обов'язкової аутентифікації
                         .anyRequest().authenticated()
                 )
