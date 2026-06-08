@@ -102,8 +102,9 @@ public class AiSessionService {
                 Якщо жодна річ не підходить — поверни порожній масив.
                 """.formatted(itemsContext, userQuery);
     }
-
+  
     String callOpenAi(String prompt) {
+
         RestClient restClient = RestClient.create();
 
         Map<String, Object> body = Map.of(

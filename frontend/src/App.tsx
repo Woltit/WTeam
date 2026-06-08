@@ -1,3 +1,4 @@
+
 import { Route, Routes } from 'react-router';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -76,6 +77,7 @@ function App() {
             </Route>
         </Routes>
     );
+
 }
 
 export default App;
