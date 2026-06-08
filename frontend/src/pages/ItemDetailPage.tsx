@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import itemsApi from '../api/items';
+import bookingsApi from '../api/bookings';
+import chatApi from '../api/chat';
 import { useAuth } from '../contexts/AuthContext';
 import type { ItemResponse } from '../types/item';
 
@@ -16,6 +18,10 @@ const ItemDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [deleting, setDeleting] = useState(false);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [booking, setBooking] = useState(false);
+    const [bookingError, setBookingError] = useState('');
 
     useEffect(() => {
         if (!itemId) return;
@@ -41,6 +47,25 @@ const ItemDetailPage = () => {
     if (error || !item) return <div className="page"><div className="alert alert-error">{error || 'Item not found.'}</div></div>;
 
     const isOwner = user?.id === item.ownerId;
+    const today = new Date().toISOString().split('T')[0];
+
+    const handleBooking = async (e: FormEvent) => {
+        e.preventDefault();
+        setBookingError('');
+        if (!startDate || !endDate) { setBookingError('Оберіть дати оренди.'); return; }
+        if (endDate <= startDate) { setBookingError('Дата закінчення має бути після дати початку.'); return; }
+        setBooking(true);
+        try {
+            const b = await bookingsApi.createBooking(item.id, startDate, endDate);
+            const room = await chatApi.getOrCreateRoom(b.id);
+            navigate(`/chats/${room.id}`);
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            setBookingError(msg ?? 'Не вдалося створити бронювання. Спробуйте ще раз.');
+        } finally {
+            setBooking(false);
+        }
+    };
 
     return (
         <div className="page">
@@ -123,9 +148,43 @@ const ItemDetailPage = () => {
                                 </button>
                             </>
                         ) : token ? (
-                            <div className="rent-cta">
-                                <p className="rent-cta-text">Зацікавив цей товар? Зв&apos;яжіться з власником через профіль.</p>
-                                <Link to="/profile" className="btn btn-primary">Перейти до профілю</Link>
+                            <div className="rent-cta" style={{ width: '100%' }}>
+                                <p className="rent-cta-text" style={{ fontWeight: 600, fontSize: '1rem' }}>Орендувати цей товар</p>
+                                {bookingError && <div className="alert alert-error" style={{ marginBottom: 0 }}>{bookingError}</div>}
+                                <form onSubmit={handleBooking} className="booking-form">
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label className="form-label">Дата початку</label>
+                                            <input
+                                                type="date"
+                                                className="form-input"
+                                                min={today}
+                                                value={startDate}
+                                                onChange={e => setStartDate(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Дата закінчення</label>
+                                            <input
+                                                type="date"
+                                                className="form-input"
+                                                min={startDate || today}
+                                                value={endDate}
+                                                onChange={e => setEndDate(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    {startDate && endDate && endDate > startDate && (
+                                        <div className="booking-price-preview">
+                                            Орієнтовна вартість: ₴{Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) * item.pricePerDay} + депозит ₴{item.depositAmount}
+                                        </div>
+                                    )}
+                                    <button type="submit" className="btn btn-primary btn-full" disabled={booking}>
+                                        {booking ? <><span className="spinner-sm" /> Бронювання...</> : 'Забронювати та написати власнику'}
+                                    </button>
+                                </form>
                             </div>
                         ) : (
                             <div className="rent-cta">

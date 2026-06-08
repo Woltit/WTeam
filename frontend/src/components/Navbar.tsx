@@ -22,8 +22,14 @@ const Navbar = () => {
                 <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                     Каталог
                 </NavLink>
+                <NavLink to="/ai" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                    ✨ AI Помічник
+                </NavLink>
                 {user && (
                     <>
+                        <NavLink to="/chats" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                            Чати
+                        </NavLink>
                         <NavLink to="/items/create" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                             Додати оголошення
                         </NavLink>
