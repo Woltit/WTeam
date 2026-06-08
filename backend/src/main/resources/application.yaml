@@ -33,3 +33,6 @@ server:
 app:
   frontend:
     oauth2-redirect-uri: "http://localhost:5173/oauth2/redirect"
+
+openai:
+  api-key: ${OPENAI_API_KEY}
