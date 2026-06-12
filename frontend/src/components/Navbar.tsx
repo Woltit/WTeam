@@ -30,6 +30,9 @@ const Navbar = () => {
                         <NavLink to="/chats" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                             Чати
                         </NavLink>
+                        <NavLink to="/my-bookings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                            Мої бронювання
+                        </NavLink>
                         <NavLink to="/items/create" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                             Додати оголошення
                         </NavLink>
