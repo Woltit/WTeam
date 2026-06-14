@@ -2,7 +2,6 @@
   <img src="https://img.shields.io/badge/status-MVP-blue" alt="Status" />
   <img src="https://img.shields.io/badge/platform-Web-lightgrey" alt="Platform" />
   <img src="https://img.shields.io/badge/stack-Go%20%7C%20Spring%20Boot%20%7C%20React-informational" alt="Stack" />
-  <img src="https://img.shields.io/badge/AI-Anthropic%20API-purple" alt="AI" />
   <img src="https://img.shields.io/badge/market-Ukraine-yellow" alt="Market" />
 </p>
 
@@ -42,13 +41,6 @@
 
 ### 🖥️ Адміністративна панель
 Інструмент для внутрішньої модерації: перегляд та схвалення оголошень, вирішення конфліктів між користувачами, статистика платформи.
-
-### 🚚 Інтеграції
-
-- **Нова Пошта** — підтримка логістики та доставки речей
-- **Firebase Cloud Messaging** — push-сповіщення для обох сторін угоди
-
-***
 
 ## 🛠️ Технічний стек
 
@@ -95,8 +87,6 @@
 - **Go-сервіс** — публічний API, AI-інтеграція, оптимізація продуктивності
 - **Spring Boot-сервіс** — бронювання, управління користувачами, Trust Score, адмін-панель
 - **React SPA** — клієнтська частина, комунікує через **Swagger API-контракт**
-- **Kafka** — event-driven комунікація між сервісами, наприклад для тригерів сповіщень
-
 ***
 
 ## 🔐 Безпека
@@ -104,24 +94,7 @@
 - **HTTPS** — шифрування всього трафіку
 - **JWT** — автентифікація та авторизація
 - **ORM + сувора валідація вводу** — захист від SQL-ін'єкцій
-- **Верифікація за паспортом** — обов'язкова для доступу до повного функціоналу
-
 ***
-
-## 👥 Команда
-
-| Учасник | Роль |
-|---|---|
-| **Дар'я Укше** | Backend (Golang), AI-інтеграція (Anthropic API), серверна оптимізація, тестування |
-| **Арсеній Лісовський** | Backend (Spring Boot), бази даних (PostgreSQL), DevOps (Docker, CI/CD, деплой на AWS) |
-| **Владислав Маєвський** | Frontend (React/TypeScript), частина backend-логіки, інтеграційне тестування |
-| **Єлизавета Харкевич** | Frontend (React/TypeScript), UI/UX дизайн, тестування інтерфейсу |
-
-***
-
-## 📋 Встановлення та локальний запуск
-
-> ⚠️ **Примітка:** Інструкції для локального розгортання будуть додані після надання конфігураційних файлів (`docker-compose.yml`, `pom.xml`, `package.json` тощо).
 
 ### Попередні вимоги
 
@@ -131,24 +104,6 @@
 - Node.js 22+
 - PostgreSQL 17+
 
-### Швидкий старт
-
-```bash
-# 1. Клонувати репозиторій
-git clone https://github.com/<org>/rentgo.git
-cd rentgo
-
-# 2. Налаштувати змінні середовища
-cp .env.example .env
-# Відредагувати .env: додати ключі Anthropic API, Firebase, DB credentials тощо
-
-# 3. Запустити всі сервіси через Docker Compose
-docker-compose up --build
-```
-
-Після заповнення `.env` та запуску фронтенд буде доступний на `http://localhost:5173`, Go API — на `http://localhost:9090`, Spring Boot сервіс — на `http://localhost:8080`.
-
-***
 
 ## 📄 API документація
 
