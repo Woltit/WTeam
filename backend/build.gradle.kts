@@ -105,6 +105,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
     implementation("me.paulschwarz:spring-dotenv:$dotenvVersion")
     implementation("org.apache.commons:commons-lang3:$apacheCommonsVersion")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
 
     compileOnly("org.projectlombok:lombok")
 

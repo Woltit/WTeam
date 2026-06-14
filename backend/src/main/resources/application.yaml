@@ -36,3 +36,6 @@ app:
 
 openai:
   api-key: ${OPENAI_API_KEY}
+
+springdoc:
+  packagesToScan: com.wteam.backend
