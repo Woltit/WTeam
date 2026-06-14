@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import itemsApi from '../api/items';
 import type { ItemResponse } from '../types/item';
 import categoriesApi from '../api/categories';

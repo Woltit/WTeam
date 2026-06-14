@@ -34,16 +34,16 @@ public class RefreshTokenService {
     @Transactional
     public RefreshToken processRefreshToken(String tokenHash) {
         RefreshToken oldToken = refreshTokenRepository.findByTokenHash(tokenHash)
-                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh token not found"));
+                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh accessToken not found"));
 
         if (oldToken.getRevokedAt() != null) {
             refreshTokenRepository.delete(oldToken);
-            throw new RefreshTokenInvalidException("Refresh token has been revoked");
+            throw new RefreshTokenInvalidException("Refresh accessToken has been revoked");
         }
 
         if (oldToken.getExpiresAt().isBefore(Instant.now())) {
             refreshTokenRepository.delete(oldToken);
-            throw new RefreshTokenInvalidException("Refresh token has expired");
+            throw new RefreshTokenInvalidException("Refresh accessToken has expired");
         }
 
         User user = oldToken.getUser();

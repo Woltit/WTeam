@@ -47,6 +47,10 @@ public class SecurityUser implements UserDetails, OAuth2User {
         return new UserPrincipalDto(user.getId(), user.getEmail());
     }
 
+    public User getOriginalUser() {
+        return user;
+    }
+
     /**
      * Повертає унікальний ідентифікатор користувача з бази даних.
      *

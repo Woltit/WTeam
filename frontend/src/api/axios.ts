@@ -6,9 +6,9 @@ const API_BASE = 'http://localhost:8080/api/v1';
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use(config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
 });
@@ -34,9 +34,9 @@ api.interceptors.response.use(
             refreshPromise = axios
                 .post<AuthResponse>(`${API_BASE}/auth/refresh`, { refreshToken })
                 .then(res => {
-                    localStorage.setItem('token', res.data.token);
+                    localStorage.setItem('accessToken', res.data.accessToken);
                     localStorage.setItem('refreshToken', res.data.refreshToken);
-                    return res.data.token;
+                    return res.data.accessToken;
                 })
                 .finally(() => { refreshPromise = null; });
         }
@@ -46,7 +46,7 @@ api.interceptors.response.use(
             original.headers.Authorization = `Bearer ${newToken}`;
             return api(original);
         } catch {
-            localStorage.removeItem('token');
+            localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             return Promise.reject(error);
         }

@@ -47,7 +47,7 @@ class AuthControllerTest {
     @DisplayName("POST /auth/register → 201 with tokens when request is valid")
     void register_whenValid_returns201() throws Exception {
         RegisterRequest req = new RegisterRequest("new@test.com", "password1", "password1");
-        AuthResponse resp = new AuthResponse("access-token", "refresh-token");
+        AuthResponse resp = new AuthResponse("access-accessToken", "refresh-accessToken");
         when(authService.register(any())).thenReturn(resp);
 
         mockMvc.perform(post("/auth/register")
@@ -55,8 +55,8 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.token").value("access-token"))
-                .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
+                .andExpect(jsonPath("$.token").value("access-accessToken"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-accessToken"));
     }
 
     @Test
@@ -88,7 +88,7 @@ class AuthControllerTest {
     @DisplayName("POST /auth/login → 200 with tokens on valid credentials")
     void login_whenValidCredentials_returns200() throws Exception {
         LoginRequest req = new LoginRequest("user@test.com", "password1");
-        AuthResponse resp = new AuthResponse("access-token", "refresh-token");
+        AuthResponse resp = new AuthResponse("access-accessToken", "refresh-accessToken");
         when(authService.login(any())).thenReturn(resp);
 
         mockMvc.perform(post("/auth/login")
@@ -96,7 +96,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("access-token"));
+                .andExpect(jsonPath("$.token").value("access-accessToken"));
     }
 
     @Test
@@ -113,10 +113,10 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/refresh → 200 with new access token")
+    @DisplayName("POST /auth/refresh → 200 with new access accessToken")
     void refresh_whenValidToken_returns200() throws Exception {
-        RefreshTokenRequest req = new RefreshTokenRequest("valid-refresh-token");
-        AuthResponse resp = new AuthResponse("new-access-token", "valid-refresh-token");
+        RefreshTokenRequest req = new RefreshTokenRequest("valid-refresh-accessToken");
+        AuthResponse resp = new AuthResponse("new-access-accessToken", "valid-refresh-accessToken");
         when(authService.refreshToken(any())).thenReturn(resp);
 
         mockMvc.perform(post("/auth/refresh")
@@ -124,6 +124,6 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("new-access-token"));
+                .andExpect(jsonPath("$.token").value("new-access-accessToken"));
     }
 }

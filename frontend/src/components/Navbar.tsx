@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
 

@@ -44,7 +44,7 @@ class AuthSecurityIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         AuthResponse authResponse = objectMapper.readValue(response, AuthResponse.class);
-        return authResponse.token();
+        return authResponse.accessToken();
     }
 
     private void ensureUser(String email, String password, Role role) {
@@ -64,7 +64,7 @@ class AuthSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("POST /bookings → 401 without a JWT token")
+    @DisplayName("POST /bookings → 401 without a JWT accessToken")
     void protectedBookingEndpoint_withoutToken_returns401() throws Exception {
         String body = """
                 {"itemId":1,"startDate":"2026-09-01","endDate":"2026-09-05"}

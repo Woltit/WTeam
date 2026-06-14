@@ -1,5 +1,4 @@
-
-import { Route, Routes } from 'react-router';
+import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import BrowsePage from './pages/BrowsePage';

@@ -135,7 +135,7 @@ public final class ValidationConstants {
     }
 
     /**
-     * The type Refresh token.
+     * The type Refresh accessToken.
      */
     public static final class RefreshToken {
         /**

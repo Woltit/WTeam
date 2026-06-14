@@ -60,13 +60,13 @@ class JwtChannelInterceptorTest {
     }
 
     @Test
-    @DisplayName("preSend should set Principal on CONNECT frame with valid Bearer token")
+    @DisplayName("preSend should set Principal on CONNECT frame with valid Bearer accessToken")
     void preSend_whenConnectWithValidToken_shouldSetPrincipal() {
-        Message<?> message = buildConnectMessage("Bearer valid-token");
+        Message<?> message = buildConnectMessage("Bearer valid-accessToken");
 
-        when(jwtService.extractUsername("valid-token")).thenReturn("user@test.com");
+        when(jwtService.extractUsername("valid-accessToken")).thenReturn("user@test.com");
         when(userDetailsService.loadUserByUsername("user@test.com")).thenReturn(securityUser);
-        when(jwtService.isTokenValid("valid-token", securityUser)).thenReturn(true);
+        when(jwtService.isTokenValid("valid-accessToken", securityUser)).thenReturn(true);
 
         Message<?> result = interceptor.preSend(message, channel);
 
@@ -76,15 +76,15 @@ class JwtChannelInterceptorTest {
     }
 
     @Test
-    @DisplayName("preSend should NOT block message when token is invalid — just skips auth")
+    @DisplayName("preSend should NOT block message when accessToken is invalid — just skips auth")
     void preSend_whenConnectWithInvalidToken_shouldPassMessageThrough() {
-        Message<?> message = buildConnectMessage("Bearer bad-token");
+        Message<?> message = buildConnectMessage("Bearer bad-accessToken");
 
-        when(jwtService.extractUsername("bad-token")).thenThrow(new RuntimeException("invalid"));
+        when(jwtService.extractUsername("bad-accessToken")).thenThrow(new RuntimeException("invalid"));
 
         Message<?> result = interceptor.preSend(message, channel);
 
-        assertNotNull(result, "Message must be passed through even with invalid token");
+        assertNotNull(result, "Message must be passed through even with invalid accessToken");
     }
 
     @Test

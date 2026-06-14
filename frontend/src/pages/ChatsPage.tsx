@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import chatApi from '../api/chat';
 import type { ChatRoomResponse } from '../types/chat';
 

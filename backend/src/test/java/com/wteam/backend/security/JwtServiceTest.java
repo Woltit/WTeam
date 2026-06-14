@@ -46,7 +46,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("extractUsername should return email from token subject")
+    @DisplayName("extractUsername should return email from accessToken subject")
     void extractUsername_shouldReturnEmail() {
         String token = jwtService.generateToken(securityUser);
 
@@ -56,7 +56,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("isTokenValid should return true for fresh token with matching user")
+    @DisplayName("isTokenValid should return true for fresh accessToken with matching user")
     void isTokenValid_whenFreshTokenAndMatchingUser_shouldReturnTrue() {
         String token = jwtService.generateToken(securityUser);
 
@@ -79,7 +79,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("isTokenValid should return false for an expired token")
+    @DisplayName("isTokenValid should return false for an expired accessToken")
     void isTokenValid_whenTokenExpired_shouldReturnFalse() {
         JwtService expiredJwtService = new JwtService();
         ReflectionTestUtils.setField(expiredJwtService, "jwtSigningKey", SIGNING_KEY);

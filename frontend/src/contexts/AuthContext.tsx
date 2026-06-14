@@ -6,7 +6,7 @@ import type { UserResponse } from '../types/user';
 
 interface AuthContextValue {
     user: UserResponse | null;
-    token: string | null;
+    accessToken: string | null;
     isAdmin: boolean;
     isLoading: boolean;
     login: (data: LoginRequest) => Promise<void>;
@@ -18,20 +18,20 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserResponse | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+    const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem('accessToken'));
     const [isLoading, setIsLoading] = useState(true);
 
     const logout = useCallback(() => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        setToken(null);
+        setAccessToken(null);
         setUser(null);
     }, []);
 
     useEffect(() => {
-        const stored = localStorage.getItem('token');
+        const stored = localStorage.getItem('accessToken');
         if (stored) {
-            setToken(stored);
+            setAccessToken(stored);
             usersApi.getMe()
                 .then(setUser)
                 .catch(() => logout())
@@ -43,18 +43,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const login = async (data: LoginRequest) => {
         const res = await authApi.login(data);
-        localStorage.setItem('token', res.token);
+        localStorage.setItem('accessToken', res.accessToken);
         localStorage.setItem('refreshToken', res.refreshToken);
-        setToken(res.token);
+        setAccessToken(res.accessToken);
         const me = await usersApi.getMe();
         setUser(me);
     };
 
     const register = async (data: RegisterRequest) => {
         const res = await authApi.register(data);
-        localStorage.setItem('token', res.token);
+        localStorage.setItem('accessToken', res.accessToken);
         localStorage.setItem('refreshToken', res.refreshToken);
-        setToken(res.token);
+        setAccessToken(res.accessToken);
         const me = await usersApi.getMe();
         setUser(me);
     };
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const isAdmin = user?.role === 'ADMIN';
 
     return (
-        <AuthContext.Provider value={{ user, token, isAdmin, isLoading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, accessToken, isAdmin, isLoading, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

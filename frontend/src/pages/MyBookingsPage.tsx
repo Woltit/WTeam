@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import bookingsApi from '../api/bookings';
 import itemsApi from '../api/items';
 import type { BookingResponse, BookingStatus } from '../api/bookings';

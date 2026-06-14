@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useParams, useNavigate, Link } from 'react-router';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import itemsApi from '../api/items';
 import bookingsApi from '../api/bookings';
 import chatApi from '../api/chat';
@@ -13,7 +13,7 @@ const conditionLabel: Record<string, string> = {
 const ItemDetailPage = () => {
     const { itemId } = useParams<{ itemId: string }>();
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+    const { user, accessToken: token } = useAuth();
     const [item, setItem] = useState<ItemResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
