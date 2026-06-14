@@ -3,23 +3,29 @@ package com.wteam.backend.booking;
 import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.common.enums.BookingStatus;
+import com.wteam.backend.common.enums.NotificationChannel;
+import com.wteam.backend.common.enums.NotificationType;
 import com.wteam.backend.exception.booking.BookingNotFoundException;
 import com.wteam.backend.exception.booking.ItemNotAvailableException;
 import com.wteam.backend.exception.item.ItemNotFoundException;
 import com.wteam.backend.exception.user.UserNotFoundException;
 import com.wteam.backend.item.Item;
 import com.wteam.backend.item.ItemRepository;
+import com.wteam.backend.kafka.notification.dto.NotificationEvent;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+
+import static com.wteam.backend.kafka.topics.KafkaConstants.NOTIFICATION_TOPIC_NAME;
 
 /**
  * Сервіс для керування бронюваннями.
@@ -34,6 +40,7 @@ public class BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public Page<BookingResponse> findAll(Pageable pageable) {
@@ -76,27 +83,33 @@ public class BookingService {
                 .build();
 
         booking.calculatePrices(item.getPricePerDay(), item.getDepositAmount());
-        return bookingMapper.toResponse(bookingRepository.save(booking));
+
+        Booking savedBooking = bookingRepository.save(booking);
+        BookingResponse response = bookingMapper.toResponse(savedBooking);
+
+        sendNotification(savedBooking, item.getOwner().getId(), NotificationType.BOOKING_REQUEST);
+
+        return response;
     }
 
     @Transactional
-    public BookingResponse approveBooking(Long bookingId, Long ownerId) {
-        return setStatusForBooking(bookingId, ownerId, BookingStatus.APPROVED, null);
+    public BookingResponse approveBooking(Long bookingId, Long userId) {
+        return setStatusForBooking(bookingId, userId, BookingStatus.APPROVED, null);
     }
 
     @Transactional
-    public BookingResponse rejectBooking(Long bookingId, Long ownerId) {
-        return setStatusForBooking(bookingId, ownerId, BookingStatus.REJECTED, null);
+    public BookingResponse rejectBooking(Long bookingId, Long userId) {
+        return setStatusForBooking(bookingId, userId, BookingStatus.REJECTED, null);
     }
 
     @Transactional
-    public BookingResponse cancelBooking(Long bookingId, Long ownerId, String cancellationReason) {
-        return setStatusForBooking(bookingId, ownerId, BookingStatus.CANCELLED, cancellationReason);
+    public BookingResponse cancelBooking(Long bookingId, Long userId, String cancellationReason) {
+        return setStatusForBooking(bookingId, userId, BookingStatus.CANCELLED, cancellationReason);
     }
 
     @Transactional
-    public BookingResponse completeBooking(Long bookingId, Long ownerId) {
-        return setStatusForBooking(bookingId, ownerId, BookingStatus.COMPLETED, null);
+    public BookingResponse completeBooking(Long bookingId, Long userId) {
+        return setStatusForBooking(bookingId, userId, BookingStatus.COMPLETED, null);
     }
 
     @Transactional(readOnly = true)
@@ -106,8 +119,8 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BookingResponse> findAllByOwnerId(Long ownerId, Pageable pageable) {
-        return bookingRepository.findAllByOwnerId(ownerId, pageable)
+    public Page<BookingResponse> findAllByOwnerId(Long userId, Pageable pageable) {
+        return bookingRepository.findAllByOwnerId(userId, pageable)
                 .map(bookingMapper::toResponse);
     }
 
@@ -120,11 +133,11 @@ public class BookingService {
     }
 
 
-    private BookingResponse setStatusForBooking(Long bookingId, Long ownerId, BookingStatus newStatus, String cancellationReason) {
+    private BookingResponse setStatusForBooking(Long bookingId, Long userId, BookingStatus newStatus, String cancellationReason) {
         Booking booking = getBooking(bookingId);
 
-        boolean isRenter = booking.getRenter().getId().equals(ownerId);
-        boolean isOwner  = booking.getItem().getOwner().getId().equals(ownerId);
+        boolean isRenter = booking.getRenter().getId().equals(userId);
+        boolean isOwner  = booking.getItem().getOwner().getId().equals(userId);
 
         if (newStatus == BookingStatus.APPROVED || newStatus == BookingStatus.REJECTED || newStatus == BookingStatus.COMPLETED) {
             if (!isOwner) {
@@ -144,6 +157,21 @@ public class BookingService {
         if (newStatus == BookingStatus.CANCELLED) {
             Assert.notNull(cancellationReason, "CancellationReason cannot be null");
             booking.setCancellationReason(cancellationReason);
+        }
+
+        NotificationType type = switch (newStatus) {
+            case APPROVED -> NotificationType.BOOKING_APPROVED;
+            case REJECTED -> NotificationType.BOOKING_REJECTED;
+            case CANCELLED -> NotificationType.BOOKING_CANCELLED;
+            default -> null;
+        };
+
+        Long recipientId = isRenter
+                ? booking.getItem().getOwner().getId()
+                : booking.getRenter().getId();
+
+        if (type != null) {
+            sendNotification(booking, recipientId, type);
         }
 
         return bookingMapper.toResponse(bookingRepository.save(booking));
@@ -171,5 +199,18 @@ public class BookingService {
     private Booking getBooking(Long bookingId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
+    }
+
+    private void sendNotification(Booking booking, Long recipientId, NotificationType notificationType) {
+        Map<String, Object> payload = Map.of(
+                "bookingId", booking.getId(),
+                "itemName", booking.getItem().getTitle(),
+                "renterName", booking.getRenter().getUserProfile().getFirstName(),
+                "reason", booking.getCancellationReason() != null ? booking.getCancellationReason() : ""
+        );
+
+        NotificationEvent notificationEvent = new NotificationEvent(recipientId, notificationType, NotificationChannel.IN_APP, payload);
+
+        eventPublisher.publishEvent(notificationEvent);
     }
 }

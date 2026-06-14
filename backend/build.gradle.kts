@@ -82,6 +82,8 @@ repositories {
 val jwtVersion              = "0.13.0"
 val dotenvVersion           = "4.0.0"
 val apacheCommonsVersion    = "3.20.0"
+val openApiVersion          = "3.0.0"
+val firebaseAdminVersion    = "9.9.0"
 
 extra["snippetsDir"]        = file("build/generated-snippets")
 
@@ -101,11 +103,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("io.jsonwebtoken:jjwt-api:$jwtVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jwtVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
     implementation("me.paulschwarz:spring-dotenv:$dotenvVersion")
     implementation("org.apache.commons:commons-lang3:$apacheCommonsVersion")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$openApiVersion")
+    implementation("com.google.firebase:firebase-admin:$firebaseAdminVersion")
 
     compileOnly("org.projectlombok:lombok")
 
@@ -114,6 +118,8 @@ dependencies {
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
@@ -134,6 +140,8 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
+    testImplementation("org.testcontainers:kafka")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

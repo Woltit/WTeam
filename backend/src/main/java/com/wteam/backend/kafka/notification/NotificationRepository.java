@@ -1,4 +1,4 @@
-package com.wteam.backend.notification;
+package com.wteam.backend.kafka.notification;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
