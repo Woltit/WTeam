@@ -4,6 +4,10 @@ spring:
     activate:
       on-profile: dev
 
+  docker:
+    compose:
+      enabled: false
+
   datasource:
     url: jdbc:postgresql://${DB_HOST:127.0.0.1}:${DB_PORT:5432}/${POSTGRES_DB:wteam_db}
     username: ${POSTGRES_USER:wteam_db_user}

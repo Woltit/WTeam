@@ -14,6 +14,7 @@ import OAuth2RedirectPage from './pages/OAuth2RedirectPage';
 import ChatsPage from './pages/ChatsPage';
 import ChatPage from './pages/ChatPage';
 import AiPage from './pages/AiPage';
+import MyBookingsPage from './pages/MyBookingsPage';
 
 function App() {
     return (
@@ -46,6 +47,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <ProfilePage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/my-bookings"
+                    element={
+                        <ProtectedRoute>
+                            <MyBookingsPage />
                         </ProtectedRoute>
                     }
                 />

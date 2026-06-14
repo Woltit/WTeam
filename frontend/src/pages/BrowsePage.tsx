@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import itemsApi from '../api/items';
 import type { ItemResponse } from '../types/item';
+import categoriesApi from '../api/categories';
+import type { CategoryResponse } from '../types/category';
 
 const conditionLabel: Record<string, string> = {
     IDEAL: 'Ideal',
@@ -27,6 +29,8 @@ const BrowsePage = () => {
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
     const [cityFilter, setCityFilter] = useState('');
+    const [categories, setCategories] = useState<CategoryResponse[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -39,6 +43,14 @@ const BrowsePage = () => {
             .finally(() => setLoading(false));
     }, [page]);
 
+    useEffect(() => {
+        categoriesApi.getCategories()
+            .then(setCategories).catch(() => {});
+    }, []);
+
+    const flatCategories = (cats: CategoryResponse[]): CategoryResponse[] =>
+        cats.flatMap(c => [c, ...flatCategories(c.subcategories)]);
+
     const filtered = items.filter(item => {
         const q = search.toLowerCase().trim();
         const matchesSearch = !q
@@ -46,7 +58,8 @@ const BrowsePage = () => {
             || item.description?.toLowerCase().includes(q)
             || item.tags?.some(t => t.toLowerCase().includes(q));
         const matchesCity = !cityFilter || item.city.toLowerCase().includes(cityFilter.toLowerCase());
-        return matchesSearch && matchesCity;
+        const matchesCategory = !selectedCategory || item.categoryId === selectedCategory;
+        return matchesSearch && matchesCity && matchesCategory;
     });
 
     return (
@@ -70,6 +83,26 @@ const BrowsePage = () => {
                     onChange={e => setCityFilter(e.target.value)}
                 />
             </div>
+            
+            <div className="category-chips container">
+                <button
+                    className={`category-chip ${selectedCategory === null ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(null)}
+                >
+                    Усі
+                </button>
+                {flatCategories(categories).map(cat => (
+                    <button
+                        key={cat.id}
+                        className={`category-chip ${selectedCategory === cat.id ? 'active' : ''}`}
+                        onClick={() => setSelectedCategory(cat.id)}
+                    >
+                        {cat.name}
+                    </button>
+                ))}
+            </div>
+
+
 
             {loading && (
                 <div className="page-loader">
