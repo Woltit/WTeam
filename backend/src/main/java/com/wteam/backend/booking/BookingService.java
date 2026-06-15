@@ -2,6 +2,7 @@ package com.wteam.backend.booking;
 
 import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
+import com.wteam.backend.booking.dto.UnavailableDateRange;
 import com.wteam.backend.common.enums.BookingStatus;
 import com.wteam.backend.common.enums.NotificationChannel;
 import com.wteam.backend.common.enums.NotificationType;
@@ -129,6 +130,14 @@ public class BookingService {
         return bookingRepository.findByActiveBookingsByItemId(itemId)
                 .stream()
                 .map(bookingMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UnavailableDateRange> getUnavailableDates(Long itemId) {
+        return bookingRepository.findByActiveBookingsByItemId(itemId)
+                .stream()
+                .map(b -> new UnavailableDateRange(b.getStartDate(), b.getEndDate()))
                 .toList();
     }
 
