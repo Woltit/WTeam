@@ -1,4 +1,4 @@
-package com.wteam.backend.kafka.notification;
+package com.wteam.backend.notification;
 
 import com.wteam.backend.booking.Booking;
 import com.wteam.backend.common.entity.BaseEntityPart;

@@ -12,7 +12,7 @@ import com.wteam.backend.exception.item.ItemNotFoundException;
 import com.wteam.backend.exception.user.UserNotFoundException;
 import com.wteam.backend.item.Item;
 import com.wteam.backend.item.ItemRepository;
-import com.wteam.backend.kafka.notification.dto.NotificationEvent;
+import com.wteam.backend.notification.dto.NotificationEvent;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,6 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Map;
-
-import static com.wteam.backend.kafka.topics.KafkaConstants.NOTIFICATION_TOPIC_NAME;
 
 /**
  * Сервіс для керування бронюваннями.

@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   kafka:
-    image: 'bitnami/kafka:latest'
+    image: 'apache/kafka:3.8.0'
     container_name: "wteam_kafka_container"
     environment:
       - KAFKA_ENABLE_KRAFT=yes
@@ -30,6 +30,7 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CFG_NODE_ID=1
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
     ports:
       - '9092:9092'
     networks:
@@ -41,5 +42,5 @@ volumes:
   postgres:
 
 networks:
-  postgres:
+  wteam_network:
     driver: bridge

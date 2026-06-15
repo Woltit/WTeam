@@ -1,4 +1,4 @@
-package com.wteam.backend.kafka.notification.dto;
+package com.wteam.backend.notification.dto;
 
 import com.wteam.backend.common.enums.NotificationChannel;
 import com.wteam.backend.common.enums.NotificationType;

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>RentGo — Сповіщення</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+<div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px;">
+    <h1 style="color: #333; font-size: 24px;" th:text="${title}">Тема сповіщення</h1>
+    <p style="color: #555; font-size: 16px; line-height: 1.5;" th:text="${body}">Текст сповіщення</p>
+
+    <div th:if="${itemName != null}" style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
+        <p style="margin: 5px 0;"><strong>Річ:</strong> <span th:text="${itemName}">Назва речі</span></p>
+        <p th:if="${renterName != null}" style="margin: 5px 0;"><strong>Користувач:</strong> <span th:text="${renterName}">Ім'я</span></p>
+        <p th:if="${reason != null}" style="margin: 5px 0;"><strong>Причина:</strong> <span th:text="${reason}">—</span></p>
+    </div>
+
+    <p style="color: #999; margin-top: 30px; font-size: 14px;">
+        З повагою,<br>
+        Команда <strong>RentGo</strong>
+    </p>
+</div>
+</body>
+</html>

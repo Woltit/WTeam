@@ -110,6 +110,8 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:$apacheCommonsVersion")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$openApiVersion")
     implementation("com.google.firebase:firebase-admin:$firebaseAdminVersion")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 
     compileOnly("org.projectlombok:lombok")
 

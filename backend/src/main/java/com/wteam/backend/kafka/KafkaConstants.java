@@ -1,4 +1,4 @@
-package com.wteam.backend.kafka.topics;
+package com.wteam.backend.kafka;
 
 public final class KafkaConstants {
     private KafkaConstants() {
