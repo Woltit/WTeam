@@ -10,6 +10,11 @@ export type BookingStatus =
     | 'CANCELLED'
     | 'DISPUTE';
 
+export interface UnavailableDateRange {
+    startDate: string;
+    endDate: string;
+}
+
 export interface BookingResponse {
     id: number;
     itemId: number;

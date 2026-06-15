@@ -1,5 +1,6 @@
 package com.wteam.backend.item;
 
+import com.wteam.backend.admin.dto.CategoryStatDto;
 import com.wteam.backend.category.Category;
 import com.wteam.backend.common.enums.RentingStatus;
 import jakarta.persistence.LockModeType;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -61,4 +63,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Page<Item> findAllByStatusAndIsVerifiedTrue(RentingStatus status, Pageable pageable);
 
     boolean existsByIdAndOwnerId(Long id, Long ownerId);
+
+    @Query("""
+        SELECT new com.wteam.backend.admin.dto.CategoryStatDto(i.category.name, COUNT(i))
+        FROM Item i
+        GROUP BY i.category.id, i.category.name
+        ORDER BY COUNT(i) DESC
+    """)
+    List<CategoryStatDto> findTopCategoriesByItemCount(Pageable pageable);
 }

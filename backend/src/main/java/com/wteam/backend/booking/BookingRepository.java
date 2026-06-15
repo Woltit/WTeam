@@ -1,5 +1,6 @@
 package com.wteam.backend.booking;
 
+import com.wteam.backend.common.enums.BookingStatus;
 import com.wteam.backend.item.Item;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -46,6 +48,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         AND b.status NOT IN ('CANCELLED', 'REJECTED', 'COMPLETED')
     """)
     List<Booking> findByActiveBookingsByItemId(@Param("itemId") Long itemId);
+
+    long countByStatusIn(Collection<BookingStatus> statuses);
+
+    long countByStatus(BookingStatus status);
 
     Long item(Item item);
 }

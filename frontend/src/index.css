@@ -965,6 +965,203 @@ a:hover { text-decoration: underline; }
   border-radius: var(--radius-sm);
 }
 
+/* ── Admin Stats ─────────────────────────────────────── */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 1.5rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.stat-card-icon { font-size: 1.75rem; }
+.stat-card-value { font-size: 2rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.stat-card-label { font-size: 0.8rem; color: var(--text); }
+
+.stats-section { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.stats-bar-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 48px;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stats-bar-label {
+  font-size: 0.875rem;
+  color: var(--text-h);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-bar-track {
+  height: 10px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.stats-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+.stats-bar-count {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--text-h);
+  text-align: right;
+}
+
+/* ── Availability Calendar ───────────────────────────── */
+
+.cal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-month {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.95rem;
+  text-transform: capitalize;
+}
+
+.cal-nav {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--text-h);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.cal-nav:hover { border-color: var(--accent); color: var(--accent); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: 0.375rem 0;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-h);
+  transition: background 0.1s, color 0.1s;
+  user-select: none;
+}
+
+.cal-day:hover:not(.cal-day-past):not(.cal-day-unavail):not(.cal-day-empty):not(.cal-day-selected) {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.cal-day-empty { cursor: default; }
+
+.cal-day-past { color: var(--border); cursor: not-allowed; }
+
+.cal-day-unavail {
+  background: var(--error-bg);
+  color: var(--error);
+  cursor: not-allowed;
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.cal-day-today { font-weight: 700; }
+
+.cal-day-selected {
+  background: var(--accent);
+  color: #fff;
+}
+
+.cal-day-range {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-radius: 0;
+}
+
+.cal-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.775rem;
+  color: var(--text);
+}
+
+.cal-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.cal-swatch-avail { background: var(--surface); border: 1.5px solid var(--border); }
+.cal-swatch-unavail { background: var(--error-bg); border: 1px solid var(--error); }
+.cal-swatch-sel { background: var(--accent); }
+
+.cal-hint {
+  font-size: 0.825rem;
+  color: var(--text);
+  text-align: center;
+  min-height: 1.25rem;
+}
+
 /* ── Chats list ──────────────────────────────────────── */
 
 .chat-list {
