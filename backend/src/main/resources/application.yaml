@@ -57,7 +57,10 @@ server:
 
 app:
   frontend:
-    oauth2-redirect-uri: "http://localhost:5173/oauth2/redirect"
+    url: ${APP_FRONTEND_URL:http://localhost:5173}
+    oauth2-redirect-uri: ${app.frontend.url}/oauth2/redirect
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,https://localhost:5173,http://localhost:5174}
   mail:
     from: "onboarding@resend.dev"
 
