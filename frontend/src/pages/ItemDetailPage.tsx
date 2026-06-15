@@ -192,7 +192,18 @@ const ItemDetailPage = () => {
                             <div className="rent-cta" style={{ width: '100%' }}>
                                 <p className="rent-cta-text" style={{ fontWeight: 600, fontSize: '1rem' }}>Орендувати цей товар</p>
                                 {bookingError && <div className="alert alert-error" style={{ marginBottom: 0 }}>{bookingError}</div>}
-                                <form onSubmit={handleBooking} className="booking-form">
+                                
+                                <AvailabilityCalendar
+                                    unavailableDates={unavailableDates}
+                                    onRangeSelect={(start, end) => {
+                                        setStartDate(start);
+                                        setEndDate(end);
+                                    }}
+                                    pricePerDay={item.pricePerDay}
+                                    depositAmount={item.depositAmount}
+                                />
+
+                                <form onSubmit={handleBooking} className="booking-form" style={{ marginTop: '1rem' }}>
                                     <button
                                         type="submit"
                                         className="btn btn-primary btn-full"
