@@ -44,21 +44,16 @@ ON CONFLICT (slug) DO NOTHING;
 INSERT INTO items (id, owner_id, category_id, title, description, condition,
                    price_per_day, deposit_amount, status, city, address, is_verified,
                    created_at, updated_at)
-SELECT v.id, admin.id, v.category_id, v.title, v.description, v.condition,
-       v.price_per_day, v.deposit_amount, v.status, v.city, v.address, TRUE, NOW(), NOW()
-FROM users admin
-         CROSS JOIN (VALUES
-                         (1, 1, 'Намет туристичний 2-місний',
-                          'Легкий намет для кемпінгу, витримує дощ', 'GOOD'::item_condition,
-                          150.00, 500.00, 'AVAILABLE'::renting_status, 'Київ', 'вул. Хрещатик 1'),
-                         (2, 2, 'Дриль Bosch Professional',
-                          'Потужний дриль з набором свердел', 'IDEAL'::item_condition,
-                          80.00, 300.00, 'AVAILABLE'::renting_status, 'Київ', 'вул. Хрещатик 1'),
-                         (3, 3, 'Камера Sony A6000',
-                          'Дзеркальна камера, обєктив 18-55mm в комплекті', 'GOOD'::item_condition,
-                          200.00, 1000.00, 'AVAILABLE'::renting_status, 'Львів', 'пл. Ринок 1')
-) AS v(id, category_id, title, description, condition, price_per_day, deposit_amount, status, city, address)
-WHERE admin.email = 'admin@gmail.com'
+VALUES
+    (1, (SELECT id FROM users WHERE email = 'admin@gmail.com'), 1, 'Намет туристичний 2-місний',
+     'Легкий намет для кемпінгу, витримує дощ', 'GOOD',
+     150.00, 500.00, 'AVAILABLE', 'Київ', 'вул. Хрещатик 1', TRUE, NOW(), NOW()),
+    (2, (SELECT id FROM users WHERE email = 'admin@gmail.com'), 2, 'Дриль Bosch Professional',
+     'Потужний дриль з набором свердел', 'IDEAL',
+     80.00, 300.00, 'AVAILABLE', 'Київ', 'вул. Хрещатик 1', TRUE, NOW(), NOW()),
+    (3, (SELECT id FROM users WHERE email = 'admin@gmail.com'), 3, 'Камера Sony A6000',
+     'Дзеркальна камера, обєктив 18-55mm в комплекті', 'GOOD',
+     200.00, 1000.00, 'AVAILABLE', 'Львів', 'пл. Ринок 1', TRUE, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Бронювання (орендар = renter@test.com)
