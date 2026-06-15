@@ -22,8 +22,6 @@ interface IPageResponse<T> {
     size: number;
 }
 
-// statusLabels mapping has been moved to LanguageContext.tsx
-
 const statusClasses: Record<BookingStatus, string> = {
     PENDING: 'badge-warning',
     APPROVED: 'badge-accent',
@@ -181,7 +179,6 @@ const MyBookingsPage = () => {
 
     const filteredBookings = bookings.filter(filterBooking);
 
-    // Sort upcoming bookings by start date ascending (closest start date first)
     if (activeSubTab === 'upcoming') {
         filteredBookings.sort((a, b) => a.booking.startDate.localeCompare(b.booking.startDate));
     }
@@ -450,28 +447,28 @@ const MyBookingsPage = () => {
             {cancellingBookingId !== null && createPortal(
                 <div
                     onClick={(e) => { if (e.target === e.currentTarget) { setCancellingBookingId(null); setCancelReason(''); } }}
-                    className="modal-backdrop"
+                    className="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
                 >
-                    <div className="modal-content">
+                    <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl max-w-lg w-full mx-4 relative text-slate-100">
                         <button
                             onClick={() => { setCancellingBookingId(null); setCancelReason(''); }}
-                            className="modal-close-btn"
+                            className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer"
                             aria-label={t('review.close')}
                         >
                             <X className="w-6 h-6" />
                         </button>
 
-                        <h2 className="modal-title">
+                        <h2 className="text-2xl font-bold text-white mb-6">
                             {t('bookings.cancelTitle')}
                         </h2>
 
                         <form onSubmit={handleCancelSubmit}>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label className="modal-label">
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-slate-300 mb-3">
                                     {t('bookings.cancelReasonLabel')}
                                 </label>
                                 <textarea
-                                    className="modal-textarea"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none transition-all"
                                     rows={4}
                                     value={cancelReason}
                                     onChange={(e) => setCancelReason(e.target.value)}
@@ -479,19 +476,19 @@ const MyBookingsPage = () => {
                                 />
                             </div>
 
-                            <div className="modal-actions">
+                            <div className="flex gap-4 mt-6">
                                 <button
                                     type="button"
                                     onClick={() => { setCancellingBookingId(null); setCancelReason(''); }}
                                     disabled={cancelling}
-                                    className="btn btn-outline flex-1"
+                                    className="flex-1 border border-slate-600 text-slate-300 hover:bg-slate-700 rounded-xl py-3 font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {t('bookings.cancelBack')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={cancelling}
-                                    className="btn btn-danger flex-1"
+                                    className="flex-1 bg-red-600 text-white hover:bg-red-500 rounded-xl py-3 font-semibold text-sm shadow-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {cancelling ? t('review.submitting') : t('bookings.cancelConfirm')}
                                 </button>
