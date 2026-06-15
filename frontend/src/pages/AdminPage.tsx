@@ -4,11 +4,12 @@ import itemsApi from '../api/items';
 import profileApi from '../api/profile';
 import categoriesApi from '../api/categories';
 import bookingsApi, { type BookingResponse, type BookingStatus } from '../api/bookings';
+import adminApi, { type AdminStatsResponse } from '../api/admin';
 import type { UserResponse, Role, VerificationStatus, PendingProfileResponse } from '../types/user';
 import type { ItemResponse } from '../types/item';
 import type { CategoryResponse, CategoryRequest } from '../types/category';
 
-type Tab = 'users' | 'items' | 'verifications' | 'categories' | 'bookings';
+type Tab = 'stats' | 'users' | 'items' | 'verifications' | 'categories' | 'bookings';
 
 const BOOKING_STATUSES: BookingStatus[] = [
     'PENDING', 'APPROVED', 'REJECTED', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTE',
@@ -19,6 +20,71 @@ const verificationLabel: Record<VerificationStatus, string> = {
     PENDING: 'Очікує',
     VERIFIED: 'Верифіковано',
     REJECTED: 'Відхилено',
+};
+
+// ── Stats Tab ────────────────────────────────────────────
+const StatsTab = () => {
+    const [stats, setStats] = useState<AdminStatsResponse | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        adminApi.getStats()
+            .then(setStats)
+            .catch(() => setError('Не вдалося завантажити статистику.'))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) return <div className="spinner" />;
+    if (error) return <div className="alert alert-error">{error}</div>;
+    if (!stats) return null;
+
+    const maxCount = Math.max(...stats.topCategories.map(c => c.itemCount), 1);
+
+    return (
+        <div className="admin-tab">
+            <div className="stats-grid">
+                <div className="stat-card">
+                    <span className="stat-card-icon">👤</span>
+                    <span className="stat-card-value">{stats.totalUsers}</span>
+                    <span className="stat-card-label">Користувачів</span>
+                </div>
+                <div className="stat-card">
+                    <span className="stat-card-icon">📦</span>
+                    <span className="stat-card-value">{stats.totalItems}</span>
+                    <span className="stat-card-label">Оголошень</span>
+                </div>
+                <div className="stat-card">
+                    <span className="stat-card-icon">🔄</span>
+                    <span className="stat-card-value">{stats.activeBookings}</span>
+                    <span className="stat-card-label">Активних оренд</span>
+                </div>
+                <div className="stat-card">
+                    <span className="stat-card-icon">✅</span>
+                    <span className="stat-card-value">{stats.completedBookings}</span>
+                    <span className="stat-card-label">Завершених оренд</span>
+                </div>
+            </div>
+
+            <div className="stats-section">
+                <h2 className="section-heading">Популярні категорії</h2>
+                {stats.topCategories.length === 0
+                    ? <p style={{ color: 'var(--text)' }}>Немає даних.</p>
+                    : stats.topCategories.map(c => (
+                        <div key={c.categoryName} className="stats-bar-row">
+                            <span className="stats-bar-label">{c.categoryName}</span>
+                            <div className="stats-bar-track">
+                                <div
+                                    className="stats-bar-fill"
+                                    style={{ width: `${(c.itemCount / maxCount) * 100}%` }}
+                                />
+                            </div>
+                            <span className="stats-bar-count">{c.itemCount}</span>
+                        </div>
+                    ))}
+            </div>
+        </div>
+    );
 };
 
 // ── Users Tab ────────────────────────────────────────────
@@ -498,9 +564,10 @@ const BookingsTab = () => {
 
 // ── Main Admin Page ───────────────────────────────────────
 const AdminPage = () => {
-    const [tab, setTab] = useState<Tab>('users');
+    const [tab, setTab] = useState<Tab>('stats');
 
     const tabs: { key: Tab; label: string }[] = [
+        { key: 'stats', label: '📊 Статистика' },
         { key: 'users', label: '👤 Користувачі' },
         { key: 'items', label: '📦 Оголошення' },
         { key: 'verifications', label: '✅ Верифікація' },
@@ -525,6 +592,7 @@ const AdminPage = () => {
                 ))}
             </div>
             <div className="admin-content">
+                {tab === 'stats' && <StatsTab />}
                 {tab === 'users' && <UsersTab />}
                 {tab === 'items' && <ItemsTab />}
                 {tab === 'verifications' && <VerificationsTab />}
