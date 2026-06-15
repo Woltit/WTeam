@@ -45,7 +45,7 @@ const ItemDetailPage = () => {
         bookingsApi.getUnavailableDates(Number(itemId))
             .then(setUnavailableDates)
             .catch(() => {});
-    }, [itemId]);
+    }, [itemId, t]);
 
     const handleDelete = async () => {
         if (!item || !confirm(t('itemDetail.deleteConfirm'))) return;

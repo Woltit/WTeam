@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ReviewModal } from '../components/ReviewModal';
 import bookingsApi from '../api/bookings';
@@ -43,7 +43,7 @@ const MyBookingsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const fetchBookings = () => {
+    const fetchBookings = useCallback(() => {
         setLoading(true);
         const fetchMethod = activeTab === 'renter' 
             ? bookingsApi.getMyBookings(page, 6)
@@ -66,11 +66,11 @@ const MyBookingsPage = () => {
             })
             .catch(() => setError(t('bookings.loadError')))
             .finally(() => setLoading(false));
-    };
+    }, [activeTab, page, t]);
 
     useEffect(() => {
         fetchBookings();
-    }, [page, activeTab]);
+    }, [fetchBookings]);
 
     const handleTabChange = (tab: 'renter' | 'owner') => {
         setActiveTab(tab);
