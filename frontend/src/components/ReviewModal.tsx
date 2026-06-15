@@ -53,11 +53,12 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
             });
             onSuccess();
             onClose();
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const resData = (err as { response?: { data?: { detailedMessage?: string; message?: string; error?: string } } })?.response?.data;
             const msg =
-                err.response?.data?.detailedMessage
-                || err.response?.data?.message
-                || err.response?.data?.error
+                resData?.detailedMessage
+                || resData?.message
+                || resData?.error
                 || t('review.error');
             setError(msg);
         } finally {
