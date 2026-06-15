@@ -505,4 +505,4 @@ const MyBookingsPage = () => {
     );
 };
 
-export default MyBookingsPage;
+                                export default MyBookingsPage;
