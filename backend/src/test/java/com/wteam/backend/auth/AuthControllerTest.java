@@ -55,7 +55,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.token").value("access-token"))
+                .andExpect(jsonPath("$.accessToken").value("access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
     }
 
@@ -96,7 +96,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("access-token"));
+                .andExpect(jsonPath("$.accessToken").value("access-token"));
     }
 
     @Test
@@ -113,7 +113,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/refresh → 200 with new access token")
+    @DisplayName("POST /auth/refresh → 200 with new access accessToken")
     void refresh_whenValidToken_returns200() throws Exception {
         RefreshTokenRequest req = new RefreshTokenRequest("valid-refresh-token");
         AuthResponse resp = new AuthResponse("new-access-token", "valid-refresh-token");
@@ -124,6 +124,6 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("new-access-token"));
+                .andExpect(jsonPath("$.accessToken").value("new-access-token"));
     }
 }

@@ -24,7 +24,6 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AiSessionService {
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
     private static final String MODEL = "gpt-4o-mini";
@@ -73,7 +72,7 @@ public class AiSessionService {
 
         StringBuilder sb = new StringBuilder();
         for (Item item : items) {
-            sb.append("ID:%d | %s | %s | %.2f грн/день | %s\n".formatted(
+            sb.append("ID:%d | %s | %s | %.2f грн/день | %s%n".formatted(
                     item.getId(),
                     item.getTitle(),
                     item.getCategory() != null ? item.getCategory().getName() : "без категорії",
@@ -124,8 +123,13 @@ public class AiSessionService {
                 .retrieve()
                 .body(Map.class);
 
+        if (response == null) {
+            throw new IllegalArgumentException("Response cannot be null");
+        }
+
         List<?> choices = (List<?>) response.get("choices");
-        Map<?, ?> firstChoice = (Map<?, ?>) choices.get(0);
+
+        Map<?, ?> firstChoice = (Map<?, ?>) choices.getFirst();
         Map<?, ?> message = (Map<?, ?>) firstChoice.get("message");
         return (String) message.get("content");
     }

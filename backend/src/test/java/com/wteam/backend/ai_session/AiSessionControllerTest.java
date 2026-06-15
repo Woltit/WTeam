@@ -36,9 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestSecurityConfig.class)
 @DisplayName("AiSessionController WebMvcTest")
 class AiSessionControllerTest {
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired MockMvc mockMvc;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean AiSessionService aiSessionService;
     @MockitoBean JwtService jwtService;

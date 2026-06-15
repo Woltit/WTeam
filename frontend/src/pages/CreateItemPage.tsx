@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import itemsApi from '../api/items';
 import categoriesApi from '../api/categories';
 import type { ItemRequest, ItemCondition } from '../types/item';
@@ -45,7 +45,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
     const set = (field: string, value: unknown) =>
         setForm(f => ({ ...f, [field]: value }));
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         setLoading(true);

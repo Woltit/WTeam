@@ -1,9 +1,10 @@
 package com.wteam.backend.security.oauth2;
 
+import com.wteam.backend.refresh_token.RefreshTokenService;
 import com.wteam.backend.security.SecurityUser;
 import com.wteam.backend.security.jwt.JwtService;
+import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
 
     @Value("${app.frontend.oauth2-redirect-uri}")
@@ -34,28 +36,38 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
                                         @NonNull HttpServletResponse response,
                                         Authentication authentication
-    ) throws IOException, ServletException {
+    ) throws IOException {
         SecurityUser securityUser;
+        User dbUser;
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof SecurityUser su) {
-            securityUser = su;
-        } else if (principal instanceof OAuth2User oAuth2User) {
-            // Google uses OIDC — principal is DefaultOidcUser (implements OidcUser → OAuth2User)
-            String email = oAuth2User instanceof OidcUser oidcUser
-                    ? oidcUser.getEmail()
-                    : (String) oAuth2User.getAttribute("email");
-            var user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalStateException("OAuth2 user not found in DB: " + email));
-            securityUser = new SecurityUser(user);
-        } else {
-            throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
+        if (principal == null) {
+            throw new IllegalArgumentException("Principal is null");
         }
 
-        String token = jwtService.generateToken(securityUser);
+        switch (principal) {
+            case SecurityUser su -> {
+                securityUser = su;
+                dbUser = securityUser.getOriginalUser();
+            }
+            case OAuth2User oAuth2User -> {
+                // Google uses OIDC — principal is DefaultOidcUser (implements OidcUser → OAuth2User)
+                String email = oAuth2User instanceof OidcUser oidcUser
+                        ? oidcUser.getEmail()
+                        : (String) oAuth2User.getAttribute("email");
+                dbUser = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new IllegalStateException("OAuth2 user not found in DB: " + email));
+                securityUser = new SecurityUser(dbUser);
+            }
+            default -> throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
+        }
+
+        String accessToken = jwtService.generateToken(securityUser);
+        var refreshToken = refreshTokenService.generateRefreshToken(dbUser);
 
         String targetUri = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("token", token)
+                .queryParam("accessToken", accessToken)
+                .queryParam("refreshToken", refreshToken.getTokenHash())
                 .build()
                 .toUriString();
 

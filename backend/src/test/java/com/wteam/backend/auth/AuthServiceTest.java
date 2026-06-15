@@ -59,13 +59,13 @@ class AuthServiceTest {
 
         when(userRepository.existsByEmail(request.email())).thenReturn(false);
         when(passwordEncoder.encode(request.password())).thenReturn("hashed-pwd");
-        when(jwtService.generateToken(any(SecurityUser.class))).thenReturn("access-token");
+        when(jwtService.generateToken(any(SecurityUser.class))).thenReturn("access-accessToken");
         when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn(refreshToken);
 
         AuthResponse response = authService.register(request);
 
         assertNotNull(response);
-        assertEquals("access-token", response.token());
+        assertEquals("access-accessToken", response.accessToken());
         assertEquals("dummy-hash", response.refreshToken());
 
         verify(userRepository).save(any(User.class));
@@ -90,13 +90,13 @@ class AuthServiceTest {
         refreshToken.setTokenHash("dummy-hash");
 
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(any(SecurityUser.class))).thenReturn("access-token");
+        when(jwtService.generateToken(any(SecurityUser.class))).thenReturn("access-accessToken");
         when(refreshTokenService.generateRefreshToken(user)).thenReturn(refreshToken);
 
         AuthResponse response = authService.login(request);
 
         assertNotNull(response);
-        assertEquals("access-token", response.token());
+        assertEquals("access-accessToken", response.accessToken());
         assertEquals("dummy-hash", response.refreshToken());
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
@@ -112,22 +112,22 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("refreshToken should return new access token for valid refresh token")
+    @DisplayName("refreshToken should return new access accessToken for valid refresh accessToken")
     void refreshToken_whenValid_shouldReturnNewAccessToken() {
-        RefreshTokenRequest request = new RefreshTokenRequest("valid-refresh-token");
+        RefreshTokenRequest request = new RefreshTokenRequest("valid-refresh-accessToken");
         User user = new User();
         user.setEmail("user@example.com");
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
-        refreshToken.setTokenHash("valid-refresh-token-hash");
+        refreshToken.setTokenHash("valid-refresh-accessToken-hash");
 
         when(refreshTokenService.processRefreshToken(request.refreshToken())).thenReturn(refreshToken);
-        when(jwtService.generateToken(any(SecurityUser.class))).thenReturn("new-access-token");
+        when(jwtService.generateToken(any(SecurityUser.class))).thenReturn("new-access-accessToken");
 
         AuthResponse response = authService.refreshToken(request);
 
         assertNotNull(response);
-        assertEquals("new-access-token", response.token());
-        assertEquals("valid-refresh-token-hash", response.refreshToken());
+        assertEquals("new-access-accessToken", response.accessToken());
+        assertEquals("valid-refresh-accessToken-hash", response.refreshToken());
     }
 }

@@ -10,12 +10,10 @@ import com.wteam.backend.category.Category;
 import com.wteam.backend.category.CategoryRepository;
 import com.wteam.backend.chat_room.dto.ChatRoomResponse;
 import com.wteam.backend.common.enums.BookingStatus;
-import com.wteam.backend.common.enums.ItemCondition;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.common.enums.VerificationStatus;
 import com.wteam.backend.item.dto.ItemResponse;
 import com.wteam.backend.message.dto.MessageResponse;
-import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
 import com.wteam.backend.user_profile.UserProfileRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -64,7 +62,7 @@ class BookingFlowIntegrationTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
                 .andReturn();
-        return objectMapper.readValue(res.getResponse().getContentAsString(), AuthResponse.class).token();
+        return objectMapper.readValue(res.getResponse().getContentAsString(), AuthResponse.class).accessToken();
     }
 
     private String login(String email, String password) throws Exception {
@@ -74,7 +72,7 @@ class BookingFlowIntegrationTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
                 .andReturn();
-        return objectMapper.readValue(res.getResponse().getContentAsString(), AuthResponse.class).token();
+        return objectMapper.readValue(res.getResponse().getContentAsString(), AuthResponse.class).accessToken();
     }
 
     private Long createItem(String ownerToken, Long categoryId) throws Exception {

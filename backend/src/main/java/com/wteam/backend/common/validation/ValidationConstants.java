@@ -135,7 +135,7 @@ public final class ValidationConstants {
     }
 
     /**
-     * The type Refresh token.
+     * The type Refresh accessToken.
      */
     public static final class RefreshToken {
         /**
@@ -185,6 +185,9 @@ public final class ValidationConstants {
     }
 
 
+    public static final class AiSession {
+        public static final int QUERY_MAX_LENGTH = 1000;
+    }
 
     public static final class Constraints {
         public static final int PASSWORD_MIN_LENGTH = 8;

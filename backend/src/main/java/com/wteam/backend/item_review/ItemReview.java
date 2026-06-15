@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Сутність, що представляє відгук користувача про товар.
@@ -21,7 +23,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Entity
 @Table(name = "item_reviews", uniqueConstraints = {
-    @UniqueConstraint(name = "uq_item_review_per_booking", columnNames = {"booking_id", "renter_id"})
+        @UniqueConstraint(name = "uq_item_review_per_booking", columnNames = {"booking_id", "reviewer_id"})
 })
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
@@ -43,12 +45,9 @@ public class ItemReview extends BaseEntityPart {
     @JoinColumn(name = "item_id", referencedColumnName = "id", nullable = false)
     private Item item;
 
-    /**
-     * Користувач (орендар), який залишив відгук.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "renter_id", referencedColumnName = "id")
-    private User renter;
+    @JoinColumn(name = "reviewer_id", referencedColumnName = "id")
+    private User reviewer;
 
     /**
      * Бронювання, за результатами якого залишено відгук.
@@ -68,4 +67,12 @@ public class ItemReview extends BaseEntityPart {
      */
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
+
+    /**
+     * Статус відгуку (PENDING / PUBLISHED).
+     */
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "status", nullable = false)
+    private com.wteam.backend.common.enums.ReviewStatus status = com.wteam.backend.common.enums.ReviewStatus.PENDING;
 }

@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useParams, Link } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import chatApi from '../api/chat';
 import { useAuth } from '../contexts/AuthContext';
 import type { ChatRoomResponse, MessageResponse } from '../types/chat';
 
 const ChatPage = () => {
     const { roomId } = useParams<{ roomId: string }>();
-    const { user, token } = useAuth();
+    const { user, accessToken: token } = useAuth();
     const [room, setRoom] = useState<ChatRoomResponse | null>(null);
     const [messages, setMessages] = useState<MessageResponse[]>([]);
     const [text, setText] = useState('');
@@ -77,7 +77,7 @@ const ChatPage = () => {
         };
     }, [token, id]);
 
-    const handleSend = async (e: FormEvent) => {
+    const handleSend = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         const trimmed = text.trim();
         if (!trimmed || sending) return;

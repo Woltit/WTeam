@@ -5,6 +5,8 @@ import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.booking.dto.BookingStatusUpdateRequest;
 import com.wteam.backend.booking.dto.UnavailableDateRange;
 import com.wteam.backend.security.SecurityUser;
+import com.wteam.backend.security.annotation.CurrentUser;
+import com.wteam.backend.security.dto.UserPrincipalDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,11 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
@@ -32,11 +30,11 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(
-            @Valid @RequestBody UserBookingRequest request,
-            @AuthenticationPrincipal SecurityUser currentUser
+            @Valid @RequestBody BookingRequest request,
+            @CurrentUser UserPrincipalDto currentUser
     ) {
         BookingRequest bookingRequest = new BookingRequest(
-                request.itemId(), currentUser.getId(), request.startDate(), request.endDate()
+                request.itemId(), currentUser.id(), request.startDate(), request.endDate()
         );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bookingService.createBooking(bookingRequest));
@@ -49,10 +47,18 @@ public class BookingController {
 
     @GetMapping("/my")
     public ResponseEntity<Page<BookingResponse>> getMyBookings(
-            @AuthenticationPrincipal SecurityUser currentUser,
+            @CurrentUser UserPrincipalDto currentUser,
             Pageable pageable
     ) {
-        return ResponseEntity.ok(bookingService.findAllByRenterId(currentUser.getId(), pageable));
+        return ResponseEntity.ok(bookingService.findAllByRenterId(currentUser.id(), pageable));
+    }
+
+    @GetMapping("/owner")
+    public ResponseEntity<Page<BookingResponse>> getOwnerBookings(
+            @CurrentUser UserPrincipalDto currentUser,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(bookingService.findAllByOwnerId(currentUser.id(), pageable));
     }
 
     @PatchMapping("/{bookingId}/status")
@@ -67,10 +73,4 @@ public class BookingController {
                 request.cancellationReason()
         ));
     }
-
-    record UserBookingRequest(
-            Long itemId,
-            LocalDate startDate,
-            LocalDate endDate
-    ) {}
 }

@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import aiApi from '../api/ai';
 import itemsApi from '../api/items';
 import type { AiQueryResponse } from '../types/chat';
@@ -12,7 +12,7 @@ const AiPage = () => {
     const [result, setResult] = useState<AiQueryResponse | null>(null);
     const [recommendedItems, setRecommendedItems] = useState<ItemResponse[]>([]);
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         const q = query.trim();
         if (!q || loading) return;

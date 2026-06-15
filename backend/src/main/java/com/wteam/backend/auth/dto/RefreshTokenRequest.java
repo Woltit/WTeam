@@ -8,6 +8,6 @@ import jakarta.validation.constraints.NotBlank;
  * @param refreshToken токен оновлення, який буде використано для генерації нового токена доступу
  */
 public record RefreshTokenRequest(
-        @NotBlank(message = "Refresh token is required")
+        @NotBlank(message = "Refresh accessToken is required")
         String refreshToken
 ) {}

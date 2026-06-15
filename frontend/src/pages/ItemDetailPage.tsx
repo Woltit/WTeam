@@ -1,8 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useParams, useNavigate, Link } from 'react-router';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import itemsApi from '../api/items';
 import bookingsApi, { type UnavailableDateRange } from '../api/bookings';
 import chatApi from '../api/chat';
+import reviewsApi from '../api/reviews';
+import type { UserReviewResponse } from '../api/reviews';
 import { useAuth } from '../contexts/AuthContext';
 import type { ItemResponse } from '../types/item';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
@@ -14,10 +16,11 @@ const conditionLabel: Record<string, string> = {
 const ItemDetailPage = () => {
     const { itemId } = useParams<{ itemId: string }>();
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+    const { user, accessToken: token } = useAuth();
     const [item, setItem] = useState<ItemResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [ownerReviews, setOwnerReviews] = useState<UserReviewResponse[]>([]);
     const [deleting, setDeleting] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -27,9 +30,18 @@ const ItemDetailPage = () => {
 
     useEffect(() => {
         if (!itemId) return;
-        const id = Number(itemId);
-        itemsApi.getItemById(id)
-            .then(setItem)
+        setLoading(true);
+        itemsApi.getItemById(Number(itemId))
+            .then(async (fetchedItem) => {
+                setItem(fetchedItem);
+                try {
+                    const revs = await reviewsApi.getUserReviews(fetchedItem.ownerId);
+                    // Filter to only show reviews left for them AS an owner
+                    setOwnerReviews(revs.filter(r => r.targetRole === 'OWNER'));
+                } catch {
+                    // Ignore review fetch errors
+                }
+            })
             .catch(() => setError('Item not found.'))
             .finally(() => setLoading(false));
         bookingsApi.getUnavailableDates(id)
@@ -143,19 +155,30 @@ const ItemDetailPage = () => {
                         </div>
                     </div>
 
-                    <div className="item-detail-section">
-                        <h2 className="section-heading">Календар доступності</h2>
-                        <AvailabilityCalendar
-                            unavailableDates={unavailableDates}
-                            onRangeSelect={(s, e) => {
-                                setStartDate(s);
-                                setEndDate(e);
-                                setBookingError('');
-                            }}
-                            pricePerDay={item.pricePerDay}
-                            depositAmount={item.depositAmount}
-                        />
-                    </div>
+                    {ownerReviews.length > 0 && (
+                        <div className="item-detail-section">
+                            <h2 className="section-heading">Відгуки про власника</h2>
+                            <div className="flex flex-col gap-4">
+                                {ownerReviews.map(review => (
+                                    <div key={review.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="flex">
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <span key={star} className={`text-lg ${star <= review.rating ? 'text-yellow-400' : 'text-slate-600'}`}>★</span>
+                                                ))}
+                                            </div>
+                                            <span className="text-slate-400 text-sm ml-2">
+                                                {new Date(review.createdAt).toLocaleDateString('uk-UA')}
+                                            </span>
+                                        </div>
+                                        {review.comment && (
+                                            <p className="text-slate-300 text-sm leading-relaxed">{review.comment}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="item-detail-actions">
                         {isOwner ? (

@@ -45,6 +45,11 @@ const getMyBookings = async (page = 0, size = 20) => {
     return response.data;
 };
 
+const getOwnerBookings = async (page = 0, size = 20) => {
+    const response = await api.get<Page<BookingResponse>>('/bookings/owner', { params: { page, size } });
+    return response.data;
+};
+
 const createBooking = async (itemId: number, startDate: string, endDate: string) => {
     const response = await api.post<BookingResponse>('/bookings', { itemId, startDate, endDate });
     return response.data;
@@ -62,9 +67,4 @@ const updateBookingStatus = async (
     return response.data;
 };
 
-const getUnavailableDates = async (itemId: number): Promise<UnavailableDateRange[]> => {
-    const response = await api.get<UnavailableDateRange[]>(`/bookings/items/${itemId}/unavailable-dates`);
-    return response.data;
-};
-
-export default { getAllBookings, getMyBookings, createBooking, updateBookingStatus, getUnavailableDates };
+export default { getAllBookings, getMyBookings, getOwnerBookings, createBooking, updateBookingStatus };

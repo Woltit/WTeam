@@ -11,4 +11,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ItemReviewRepository extends JpaRepository<ItemReview, Long> {
+    java.util.Optional<ItemReview> findByBookingIdAndReviewerId(Long bookingId, Long reviewerId);
+    java.util.List<ItemReview> findByBookingId(Long bookingId);
+    java.util.List<ItemReview> findByStatusAndCreatedAtBefore(com.wteam.backend.common.enums.ReviewStatus status, java.time.Instant date);
+    java.util.List<ItemReview> findByItemIdAndStatusOrderByCreatedAtAsc(Long itemId, com.wteam.backend.common.enums.ReviewStatus status);
 }

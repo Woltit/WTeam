@@ -80,6 +80,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/ai/recommend").permitAll()
                         // WebSocket handshake (аутентифікація відбувається через STOMP CONNECT)
                         .requestMatchers("/ws/**").permitAll()
+                        // Swagger
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // всі інші запити вимагають обов'язкової аутентифікації
                         .anyRequest().authenticated()
                 )

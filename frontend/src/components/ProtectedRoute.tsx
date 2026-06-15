@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { Navigate } from 'react-router';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 }
 
 const ProtectedRoute = ({ children, requireAdmin = false }: Props) => {
-    const { token, isAdmin, isLoading } = useAuth();
+    const { accessToken: token, isAdmin, isLoading } = useAuth();
 
     if (isLoading) {
         return (
