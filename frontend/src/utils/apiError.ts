@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-export function getApiErrorMessage(err: unknown, fallback: string): string {
+export function getApiErrorMessage(err: unknown, fallback: string, serverDownMsg: string = 'Server unavailable'): string {
     if (!axios.isAxiosError(err)) {
         return fallback;
     }
 
     if (!err.response) {
-        return 'Сервер недоступний. Переконайтеся, що бекенд запущено (порт 8080).';
+        return serverDownMsg;
     }
 
     const data = err.response.data as { message?: string; detailedMessage?: string } | undefined;

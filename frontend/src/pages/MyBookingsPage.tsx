@@ -22,8 +22,6 @@ interface IPageResponse<T> {
     size: number;
 }
 
-// statusLabels mapping has been moved to LanguageContext.tsx
-
 const statusClasses: Record<BookingStatus, string> = {
     PENDING: 'badge-warning',
     APPROVED: 'badge-accent',
@@ -181,7 +179,6 @@ const MyBookingsPage = () => {
 
     const filteredBookings = bookings.filter(filterBooking);
 
-    // Sort upcoming bookings by start date ascending (closest start date first)
     if (activeSubTab === 'upcoming') {
         filteredBookings.sort((a, b) => a.booking.startDate.localeCompare(b.booking.startDate));
     }
@@ -505,4 +502,4 @@ const MyBookingsPage = () => {
     );
 };
 
-                                export default MyBookingsPage;
+export default MyBookingsPage;

@@ -35,7 +35,7 @@ function RegisterPage() {
         await register({ email, password, checkPassword });
         navigate("/");
     } catch (err: unknown) {
-        setError(getApiErrorMessage(err, t('register.error')));
+        setError(getApiErrorMessage(err, t('register.error'), t('errors.serverDown')));
     } finally {
         setLoading(false);
     }
