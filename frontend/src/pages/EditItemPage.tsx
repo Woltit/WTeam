@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ItemForm } from './CreateItemPage';
 import type { ItemRequest } from '../types/item';
 import type { ItemResponse } from '../types/item';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const EditItemPage = () => {
     const { itemId } = useParams<{ itemId: string }>();
@@ -13,6 +14,7 @@ const EditItemPage = () => {
     const [item, setItem] = useState<ItemResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const { t } = useLanguage();
 
     useEffect(() => {
         if (!itemId) return;
@@ -24,9 +26,9 @@ const EditItemPage = () => {
                 }
                 setItem(data);
             })
-            .catch(() => setError('Item not found.'))
+            .catch(() => setError(t('itemDetail.notFound')))
             .finally(() => setLoading(false));
-    }, [itemId, user, navigate]);
+    }, [itemId, user, navigate, t]);
 
     const handleSubmit = async (data: ItemRequest) => {
         await itemsApi.updateItem(Number(itemId), data);
@@ -34,7 +36,7 @@ const EditItemPage = () => {
     };
 
     if (loading) return <div className="page-loader"><div className="spinner" /></div>;
-    if (error || !item) return <div className="page"><div className="alert alert-error">{error || 'Item not found.'}</div></div>;
+    if (error || !item) return <div className="page"><div className="alert alert-error">{error || t('itemDetail.notFound')}</div></div>;
 
     const initial: Partial<ItemRequest> = {
         categoryId: item.categoryId,
@@ -54,11 +56,11 @@ const EditItemPage = () => {
     return (
         <div className="page">
             <div className="page-header">
-                <h1 className="page-title">Edit Listing</h1>
-                <p className="page-subtitle">Update the details for "{item.title}".</p>
+                <h1 className="page-title">{t('itemForm.editTitle')}</h1>
+                <p className="page-subtitle">{t('itemForm.editSubtitle', { title: item.title })}</p>
             </div>
             <div className="form-card">
-                <ItemForm initial={initial} onSubmit={handleSubmit} submitLabel="Save Changes" />
+                <ItemForm initial={initial} onSubmit={handleSubmit} submitLabel={t('itemForm.submitEdit')} />
             </div>
         </div>
     );

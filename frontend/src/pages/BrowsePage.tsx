@@ -4,14 +4,7 @@ import itemsApi from '../api/items';
 import type { ItemResponse } from '../types/item';
 import categoriesApi from '../api/categories';
 import type { CategoryResponse } from '../types/category';
-
-const conditionLabel: Record<string, string> = {
-    IDEAL: 'Ideal',
-    GOOD: 'Good',
-    NORM: 'Normal',
-    BAD: 'Fair',
-    NEEDS_REPAIRING: 'Needs Repair',
-};
+import { useLanguage } from '../contexts/LanguageContext';
 
 const conditionClass: Record<string, string> = {
     IDEAL: 'badge-success',
@@ -22,6 +15,7 @@ const conditionClass: Record<string, string> = {
 };
 
 const BrowsePage = () => {
+    const { t } = useLanguage();
     const [items, setItems] = useState<ItemResponse[]>([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -66,19 +60,19 @@ const BrowsePage = () => {
         <div className="page">
             <div className="page-hero">
                 <h1 className="hero-title">Rent anything,<br /><span className="hero-accent">from anyone.</span></h1>
-                <p className="hero-sub">Browse thousands of items available for rent near you.</p>
+                <p className="hero-sub">{t('browse.heroSub')}</p>
             </div>
 
             <div className="browse-filters container">
                 <input
                     className="form-input"
-                    placeholder="Пошук за назвою, описом або тегами…"
+                    placeholder={t('browse.searchPlaceholder')}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
                 <input
                     className="form-input"
-                    placeholder="Місто…"
+                    placeholder={t('browse.cityPlaceholder')}
                     value={cityFilter}
                     onChange={e => setCityFilter(e.target.value)}
                 />
@@ -89,7 +83,7 @@ const BrowsePage = () => {
                     className={`category-chip ${selectedCategory === null ? 'active' : ''}`}
                     onClick={() => setSelectedCategory(null)}
                 >
-                    Усі
+                    {t('browse.all')}
                 </button>
                 {flatCategories(categories).map(cat => (
                     <button
@@ -102,22 +96,20 @@ const BrowsePage = () => {
                 ))}
             </div>
 
-
-
             {loading && (
                 <div className="page-loader">
                     <div className="spinner" />
                 </div>
             )}
 
-            {error && <div className="alert alert-error container">{error}</div>}
+            {error && <div className="alert alert-error container">{t('browse.loadingError')}</div>}
 
             {!loading && !error && (
                 <>
                     {filtered.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">📦</div>
-                            <p>{items.length === 0 ? 'No items available right now. Check back soon!' : 'Нічого не знайдено за вашим запитом.'}</p>
+                            <p>{items.length === 0 ? t('browse.noItems') : t('browse.notFound')}</p>
                         </div>
                     ) : (
                         <div className="items-grid">
@@ -129,15 +121,15 @@ const BrowsePage = () => {
                                     <div className="item-card-body">
                                         <div className="item-card-top">
                                             <span className={`badge ${conditionClass[item.condition]}`}>
-                                                {conditionLabel[item.condition]}
+                                                {t('condition.' + item.condition)}
                                             </span>
                                         </div>
                                         <h2 className="item-card-title">{item.title}</h2>
                                         <p className="item-card-location">📍 {item.city}</p>
                                         <div className="item-card-price">
-                                            <span className="price-main">₴{item.pricePerDay}<span className="price-unit">/day</span></span>
+                                            <span className="price-main">₴{item.pricePerDay}<span className="price-unit">{t('browse.priceUnitDay')}</span></span>
                                             {item.pricePerWeek && (
-                                                <span className="price-secondary">₴{item.pricePerWeek}/week</span>
+                                                <span className="price-secondary">₴{item.pricePerWeek}{t('browse.priceUnitWeek')}</span>
                                             )}
                                         </div>
                                         <div className="item-card-owner">
@@ -164,15 +156,15 @@ const BrowsePage = () => {
                                 onClick={() => setPage(p => Math.max(0, p - 1))}
                                 disabled={page === 0}
                             >
-                                ← Prev
+                                {t('browse.prev')}
                             </button>
-                            <span className="pagination-info">Page {page + 1} of {totalPages}</span>
+                            <span className="pagination-info">{t('browse.pageInfo', { page: page + 1, total: totalPages })}</span>
                             <button
                                 className="btn btn-outline btn-sm"
                                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                                 disabled={page >= totalPages - 1}
                             >
-                                Next →
+                                {t('browse.next')}
                             </button>
                         </div>
                     )}

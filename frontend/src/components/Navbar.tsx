@@ -1,9 +1,11 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
     const { user, isAdmin, logout } = useAuth();
+    const { language, setLanguage, t } = useLanguage();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -20,35 +22,50 @@ const Navbar = () => {
 
             <div className="navbar-links">
                 <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                    Каталог
+                    {t('nav.catalog')}
                 </NavLink>
                 <NavLink to="/ai" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                    ✨ AI Помічник
+                    {t('nav.aiHelper')}
                 </NavLink>
                 {user && (
                     <>
                         <NavLink to="/chats" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                            Чати
+                            {t('nav.chats')}
                         </NavLink>
                         <NavLink to="/my-bookings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                            Мої бронювання
+                            {t('nav.myBookings')}
                         </NavLink>
                         <NavLink to="/items/create" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                            Додати оголошення
+                            {t('nav.addListing')}
                         </NavLink>
                         <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                            Профіль
+                            {t('nav.profile')}
                         </NavLink>
                     </>
                 )}
                 {isAdmin && (
                     <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        Адмін
+                        {t('nav.admin')}
                     </NavLink>
                 )}
             </div>
 
             <div className="navbar-actions">
+                <div className="lang-switcher">
+                    <button 
+                        className={`lang-btn ${language === 'ua' ? 'active' : ''}`} 
+                        onClick={() => setLanguage('ua')}
+                    >
+                        UA
+                    </button>
+                    <span className="lang-separator">|</span>
+                    <button 
+                        className={`lang-btn ${language === 'en' ? 'active' : ''}`} 
+                        onClick={() => setLanguage('en')}
+                    >
+                        EN
+                    </button>
+                </div>
                 <ThemeToggle />
                 {user ? (
                     <div className="navbar-user">
@@ -58,13 +75,13 @@ const Navbar = () => {
                                 : user.email}
                         </span>
                         <button className="btn btn-outline btn-sm" onClick={handleLogout}>
-                            Вийти
+                            {t('nav.logout')}
                         </button>
                     </div>
                 ) : (
                     <div className="navbar-auth">
-                        <Link to="/login" className="btn btn-outline btn-sm">Увійти</Link>
-                        <Link to="/register" className="btn btn-primary btn-sm">Реєстрація</Link>
+                        <Link to="/login" className="btn btn-outline btn-sm">{t('nav.login')}</Link>
+                        <Link to="/register" className="btn btn-primary btn-sm">{t('nav.register')}</Link>
                     </div>
                 )}
             </div>

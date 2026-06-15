@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { UnavailableDateRange } from '../api/bookings';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Props {
     unavailableDates: UnavailableDateRange[];
@@ -9,11 +10,21 @@ interface Props {
 }
 
 const toStr = (d: Date): string => d.toISOString().split('T')[0];
-const DAY_NAMES = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
 
-const pluralDays = (n: number) => n === 1 ? 'день' : n < 5 ? 'дні' : 'днів';
+const DAY_NAMES: Record<'ua' | 'en', string[]> = {
+    ua: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+    en: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+};
+
+const pluralDays = (n: number, lang: 'ua' | 'en') => {
+    if (lang === 'en') {
+        return n === 1 ? 'day' : 'days';
+    }
+    return n === 1 ? 'день' : n < 5 ? 'дні' : 'днів';
+};
 
 const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, depositAmount }: Props) => {
+    const { language, t } = useLanguage();
     const today = toStr(new Date());
     const [viewDate, setViewDate] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
     const [step, setStep] = useState<'start' | 'end'>('start');
@@ -73,11 +84,13 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
     }
     while (cells.length % 7 !== 0) cells.push(null);
 
-    const monthLabel = viewDate.toLocaleString('uk-UA', { month: 'long', year: 'numeric' });
+    const monthLabel = viewDate.toLocaleString(language === 'ua' ? 'uk-UA' : 'en-US', { month: 'long', year: 'numeric' });
     const activeEnd = end ?? previewEnd;
     const dayCount = start && activeEnd
         ? Math.ceil((new Date(activeEnd).getTime() - new Date(start).getTime()) / 86400000)
         : 0;
+
+    const dayNames = DAY_NAMES[language] || DAY_NAMES.ua;
 
     return (
         <div className="cal">
@@ -88,7 +101,7 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
             </div>
 
             <div className="cal-grid">
-                {DAY_NAMES.map(d => <div key={d} className="cal-weekday">{d}</div>)}
+                {dayNames.map(d => <div key={d} className="cal-weekday">{d}</div>)}
                 {cells.map((date, i) => {
                     if (!date) return <div key={`e${i}`} className="cal-day cal-day-empty" />;
 
@@ -122,22 +135,22 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
             </div>
 
             <div className="cal-legend">
-                <span className="cal-legend-item"><span className="cal-swatch cal-swatch-avail" />Доступно</span>
-                <span className="cal-legend-item"><span className="cal-swatch cal-swatch-unavail" />Зайнято</span>
-                <span className="cal-legend-item"><span className="cal-swatch cal-swatch-sel" />Вибрано</span>
+                <span className="cal-legend-item"><span className="cal-swatch cal-swatch-avail" />{t('cal.available')}</span>
+                <span className="cal-legend-item"><span className="cal-swatch cal-swatch-unavail" />{t('cal.booked')}</span>
+                <span className="cal-legend-item"><span className="cal-swatch cal-swatch-sel" />{t('cal.selected')}</span>
             </div>
 
             <p className="cal-hint">
                 {!start
-                    ? 'Оберіть дату початку оренди'
+                    ? t('cal.selectStart')
                     : !end
-                    ? `Початок: ${start} — оберіть дату закінчення`
+                    ? t('cal.selectEnd', { start })
                     : `${start} → ${end}`}
             </p>
 
             {start && end && dayCount > 0 && (
                 <div className="booking-price-preview">
-                    {dayCount} {pluralDays(dayCount)} · ₴{dayCount * pricePerDay} + депозит ₴{depositAmount}
+                    {dayCount} {pluralDays(dayCount, language)} · ₴{dayCount * pricePerDay} + {t('cal.depositLabel')} ₴{depositAmount}
                 </div>
             )}
         </div>
