@@ -3,6 +3,7 @@ package com.wteam.backend.booking;
 import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.booking.dto.BookingStatusUpdateRequest;
+import com.wteam.backend.booking.dto.UnavailableDateRange;
 import com.wteam.backend.security.SecurityUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
@@ -38,6 +40,11 @@ public class BookingController {
         );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bookingService.createBooking(bookingRequest));
+    }
+
+    @GetMapping("/items/{itemId}/unavailable-dates")
+    public ResponseEntity<List<UnavailableDateRange>> getUnavailableDates(@PathVariable Long itemId) {
+        return ResponseEntity.ok(bookingService.getUnavailableDates(itemId));
     }
 
     @GetMapping("/my")
