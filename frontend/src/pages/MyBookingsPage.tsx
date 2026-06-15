@@ -38,10 +38,10 @@ const statusClasses: Record<BookingStatus, string> = {
 const MyBookingsPage = () => {
     const { language, t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'renter' | 'owner'>('renter');
+    const [activeSubTab, setActiveSubTab] = useState<'all' | 'pending' | 'active' | 'upcoming' | 'completed' | 'cancelled'>('all');
     const [bookings, setBookings] = useState<IBookingWithItem[]>([]);
     const [page, setPage] = useState(0);
     const [reviewingBookingId, setReviewingBookingId] = useState<number | null>(null);
-    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -52,8 +52,8 @@ const MyBookingsPage = () => {
     const fetchBookings = useCallback(() => {
         setLoading(true);
         const fetchMethod = activeTab === 'renter' 
-            ? bookingsApi.getMyBookings(page, 6)
-            : bookingsApi.getOwnerBookings(page, 6);
+            ? bookingsApi.getMyBookings(0, 100)
+            : bookingsApi.getOwnerBookings(0, 100);
 
         fetchMethod
             .then(async (data: IPageResponse<BookingResponse>) => {
@@ -68,11 +68,10 @@ const MyBookingsPage = () => {
                     })
                 );
                 setBookings(bookingsWithItems);
-                setTotalPages(data.totalPages);
             })
             .catch(() => setError(t('bookings.loadError')))
             .finally(() => setLoading(false));
-    }, [activeTab, page, t]);
+    }, [activeTab, t]);
 
     useEffect(() => {
         fetchBookings();
@@ -80,8 +79,14 @@ const MyBookingsPage = () => {
 
     const handleTabChange = (tab: 'renter' | 'owner') => {
         setActiveTab(tab);
+        setActiveSubTab('all');
         setPage(0);
         setBookings([]);
+    };
+
+    const handleSubTabChange = (subTab: 'all' | 'pending' | 'active' | 'upcoming' | 'completed' | 'cancelled') => {
+        setActiveSubTab(subTab);
+        setPage(0);
     };
 
     const handleApprove = async (bookingId: number) => {
@@ -152,32 +157,109 @@ const MyBookingsPage = () => {
         return `${y}-${m}-${day}`;
     })();
 
+    const filterBooking = (item: IBookingWithItem) => {
+        const status = item.booking.status;
+        const startDate = item.booking.startDate;
+
+        if (activeSubTab === 'pending') {
+            return status === 'PENDING';
+        }
+        if (activeSubTab === 'active') {
+            return ['APPROVED', 'PAID', 'IN_PROGRESS', 'DISPUTE'].includes(status) && startDate <= todayStr;
+        }
+        if (activeSubTab === 'upcoming') {
+            return ['APPROVED', 'PAID', 'IN_PROGRESS'].includes(status) && startDate > todayStr;
+        }
+        if (activeSubTab === 'completed') {
+            return status === 'COMPLETED';
+        }
+        if (activeSubTab === 'cancelled') {
+            return ['CANCELLED', 'REJECTED'].includes(status);
+        }
+        return true;
+    };
+
+    const filteredBookings = bookings.filter(filterBooking);
+
+    // Sort upcoming bookings by start date ascending (closest start date first)
+    if (activeSubTab === 'upcoming') {
+        filteredBookings.sort((a, b) => a.booking.startDate.localeCompare(b.booking.startDate));
+    }
+
+    const countPending = bookings.filter(b => b.booking.status === 'PENDING').length;
+    const countActive = bookings.filter(b => ['APPROVED', 'PAID', 'IN_PROGRESS', 'DISPUTE'].includes(b.booking.status) && b.booking.startDate <= todayStr).length;
+    const countUpcoming = bookings.filter(b => ['APPROVED', 'PAID', 'IN_PROGRESS'].includes(b.booking.status) && b.booking.startDate > todayStr).length;
+    const countCompleted = bookings.filter(b => b.booking.status === 'COMPLETED').length;
+    const countCancelled = bookings.filter(b => ['CANCELLED', 'REJECTED'].includes(b.booking.status)).length;
+    const countAll = bookings.length;
+
+    const itemsPerPage = 6;
+    const paginatedBookings = filteredBookings.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
+    const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+
     return (
         <div className="page">
             <div className="page-header">
                 <h1 className="page-title">{t('bookings.title')}</h1>
                 <p className="page-subtitle">{t('bookings.subtitle')}</p>
                 
-                <div className="flex bg-slate-800 p-1 rounded-xl w-fit mt-6">
+                <div className="tab-container">
                     <button
                         onClick={() => handleTabChange('renter')}
-                        className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                            activeTab === 'renter'
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                        }`}
+                        className={`tab-btn ${activeTab === 'renter' ? 'active' : ''}`}
                     >
                         {t('bookings.tabRentsLabel')}
                     </button>
                     <button
                         onClick={() => handleTabChange('owner')}
-                        className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                            activeTab === 'owner'
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                        }`}
+                        className={`tab-btn ${activeTab === 'owner' ? 'active' : ''}`}
                     >
                         {t('bookings.tabOffersLabel')}
+                    </button>
+                </div>
+
+                <div className="subtab-container">
+                    <button
+                        onClick={() => handleSubTabChange('all')}
+                        className={`subtab-btn ${activeSubTab === 'all' ? 'active' : ''}`}
+                    >
+                        {t('bookings.subTabAll')}
+                        <span className="subtab-badge">{countAll}</span>
+                    </button>
+                    <button
+                        onClick={() => handleSubTabChange('pending')}
+                        className={`subtab-btn ${activeSubTab === 'pending' ? 'active' : ''}`}
+                    >
+                        {t('bookings.subTabPending')}
+                        <span className="subtab-badge">{countPending}</span>
+                    </button>
+                    <button
+                        onClick={() => handleSubTabChange('active')}
+                        className={`subtab-btn ${activeSubTab === 'active' ? 'active' : ''}`}
+                    >
+                        {t('bookings.subTabActive')}
+                        <span className="subtab-badge">{countActive}</span>
+                    </button>
+                    <button
+                        onClick={() => handleSubTabChange('upcoming')}
+                        className={`subtab-btn ${activeSubTab === 'upcoming' ? 'active' : ''}`}
+                    >
+                        {t('bookings.subTabUpcoming')}
+                        <span className="subtab-badge">{countUpcoming}</span>
+                    </button>
+                    <button
+                        onClick={() => handleSubTabChange('completed')}
+                        className={`subtab-btn ${activeSubTab === 'completed' ? 'active' : ''}`}
+                    >
+                        {t('bookings.subTabCompleted')}
+                        <span className="subtab-badge">{countCompleted}</span>
+                    </button>
+                    <button
+                        onClick={() => handleSubTabChange('cancelled')}
+                        className={`subtab-btn ${activeSubTab === 'cancelled' ? 'active' : ''}`}
+                    >
+                        {t('bookings.subTabCancelled')}
+                        <span className="subtab-badge">{countCancelled}</span>
                     </button>
                 </div>
             </div>
@@ -193,15 +275,26 @@ const MyBookingsPage = () => {
 
             {!loading && !error && (
                 <>
-                    {bookings.length === 0 ? (
+                    {filteredBookings.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">📅</div>
                             <p>
-                                {activeTab === 'renter' 
-                                    ? t('bookings.noRentsPrompt')
-                                    : t('bookings.noOffersPrompt')}
+                                {bookings.length === 0 
+                                    ? (activeTab === 'renter' ? t('bookings.noRentsPrompt') : t('bookings.noOffersPrompt'))
+                                    : activeTab === 'renter'
+                                    ? (activeSubTab === 'pending' ? t('bookings.noPendingRentsPrompt') :
+                                       activeSubTab === 'active' ? t('bookings.noActiveRentsPrompt') :
+                                       activeSubTab === 'upcoming' ? t('bookings.noUpcomingRentsPrompt') :
+                                       activeSubTab === 'completed' ? t('bookings.noCompletedRentsPrompt') :
+                                       t('bookings.noCancelledRentsPrompt'))
+                                    : (activeSubTab === 'pending' ? t('bookings.noPendingOffersPrompt') :
+                                       activeSubTab === 'active' ? t('bookings.noActiveOffersPrompt') :
+                                       activeSubTab === 'upcoming' ? t('bookings.noUpcomingOffersPrompt') :
+                                       activeSubTab === 'completed' ? t('bookings.noCompletedOffersPrompt') :
+                                       t('bookings.noCancelledOffersPrompt'))
+                                }
                             </p>
-                            {activeTab === 'renter' && (
+                            {activeTab === 'renter' && bookings.length === 0 && (
                                 <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>
                                     {t('bookings.goToCatalog')}
                                 </Link>
@@ -209,7 +302,7 @@ const MyBookingsPage = () => {
                         </div>
                     ) : (
                         <div className="items-grid">
-                            {bookings.map(({ booking, item }) => (
+                            {paginatedBookings.map(({ booking, item }) => (
                                 <div key={booking.id} className="item-card">
                                     <div className="item-card-img-placeholder">
                                         <span className="item-card-icon">📦</span>
@@ -343,73 +436,73 @@ const MyBookingsPage = () => {
             )}
 
             {reviewingBookingId !== null && (
-                                                <ReviewModal
-                                                    isOpen={true}
-                                                    onClose={() => setReviewingBookingId(null)}
-                                                    bookingId={reviewingBookingId}
-                                                    type={activeTab === 'renter' ? 'item' : 'user'}
-                                                    onSuccess={() => {
-                                                        fetchBookings();
-                                                    }}
-                                                />
-                                            )}
+                <ReviewModal
+                    isOpen={true}
+                    onClose={() => setReviewingBookingId(null)}
+                    bookingId={reviewingBookingId}
+                    type={activeTab === 'renter' ? 'item' : 'user'}
+                    onSuccess={() => {
+                        fetchBookings();
+                    }}
+                />
+            )}
 
-                                            {cancellingBookingId !== null && createPortal(
-                                                <div
-                                                    onClick={(e) => { if (e.target === e.currentTarget) { setCancellingBookingId(null); setCancelReason(''); } }}
-                                                    className="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
-                                                >
-                                                    <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl max-w-lg w-full mx-4 relative text-slate-100">
-                                                        <button
-                                                            onClick={() => { setCancellingBookingId(null); setCancelReason(''); }}
-                                                            className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                                                            aria-label={t('review.close')}
-                                                        >
-                                                            <X className="w-6 h-6" />
-                                                        </button>
+            {cancellingBookingId !== null && createPortal(
+                <div
+                    onClick={(e) => { if (e.target === e.currentTarget) { setCancellingBookingId(null); setCancelReason(''); } }}
+                    className="modal-backdrop"
+                >
+                    <div className="modal-content">
+                        <button
+                            onClick={() => { setCancellingBookingId(null); setCancelReason(''); }}
+                            className="modal-close-btn"
+                            aria-label={t('review.close')}
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
 
-                                                        <h2 className="text-2xl font-bold text-white mb-6">
-                                                            {t('bookings.cancelTitle')}
-                                                        </h2>
+                        <h2 className="modal-title">
+                            {t('bookings.cancelTitle')}
+                        </h2>
 
-                                                        <form onSubmit={handleCancelSubmit}>
-                                                            <div className="mb-6">
-                                                                <label className="block text-sm font-medium text-slate-300 mb-3">
-                                                                    {t('bookings.cancelReasonLabel')}
-                                                                </label>
-                                                                <textarea
-                                                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none transition-all"
-                                                                    rows={4}
-                                                                    value={cancelReason}
-                                                                    onChange={(e) => setCancelReason(e.target.value)}
-                                                                    placeholder={t('bookings.cancelPlaceholder')}
-                                                                />
-                                                            </div>
+                        <form onSubmit={handleCancelSubmit}>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label className="modal-label">
+                                    {t('bookings.cancelReasonLabel')}
+                                </label>
+                                <textarea
+                                    className="modal-textarea"
+                                    rows={4}
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder={t('bookings.cancelPlaceholder')}
+                                />
+                            </div>
 
-                                                            <div className="flex gap-4 mt-6">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => { setCancellingBookingId(null); setCancelReason(''); }}
-                                                                    disabled={cancelling}
-                                                                    className="flex-1 border border-slate-600 text-slate-300 hover:bg-slate-700 rounded-xl py-3 font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    {t('bookings.cancelBack')}
-                                                                </button>
-                                                                <button
-                                                                    type="submit"
-                                                                    disabled={cancelling}
-                                                                    className="flex-1 bg-red-600 text-white hover:bg-red-500 rounded-xl py-3 font-semibold text-sm shadow-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    {cancelling ? t('review.submitting') : t('bookings.cancelConfirm')}
-                                                                </button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>,
-                                                document.body
-                                            )}
-                                        </div>
-                                    );
-                                };
+                            <div className="modal-actions">
+                                <button
+                                    type="button"
+                                    onClick={() => { setCancellingBookingId(null); setCancelReason(''); }}
+                                    disabled={cancelling}
+                                    className="btn btn-outline flex-1"
+                                >
+                                    {t('bookings.cancelBack')}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={cancelling}
+                                    className="btn btn-danger flex-1"
+                                >
+                                    {cancelling ? t('review.submitting') : t('bookings.cancelConfirm')}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>,
+                document.body
+            )}
+        </div>
+    );
+};
 
                                 export default MyBookingsPage;
