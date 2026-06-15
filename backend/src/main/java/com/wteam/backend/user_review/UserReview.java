@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Сутність, що представляє відгук користувача про іншого користувача.
@@ -19,7 +21,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Entity
 @Table(name = "user_reviews", uniqueConstraints = {
-    @UniqueConstraint(name = "uq_user_review_per_booking", columnNames = {"booking_id", "reviewer_id"})
+        @UniqueConstraint(name = "uq_user_review_per_booking", columnNames = {"booking_id", "reviewer_id", "target_user_id"})
 })
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
@@ -34,12 +36,9 @@ public class UserReview extends BaseEntityFull {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    /**
-     * Користувач, якому залишають відгук.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private User user;
+    @JoinColumn(name = "target_user_id", referencedColumnName = "id", nullable = false)
+    private User targetUser;
 
     /**
      * Користувач, який залишає відгук.
@@ -56,14 +55,30 @@ public class UserReview extends BaseEntityFull {
     private Booking booking;
 
     /**
-     * Рейтинг довіри (1-5).
+     * Роль цільового користувача.
      */
-    @Column(name = "trust_rating", nullable = false)
-    private short trustRating;
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "target_role", nullable = false)
+    private com.wteam.backend.common.enums.TargetRole targetRole;
+
+    /**
+     * Рейтинг (1-5).
+     */
+    @Column(name = "rating", nullable = false)
+    private short rating;
 
     /**
      * Текстовий коментар до відгуку.
      */
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
+
+    /**
+     * Статус відгуку (PENDING / PUBLISHED).
+     */
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "status", nullable = false)
+    private com.wteam.backend.common.enums.ReviewStatus status = com.wteam.backend.common.enums.ReviewStatus.PENDING;
 }

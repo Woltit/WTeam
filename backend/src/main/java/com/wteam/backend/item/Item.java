@@ -136,4 +136,18 @@ public class Item extends BaseEntityFull {
     @Column(name = "is_verified", nullable = false)
     @Builder.Default
     private boolean isVerified = false;
+
+    /**
+     * Рейтинг товару (на основі відгуків).
+     */
+    @Column(name = "rating", precision = 3, scale = 2)
+    @Builder.Default
+    private BigDecimal rating = BigDecimal.ZERO;
+
+    /**
+     * Загальна кількість відгуків на товар.
+     */
+    @Column(name = "total_reviews")
+    @Builder.Default
+    private Integer totalReviews = 0;
 }

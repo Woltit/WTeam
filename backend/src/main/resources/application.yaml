@@ -49,6 +49,9 @@ app:
 
 openai:
   api-key: ${OPENAI_API_KEY}
-
 springdoc:
   packagesToScan: com.wteam.backend
+
+rentgo:
+  reviews:
+    blind-period-minutes: 2 # Для тестування ставимо 2 хвилини! В проді буде 4320 (3 дні)

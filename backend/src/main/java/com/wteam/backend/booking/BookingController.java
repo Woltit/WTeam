@@ -46,6 +46,14 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.findAllByRenterId(currentUser.id(), pageable));
     }
 
+    @GetMapping("/owner")
+    public ResponseEntity<Page<BookingResponse>> getOwnerBookings(
+            @AuthenticationPrincipal SecurityUser currentUser,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(bookingService.findAllByOwnerId(currentUser.getId(), pageable));
+    }
+
     @PatchMapping("/{bookingId}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookingResponse> updateBookingStatus(

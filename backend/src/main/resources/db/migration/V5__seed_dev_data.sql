@@ -49,14 +49,14 @@ SELECT v.id, admin.id, v.category_id, v.title, v.description, v.condition,
 FROM users admin
          CROSS JOIN (VALUES
                          (1, 1, 'Намет туристичний 2-місний',
-                          'Легкий намет для кемпінгу, витримує дощ', 'GOOD'::item_condition,
-                          150.00, 500.00, 'AVAILABLE'::renting_status, 'Київ', 'вул. Хрещатик 1'),
+                          'Легкий намет для кемпінгу, витримує дощ', 'GOOD'::itemcondition,
+                          150.00, 500.00, 'AVAILABLE'::rentingstatus, 'Київ', 'вул. Хрещатик 1'),
                          (2, 2, 'Дриль Bosch Professional',
-                          'Потужний дриль з набором свердел', 'IDEAL'::item_condition,
-                          80.00, 300.00, 'AVAILABLE'::renting_status, 'Київ', 'вул. Хрещатик 1'),
+                          'Потужний дриль з набором свердел', 'IDEAL'::itemcondition,
+                          80.00, 300.00, 'AVAILABLE'::rentingstatus, 'Київ', 'вул. Хрещатик 1'),
                          (3, 3, 'Камера Sony A6000',
-                          'Дзеркальна камера, обєктив 18-55mm в комплекті', 'GOOD'::item_condition,
-                          200.00, 1000.00, 'AVAILABLE'::renting_status, 'Львів', 'пл. Ринок 1')
+                          'Дзеркальна камера, обєктив 18-55mm в комплекті', 'GOOD'::itemcondition,
+                          200.00, 1000.00, 'AVAILABLE'::rentingstatus, 'Львів', 'пл. Ринок 1')
 ) AS v(id, category_id, title, description, condition, price_per_day, deposit_amount, status, city, address)
 WHERE admin.email = 'admin@gmail.com'
 ON CONFLICT (id) DO NOTHING;
