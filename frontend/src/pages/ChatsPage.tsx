@@ -2,26 +2,28 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import chatApi from '../api/chat';
 import type { ChatRoomResponse } from '../types/chat';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ChatsPage = () => {
     const [rooms, setRooms] = useState<ChatRoomResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const { t } = useLanguage();
 
     useEffect(() => {
         chatApi.getMyRooms()
             .then(setRooms)
-            .catch(() => setError('Не вдалося завантажити чати.'))
+            .catch(() => setError(t('chats.loadError')))
             .finally(() => setLoading(false));
-    }, []);
+    }, [t]);
 
     if (loading) return <div className="page-loader"><div className="spinner" /></div>;
 
     return (
         <div className="page">
             <div className="page-header">
-                <h1 className="page-title">Мої чати</h1>
-                <p className="page-subtitle">Переписка з орендодавцями та орендарями</p>
+                <h1 className="page-title">{t('chats.title')}</h1>
+                <p className="page-subtitle">{t('chats.subtitle')}</p>
             </div>
 
             {error && <div className="alert alert-error">{error}</div>}
@@ -29,10 +31,10 @@ const ChatsPage = () => {
             {rooms.length === 0 && !error ? (
                 <div className="empty-state">
                     <div className="empty-icon">💬</div>
-                    <p>У вас ще немає активних чатів.</p>
-                    <p style={{ fontSize: '0.875rem' }}>Зробіть бронювання, щоб почати спілкування з власником.</p>
+                    <p>{t('chats.noChats')}</p>
+                    <p style={{ fontSize: '0.875rem' }}>{t('chats.startPrompt')}</p>
                     <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-                        Переглянути оголошення
+                        {t('chats.browseListings')}
                     </Link>
                 </div>
             ) : (

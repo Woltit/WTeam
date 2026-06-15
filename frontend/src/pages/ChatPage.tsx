@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import chatApi from '../api/chat';
 import { useAuth } from '../contexts/AuthContext';
 import type { ChatRoomResponse, MessageResponse } from '../types/chat';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ChatPage = () => {
     const { roomId } = useParams<{ roomId: string }>();
@@ -16,6 +17,7 @@ const ChatPage = () => {
     const [connected, setConnected] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
     const stompRef = useRef<import('@stomp/stompjs').Client | null>(null);
+    const { language, t } = useLanguage();
 
     const id = Number(roomId);
 
@@ -30,9 +32,9 @@ const ChatPage = () => {
                 setMessages(msgs);
                 chatApi.markAsRead(id).catch(() => {});
             })
-            .catch(() => setError('Не вдалося завантажити чат.'))
+            .catch(() => setError(t('chats.loadChatError')))
             .finally(() => setLoading(false));
-    }, [id]);
+    }, [id, t]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -96,7 +98,7 @@ const ChatPage = () => {
                 setText('');
             }
         } catch {
-            setError('Не вдалося надіслати повідомлення.');
+            setError(t('chats.sendError'));
         } finally {
             setSending(false);
         }
@@ -108,19 +110,19 @@ const ChatPage = () => {
     return (
         <div className="page chat-page">
             <div className="chat-header">
-                <Link to="/chats" className="btn btn-outline btn-sm">← Назад</Link>
+                <Link to="/chats" className="btn btn-outline btn-sm">{t('browse.prev')}</Link>
                 <div className="chat-header-info">
-                    <div className="chat-header-name">{room?.otherUserName ?? 'Чат'}</div>
+                    <div className="chat-header-name">{room?.otherUserName ?? t('chats.defaultName')}</div>
                     <div className="chat-header-sub">{room?.itemTitle}</div>
                 </div>
-                <span className={`chat-status-dot ${connected ? 'connected' : ''}`} title={connected ? 'Підключено' : 'Офлайн'} />
+                <span className={`chat-status-dot ${connected ? 'connected' : ''}`} title={connected ? t('chats.connected') : t('chats.offline')} />
             </div>
 
             {error && <div className="alert alert-error">{error}</div>}
 
             <div className="chat-messages">
                 {messages.length === 0 && (
-                    <div className="chat-empty">Поки немає повідомлень. Напишіть першим!</div>
+                    <div className="chat-empty">{t('chats.emptyChat')}</div>
                 )}
                 {messages.map(msg => {
                     const isMine = msg.senderId === user?.id;
@@ -131,7 +133,7 @@ const ChatPage = () => {
                                 {msg.messageText}
                             </div>
                             <div className="chat-time">
-                                {new Date(msg.createdAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(msg.createdAt).toLocaleTimeString(language === 'ua' ? 'uk-UA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                             </div>
                         </div>
                     );
@@ -142,14 +144,14 @@ const ChatPage = () => {
             <form className="chat-input-row" onSubmit={handleSend}>
                 <input
                     className="form-input chat-input"
-                    placeholder="Написати повідомлення..."
+                    placeholder={t('chats.placeholder')}
                     value={text}
                     onChange={e => setText(e.target.value)}
                     disabled={sending}
                     maxLength={2000}
                 />
                 <button className="btn btn-primary" type="submit" disabled={sending || !text.trim()}>
-                    {sending ? <span className="spinner-sm" /> : 'Надіслати'}
+                    {sending ? <span className="spinner-sm" /> : t('chats.send')}
                 </button>
             </form>
         </div>

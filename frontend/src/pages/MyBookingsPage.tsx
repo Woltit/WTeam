@@ -5,6 +5,7 @@ import bookingsApi from '../api/bookings';
 import itemsApi from '../api/items';
 import type { BookingResponse, BookingStatus } from '../api/bookings';
 import type { ItemResponse } from '../types/item';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface IBookingWithItem {
     booking: BookingResponse;
@@ -19,16 +20,7 @@ interface IPageResponse<T> {
     size: number;
 }
 
-const statusLabels: Record<BookingStatus, string> = {
-    PENDING: 'Очікує підтвердження',
-    APPROVED: 'Підтверджено',
-    REJECTED: 'Відхилено',
-    PAID: 'Оплачено',
-    IN_PROGRESS: 'В оренді',
-    COMPLETED: 'Завершено',
-    CANCELLED: 'Скасовано',
-    DISPUTE: 'Суперечка',
-};
+// statusLabels mapping has been moved to LanguageContext.tsx
 
 const statusClasses: Record<BookingStatus, string> = {
     PENDING: 'badge-warning',
@@ -42,6 +34,7 @@ const statusClasses: Record<BookingStatus, string> = {
 };
 
 const MyBookingsPage = () => {
+    const { language, t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'renter' | 'owner'>('renter');
     const [bookings, setBookings] = useState<IBookingWithItem[]>([]);
     const [page, setPage] = useState(0);
@@ -71,7 +64,7 @@ const MyBookingsPage = () => {
                 setBookings(bookingsWithItems);
                 setTotalPages(data.totalPages);
             })
-            .catch(() => setError('Не вдалося завантажити бронювання.'))
+            .catch(() => setError(t('bookings.loadError')))
             .finally(() => setLoading(false));
     };
 
@@ -87,7 +80,7 @@ const MyBookingsPage = () => {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('uk-UA', {
+        return date.toLocaleDateString(language === 'ua' ? 'uk-UA' : 'en-US', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
@@ -97,8 +90,8 @@ const MyBookingsPage = () => {
     return (
         <div className="page">
             <div className="page-header">
-                <h1 className="page-title">Мої бронювання</h1>
-                <p className="page-subtitle">Перегляд статусу та управління вашими замовленнями</p>
+                <h1 className="page-title">{t('bookings.title')}</h1>
+                <p className="page-subtitle">{t('bookings.subtitle')}</p>
                 
                 <div className="flex bg-slate-800 p-1 rounded-xl w-fit mt-6">
                     <button
@@ -109,7 +102,7 @@ const MyBookingsPage = () => {
                                 : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                         }`}
                     >
-                        Мої оренди
+                        {t('bookings.tabRentsLabel')}
                     </button>
                     <button
                         onClick={() => handleTabChange('owner')}
@@ -119,7 +112,7 @@ const MyBookingsPage = () => {
                                 : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                         }`}
                     >
-                        Здано в оренду
+                        {t('bookings.tabOffersLabel')}
                     </button>
                 </div>
             </div>
@@ -127,7 +120,7 @@ const MyBookingsPage = () => {
             {loading && (
                 <div className="page-loader">
                     <div className="spinner" />
-                    <span className="loader-text">Завантаження бронювань...</span>
+                    <span className="loader-text">{t('bookings.loading')}</span>
                 </div>
             )}
 
@@ -140,12 +133,12 @@ const MyBookingsPage = () => {
                             <div className="empty-icon">📅</div>
                             <p>
                                 {activeTab === 'renter' 
-                                    ? 'У вас ще немає жодних бронювань. Перейдіть до каталогу, щоб орендувати щось.' 
-                                    : 'У вас ще немає замовлень на ваші товари.'}
+                                    ? t('bookings.noRentsPrompt')
+                                    : t('bookings.noOffersPrompt')}
                             </p>
                             {activeTab === 'renter' && (
                                 <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-                                    Перейти до каталогу
+                                    {t('bookings.goToCatalog')}
                                 </Link>
                             )}
                         </div>
@@ -159,7 +152,7 @@ const MyBookingsPage = () => {
                                     <div className="item-card-body">
                                         <div className="item-card-top" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>
                                             <span className={`badge ${statusClasses[booking.status] || 'badge-neutral'}`}>
-                                                {statusLabels[booking.status] || booking.status}
+                                                {t('bookingStatus.' + booking.status)}
                                             </span>
                                             <span style={{ fontSize: '0.8rem', color: 'var(--text)' }}>
                                                 #{booking.id}
@@ -167,7 +160,7 @@ const MyBookingsPage = () => {
                                         </div>
 
                                         <h2 className="item-card-title" style={{ marginTop: '0.5rem', marginBottom: '0.25rem' }}>
-                                            {item ? item.title : `Товар #${booking.itemId}`}
+                                            {item ? item.title : t('bookings.itemPlaceholder', { id: booking.itemId })}
                                         </h2>
 
                                         {item && (
@@ -175,30 +168,30 @@ const MyBookingsPage = () => {
                                         )}
 
                                         <div style={{ fontSize: '0.85rem', color: 'var(--text)', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
-                                            <div><strong>Період:</strong> {formatDate(booking.startDate)} — {formatDate(booking.endDate)}</div>
+                                            <div><strong>{t('bookings.period')}</strong> {formatDate(booking.startDate)} — {formatDate(booking.endDate)}</div>
                                             {booking.depositTotal > 0 && (
-                                                <div style={{ marginTop: '0.25rem' }}><strong>Застава:</strong> ₴{booking.depositTotal}</div>
+                                                <div style={{ marginTop: '0.25rem' }}><strong>{t('bookings.depositLabel')}</strong> ₴{booking.depositTotal}</div>
                                             )}
                                         </div>
 
                                         <div className="item-card-price" style={{ borderTop: '1px solid var(--border)', paddingTop: '0.75rem', marginTop: 'auto' }}>
                                             <span className="price-main">
                                                 ₴{booking.totalPrice}
-                                                <span className="price-unit" style={{ fontSize: '0.75rem', color: 'var(--text)', fontWeight: 'normal' }}> загалом</span>
+                                                <span className="price-unit" style={{ fontSize: '0.75rem', color: 'var(--text)', fontWeight: 'normal' }}>{t('bookings.totalUnit')}</span>
                                             </span>
                                         </div>
 
                                         {item && (
                                             <div className="flex flex-row items-center gap-2 mt-3 w-full">
                                                 <Link to={`/items/${item.id}`} className="btn btn-primary btn-sm flex-1 text-center justify-center">
-                                                    Деталі товару
+                                                    {t('bookings.itemDetails')}
                                                 </Link>
                                                 {booking.status === 'COMPLETED' && (
                                                     <button 
                                                         className="btn btn-primary btn-sm flex-1 justify-center" 
                                                         onClick={() => setReviewingBookingId(booking.id)}
                                                     >
-                                                        Залишити відгук
+                                                        {t('bookings.actionReview')}
                                                     </button>
                                                 )}
                                             </div>
@@ -216,15 +209,15 @@ const MyBookingsPage = () => {
                                 onClick={() => setPage(p => Math.max(0, p - 1))}
                                 disabled={page === 0}
                             >
-                                ← Назад
+                                {t('browse.prev')}
                             </button>
-                            <span className="pagination-info">Сторінка {page + 1} з {totalPages}</span>
+                            <span className="pagination-info">{t('browse.pageInfo', { page: page + 1, total: totalPages })}</span>
                             <button
                                 className="btn btn-outline btn-sm"
                                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                                 disabled={page >= totalPages - 1}
                             >
-                                Вперед →
+                                {t('browse.next')}
                             </button>
                         </div>
                     )}

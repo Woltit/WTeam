@@ -4,11 +4,9 @@ import itemsApi from '../api/items';
 import categoriesApi from '../api/categories';
 import type { ItemRequest, ItemCondition } from '../types/item';
 import type { CategoryResponse } from '../types/category';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CONDITIONS: ItemCondition[] = ['IDEAL', 'GOOD', 'NORM', 'BAD', 'NEEDS_REPAIRING'];
-const CONDITION_LABELS: Record<ItemCondition, string> = {
-    IDEAL: 'Ideal', GOOD: 'Good', NORM: 'Normal', BAD: 'Fair', NEEDS_REPAIRING: 'Needs Repair',
-};
 
 interface ItemFormProps {
     initial?: Partial<ItemRequest>;
@@ -17,6 +15,7 @@ interface ItemFormProps {
 }
 
 export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps) => {
+    const { t } = useLanguage();
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
     const [form, setForm] = useState<Omit<ItemRequest, 'tags'> & { tags: string }>({
         categoryId: initial.categoryId ?? 0,
@@ -56,7 +55,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
             });
         } catch (err: unknown) {
             const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-            setError(msg ?? 'Something went wrong.');
+            setError(msg ?? t('itemForm.somethingWentWrong'));
         } finally {
             setLoading(false);
         }
@@ -68,15 +67,15 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
 
             <div className="form-row">
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-title">Title *</label>
+                    <label className="form-label" htmlFor="if-title">{t('itemForm.title')} *</label>
                     <input id="if-title" className="form-input" value={form.title}
-                        onChange={e => set('title', e.target.value)} required placeholder="e.g. Electric Drill" />
+                        onChange={e => set('title', e.target.value)} required placeholder={t('itemForm.titlePlaceholder')} />
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-category">Category *</label>
+                    <label className="form-label" htmlFor="if-category">{t('itemForm.category')} *</label>
                     <select id="if-category" className="form-input" value={form.categoryId}
                         onChange={e => set('categoryId', Number(e.target.value))} required>
-                        <option value={0} disabled>Select category</option>
+                        <option value={0} disabled>{t('itemForm.selectCategory')}</option>
                         {flatCategories(categories).map(c => (
                             <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
@@ -85,42 +84,42 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
             </div>
 
             <div className="form-group">
-                <label className="form-label" htmlFor="if-desc">Description *</label>
+                <label className="form-label" htmlFor="if-desc">{t('itemForm.description')} *</label>
                 <textarea id="if-desc" className="form-input form-textarea" rows={4}
                     value={form.description ?? ''} onChange={e => set('description', e.target.value)} required
-                    placeholder="Describe the item, its features, and any usage notes..." />
+                    placeholder={t('itemForm.descPlaceholder')} />
             </div>
 
             <div className="form-row">
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-condition">Condition *</label>
+                    <label className="form-label" htmlFor="if-condition">{t('itemForm.condition')} *</label>
                     <select id="if-condition" className="form-input" value={form.condition}
                         onChange={e => set('condition', e.target.value as ItemCondition)} required>
                         {CONDITIONS.map(c => (
-                            <option key={c} value={c}>{CONDITION_LABELS[c]}</option>
+                            <option key={c} value={c}>{t('condition.' + c)}</option>
                         ))}
                     </select>
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-tags">Tags (comma-separated)</label>
+                    <label className="form-label" htmlFor="if-tags">{t('itemForm.tagsLabel')}</label>
                     <input id="if-tags" className="form-input" value={form.tags}
-                        onChange={e => set('tags', e.target.value)} placeholder="tool, drill, DIY" />
+                        onChange={e => set('tags', e.target.value)} placeholder={t('itemForm.tagsPlaceholder')} />
                 </div>
             </div>
 
             <div className="form-row">
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-ppd">Price per Day (₴) *</label>
+                    <label className="form-label" htmlFor="if-ppd">{t('itemForm.price')}</label>
                     <input id="if-ppd" type="number" min="0.01" step="0.01" className="form-input"
                         value={form.pricePerDay} onChange={e => set('pricePerDay', Number(e.target.value))} required />
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-ppw">Price per Week (₴)</label>
+                    <label className="form-label" htmlFor="if-ppw">{t('itemForm.priceWeek')}</label>
                     <input id="if-ppw" type="number" min="0.01" step="0.01" className="form-input"
                         value={form.pricePerWeek ?? ''} onChange={e => set('pricePerWeek', e.target.value ? Number(e.target.value) : null)} />
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-deposit">Deposit (₴) *</label>
+                    <label className="form-label" htmlFor="if-deposit">{t('itemForm.deposit')}</label>
                     <input id="if-deposit" type="number" min="0" step="0.01" className="form-input"
                         value={form.depositAmount} onChange={e => set('depositAmount', Number(e.target.value))} required />
                 </div>
@@ -128,25 +127,25 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
 
             <div className="form-row">
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-city">City *</label>
+                    <label className="form-label" htmlFor="if-city">{t('itemForm.city')} *</label>
                     <input id="if-city" className="form-input" value={form.city}
-                        onChange={e => set('city', e.target.value)} required placeholder="Kyiv" />
+                        onChange={e => set('city', e.target.value)} required placeholder={t('itemForm.cityPlaceholder')} />
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-address">Address *</label>
+                    <label className="form-label" htmlFor="if-address">{t('itemForm.address')} *</label>
                     <input id="if-address" className="form-input" value={form.address}
-                        onChange={e => set('address', e.target.value)} required placeholder="Khreshchatyk 1" />
+                        onChange={e => set('address', e.target.value)} required placeholder={t('itemForm.addressPlaceholder')} />
                 </div>
             </div>
 
             <div className="form-row">
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-lat">Latitude</label>
+                    <label className="form-label" htmlFor="if-lat">{t('itemForm.latitude')}</label>
                     <input id="if-lat" type="number" step="any" className="form-input"
                         value={form.latitude ?? ''} onChange={e => set('latitude', Number(e.target.value))} />
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-lon">Longitude</label>
+                    <label className="form-label" htmlFor="if-lon">{t('itemForm.longitude')}</label>
                     <input id="if-lon" type="number" step="any" className="form-input"
                         value={form.longitude ?? ''} onChange={e => set('longitude', Number(e.target.value))} />
                 </div>
@@ -161,6 +160,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
 
 const CreateItemPage = () => {
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     const handleSubmit = async (data: ItemRequest) => {
         const item = await itemsApi.createItem(data);
@@ -170,11 +170,11 @@ const CreateItemPage = () => {
     return (
         <div className="page">
             <div className="page-header">
-                <h1 className="page-title">List a New Item</h1>
-                <p className="page-subtitle">Fill in the details below to make your item available for rent.</p>
+                <h1 className="page-title">{t('itemForm.createTitle')}</h1>
+                <p className="page-subtitle">{t('itemForm.createSubtitle')}</p>
             </div>
             <div className="form-card">
-                <ItemForm onSubmit={handleSubmit} submitLabel="Create Listing" />
+                <ItemForm onSubmit={handleSubmit} submitLabel={t('itemForm.submitCreate')} />
             </div>
         </div>
     );

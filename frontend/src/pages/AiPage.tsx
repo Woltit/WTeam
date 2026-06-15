@@ -4,6 +4,7 @@ import aiApi from '../api/ai';
 import itemsApi from '../api/items';
 import type { AiQueryResponse } from '../types/chat';
 import type { ItemResponse } from '../types/item';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const AiPage = () => {
     const [query, setQuery] = useState('');
@@ -11,6 +12,7 @@ const AiPage = () => {
     const [error, setError] = useState('');
     const [result, setResult] = useState<AiQueryResponse | null>(null);
     const [recommendedItems, setRecommendedItems] = useState<ItemResponse[]>([]);
+    const { t } = useLanguage();
 
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -33,23 +35,23 @@ const AiPage = () => {
                 setRecommendedItems(items.filter(Boolean) as ItemResponse[]);
             }
         } catch {
-            setError('Не вдалося отримати відповідь від AI. Спробуйте ще раз.');
+            setError(t('ai.error'));
         } finally {
             setLoading(false);
         }
     };
 
     const examples = [
-        'Що взяти в похід на вихідні?',
-        'Потрібен інструмент для ремонту квартири',
-        'Шукаю камеру для фотосесії',
+        t('ai.example1'),
+        t('ai.example2'),
+        t('ai.example3'),
     ];
 
     return (
         <div className="page">
             <div className="page-header">
-                <h1 className="page-title">AI Помічник</h1>
-                <p className="page-subtitle">Опишіть що вам потрібно — AI підбере відповідні речі для оренди</p>
+                <h1 className="page-title">{t('ai.title')}</h1>
+                <p className="page-subtitle">{t('ai.subtitle')}</p>
             </div>
 
             <div className="ai-card">
@@ -57,7 +59,7 @@ const AiPage = () => {
                     <div className="form-group">
                         <textarea
                             className="form-input form-textarea ai-textarea"
-                            placeholder="Наприклад: Планую похід у Карпати на 3 дні, що взяти?"
+                            placeholder={t('ai.textareaPlaceholder')}
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                             rows={3}
@@ -80,7 +82,7 @@ const AiPage = () => {
                             ))}
                         </div>
                         <button className="btn btn-primary" type="submit" disabled={loading || !query.trim()}>
-                            {loading ? <><span className="spinner-sm" /> Думаю...</> : '✨ Знайти'}
+                            {loading ? <><span className="spinner-sm" /> {t('ai.thinking')}</> : t('ai.submit')}
                         </button>
                     </div>
                 </form>
@@ -91,14 +93,14 @@ const AiPage = () => {
             {result && (
                 <div className="ai-result">
                     <div className="ai-response-card">
-                        <div className="ai-response-label">Відповідь AI</div>
+                        <div className="ai-response-label">{t('ai.responseLabel')}</div>
                         <p className="ai-response-text">{result.aiResponse}</p>
                     </div>
 
                     {recommendedItems.length > 0 && (
                         <div>
                             <h2 className="section-heading" style={{ marginBottom: '1rem' }}>
-                                Рекомендовані речі
+                                {t('ai.recommendations')}
                             </h2>
                             <div className="items-grid">
                                 {recommendedItems.map(item => (
@@ -111,7 +113,7 @@ const AiPage = () => {
                                             <div className="item-card-location">📍 {item.city}</div>
                                             <div className="item-card-price">
                                                 <span className="price-main">₴{item.pricePerDay}</span>
-                                                <span className="price-unit">/ день</span>
+                                                <span className="price-unit">{t('browse.priceUnitDay')}</span>
                                             </div>
                                         </div>
                                     </Link>
@@ -123,8 +125,8 @@ const AiPage = () => {
                     {result.recommendedItemIds.length === 0 && (
                         <div className="empty-state" style={{ padding: '2rem' }}>
                             <div className="empty-icon">🔍</div>
-                            <p>AI не знайшов підходящих речей за вашим запитом.</p>
-                            <p style={{ fontSize: '0.875rem' }}>Спробуйте переформулювати або перегляньте каталог.</p>
+                            <p>{t('ai.noRecommendations')}</p>
+                            <p style={{ fontSize: '0.875rem' }}>{t('ai.rephrasePrompt')}</p>
                         </div>
                     )}
                 </div>

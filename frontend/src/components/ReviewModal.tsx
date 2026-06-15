@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../api/axios';
 import { Star, X } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ReviewModalProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface ReviewModalProps {
 }
 
 export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, bookingId, type, onSuccess }) => {
+    const { t } = useLanguage();
     const [rating, setRating] = useState<number>(0);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [comment, setComment] = useState<string>('');
@@ -33,7 +35,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (rating === 0) {
-            setError('Будь ласка, оберіть оцінку (від 1 до 5 зірок).');
+            setError(t('review.selectRatingError'));
             return;
         }
 
@@ -56,7 +58,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
                 err.response?.data?.detailedMessage
                 || err.response?.data?.message
                 || err.response?.data?.error
-                || 'Помилка при збереженні відгуку.';
+                || t('review.error');
             setError(msg);
         } finally {
             setIsSubmitting(false);
@@ -81,14 +83,14 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
                 <button
                     onClick={onClose}
                     className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                    aria-label="Закрити"
+                    aria-label={t('review.close')}
                 >
                     <X className="w-6 h-6" />
                 </button>
 
                 {/* ── Title ───────────────────────────────── */}
                 <h2 className="text-2xl font-bold text-white mb-8">
-                    {type === 'item' ? 'Оцінити товар' : 'Оцінити орендаря'}
+                    {type === 'item' ? t('review.rateItem') : t('review.rateRenter')}
                 </h2>
 
                 {/* ── Error Alert ─────────────────────────── */}
@@ -102,7 +104,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
                     {/* ── Star Rating ─────────────────────── */}
                     <div className="mb-6">
                         <label className="block text-sm font-medium text-slate-300 mb-3">
-                            {type === 'item' ? 'Оцінка товару' : 'Оцінка орендаря'}
+                            {type === 'item' ? t('review.itemRating') : t('review.renterRating')}
                         </label>
                         <div className="flex gap-1">
                             {[1, 2, 3, 4, 5].map((star) => {
@@ -132,14 +134,14 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
                     {/* ── Comment ─────────────────────────── */}
                     <div className="mb-6">
                         <label className="block text-sm font-medium text-slate-300 mb-3">
-                            Ваш коментар
+                            {t('review.commentLabel')}
                         </label>
                         <textarea
                             className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none transition-all"
                             rows={4}
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
-                            placeholder="Поділіться вашими враженнями від оренди..."
+                            placeholder={t('review.placeholder')}
                         />
                     </div>
 
@@ -151,14 +153,14 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
                             disabled={isSubmitting}
                             className="flex-1 border border-slate-600 text-slate-300 hover:bg-slate-700 rounded-xl py-3 font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Скасувати
+                            {t('review.cancel')}
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
                             className="flex-1 bg-indigo-600 text-white hover:bg-indigo-500 rounded-xl py-3 font-semibold text-sm shadow-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isSubmitting ? 'Відправка...' : 'Відправити'}
+                            {isSubmitting ? t('review.submitting') : t('review.submit')}
                         </button>
                     </div>
                 </form>

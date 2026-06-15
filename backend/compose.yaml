@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   kafka:
-    image: 'apache/kafka:3.8.0'
+    image: 'bitnamilegacy/kafka:3.8.0'
     container_name: "wteam_kafka_container"
     environment:
       KAFKA_NODE_ID: 1

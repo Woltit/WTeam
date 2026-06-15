@@ -8,12 +8,10 @@ import type { UserReviewResponse } from '../api/reviews';
 import { useAuth } from '../contexts/AuthContext';
 import type { ItemResponse } from '../types/item';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
-
-const conditionLabel: Record<string, string> = {
-    IDEAL: 'Ideal', GOOD: 'Good', NORM: 'Normal', BAD: 'Fair', NEEDS_REPAIRING: 'Needs Repair',
-};
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ItemDetailPage = () => {
+    const { t } = useLanguage();
     const { itemId } = useParams<{ itemId: string }>();
     const navigate = useNavigate();
     const { user, accessToken: token } = useAuth();
@@ -42,7 +40,7 @@ const ItemDetailPage = () => {
                     // Ignore review fetch errors
                 }
             })
-            .catch(() => setError('Item not found.'))
+            .catch(() => setError(t('itemDetail.notFound')))
             .finally(() => setLoading(false));
         bookingsApi.getUnavailableDates(Number(itemId))
             .then(setUnavailableDates)
@@ -50,26 +48,26 @@ const ItemDetailPage = () => {
     }, [itemId]);
 
     const handleDelete = async () => {
-        if (!item || !confirm('Delete this item? This cannot be undone.')) return;
+        if (!item || !confirm(t('itemDetail.deleteConfirm'))) return;
         setDeleting(true);
         try {
             await itemsApi.deleteItem(item.id);
             navigate('/');
         } catch {
-            setError('Failed to delete item.');
+            setError(t('itemDetail.deleteError'));
             setDeleting(false);
         }
     };
 
     if (loading) return <div className="page-loader"><div className="spinner" /></div>;
-    if (error || !item) return <div className="page"><div className="alert alert-error">{error || 'Item not found.'}</div></div>;
+    if (error || !item) return <div className="page"><div className="alert alert-error">{error || t('itemDetail.notFound')}</div></div>;
 
     const isOwner = user?.id === item.ownerId;
 
     const handleBooking = async (e: FormEvent) => {
         e.preventDefault();
         setBookingError('');
-        if (!startDate || !endDate) { setBookingError('Оберіть дати оренди в календарі.'); return; }
+        if (!startDate || !endDate) { setBookingError(t('itemDetail.selectDatesError')); return; }
         setBooking(true);
         try {
             const b = await bookingsApi.createBooking(item.id, startDate, endDate);
@@ -77,7 +75,7 @@ const ItemDetailPage = () => {
             navigate(`/chats/${room.id}`);
         } catch (err: unknown) {
             const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-            setBookingError(msg ?? 'Не вдалося створити бронювання. Спробуйте ще раз.');
+            setBookingError(msg ?? t('itemDetail.bookError'));
         } finally {
             setBooking(false);
         }
@@ -94,8 +92,8 @@ const ItemDetailPage = () => {
                     <div className="item-detail-header">
                         <div className="item-detail-badges">
                             <span className="badge badge-accent">{item.status.replace('_', ' ')}</span>
-                            <span className="badge badge-neutral">{conditionLabel[item.condition]}</span>
-                            {item.isVerified && <span className="badge badge-success">✓ Verified</span>}
+                            <span className="badge badge-neutral">{t('condition.' + item.condition)}</span>
+                            {item.isVerified && <span className="badge badge-success">✓ {t('itemDetail.verified')}</span>}
                         </div>
                         <h1 className="item-detail-title">{item.title}</h1>
                         <p className="item-detail-location">📍 {item.city}, {item.address}</p>
@@ -104,30 +102,30 @@ const ItemDetailPage = () => {
                     <div className="item-detail-pricing">
                         <div className="price-block">
                             <span className="price-value">₴{item.pricePerDay}</span>
-                            <span className="price-label">per day</span>
+                            <span className="price-label">{t('itemDetail.perDay')}</span>
                         </div>
                         {item.pricePerWeek && (
                             <div className="price-block">
                                 <span className="price-value">₴{item.pricePerWeek}</span>
-                                <span className="price-label">per week</span>
+                                <span className="price-label">{t('itemDetail.perWeek')}</span>
                             </div>
                         )}
                         <div className="price-block">
                             <span className="price-value">₴{item.depositAmount}</span>
-                            <span className="price-label">deposit</span>
+                            <span className="price-label">{t('itemDetail.deposit')}</span>
                         </div>
                     </div>
 
                     {item.description && (
                         <div className="item-detail-section">
-                            <h2 className="section-heading">Description</h2>
+                            <h2 className="section-heading">{t('itemDetail.description')}</h2>
                             <p className="item-detail-desc">{item.description}</p>
                         </div>
                     )}
 
                     {item.tags?.length > 0 && (
                         <div className="item-detail-section">
-                            <h2 className="section-heading">Tags</h2>
+                            <h2 className="section-heading">{t('itemDetail.tags')}</h2>
                             <div className="tag-list">
                                 {item.tags.map(tag => <span key={tag} className="tag">{tag}</span>)}
                             </div>
@@ -135,7 +133,7 @@ const ItemDetailPage = () => {
                     )}
 
                     <div className="item-detail-section">
-                        <h2 className="section-heading">Owner</h2>
+                        <h2 className="section-heading">{t('itemDetail.owner')}</h2>
                         <div className="owner-card">
                             <div className="owner-avatar owner-avatar-lg">
                                 {item.ownerProfile.avatarUrl
@@ -146,10 +144,10 @@ const ItemDetailPage = () => {
                             <div className="owner-info">
                                 <span className="owner-name-lg">{item.ownerProfile.firstName} {item.ownerProfile.lastName}</span>
                                 {item.ownerProfile.renterTrustScore != null && (
-                                    <span className="trust-score">⭐ Trust {item.ownerProfile.ownerTrustScore}</span>
+                                    <span className="trust-score">⭐ {t('itemDetail.trust')} {item.ownerProfile.ownerTrustScore}</span>
                                 )}
                                 {item.ownerProfile.totalSuccessfulRents != null && (
-                                    <span className="rents-count">{item.ownerProfile.totalSuccessfulRents} successful rents</span>
+                                    <span className="rents-count">{t('itemDetail.successfulRents', { count: item.ownerProfile.totalSuccessfulRents })}</span>
                                 )}
                             </div>
                         </div>
@@ -157,7 +155,7 @@ const ItemDetailPage = () => {
 
                     {ownerReviews.length > 0 && (
                         <div className="item-detail-section">
-                            <h2 className="section-heading">Відгуки про власника</h2>
+                            <h2 className="section-heading">{t('itemDetail.ownerReviews')}</h2>
                             <div className="flex flex-col gap-4">
                                 {ownerReviews.map(review => (
                                     <div key={review.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700">
@@ -168,7 +166,7 @@ const ItemDetailPage = () => {
                                                 ))}
                                             </div>
                                             <span className="text-slate-400 text-sm ml-2">
-                                                {new Date(review.createdAt).toLocaleDateString('uk-UA')}
+                                                {new Date(review.createdAt).toLocaleDateString(t('nav.catalog') === 'Каталог' ? 'uk-UA' : 'en-US')}
                                             </span>
                                         </div>
                                         {review.comment && (
@@ -183,14 +181,14 @@ const ItemDetailPage = () => {
                     <div className="item-detail-actions">
                         {isOwner ? (
                             <>
-                                <Link to={`/items/${item.id}/edit`} className="btn btn-outline">Edit Item</Link>
+                                <Link to={`/items/${item.id}/edit`} className="btn btn-outline">{t('itemDetail.editBtn')}</Link>
                                 <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
-                                    {deleting ? <span className="spinner-sm" /> : 'Delete Item'}
+                                    {deleting ? <span className="spinner-sm" /> : t('itemDetail.deleteBtn')}
                                 </button>
                             </>
                         ) : token ? (
                             <div className="rent-cta" style={{ width: '100%' }}>
-                                <p className="rent-cta-text" style={{ fontWeight: 600, fontSize: '1rem' }}>Орендувати цей товар</p>
+                                <p className="rent-cta-text" style={{ fontWeight: 600, fontSize: '1rem' }}>{t('itemDetail.bookTitle')}</p>
                                 {bookingError && <div className="alert alert-error" style={{ marginBottom: 0 }}>{bookingError}</div>}
                                 
                                 <AvailabilityCalendar
@@ -210,18 +208,18 @@ const ItemDetailPage = () => {
                                         disabled={booking || !startDate || !endDate}
                                     >
                                         {booking
-                                            ? <><span className="spinner-sm" /> Бронювання...</>
+                                            ? <><span className="spinner-sm" /> {t('itemDetail.bookingInProgress')}</>
                                             : startDate && endDate
-                                            ? 'Забронювати та написати власнику'
-                                            : 'Оберіть дати в календарі'}
+                                            ? t('itemDetail.bookAndMessage')
+                                            : t('itemDetail.selectDatesPrompt')}
                                     </button>
                                 </form>
                             </div>
                         ) : (
                             <div className="rent-cta">
-                                <p className="rent-cta-text">Увійдіть, щоб орендувати цей товар</p>
-                                <Link to="/login" className="btn btn-primary">Увійти</Link>
-                                <Link to="/register" className="btn btn-outline">Зареєструватися</Link>
+                                <p className="rent-cta-text">{t('itemDetail.loginToBook')}</p>
+                                <Link to="/login" className="btn btn-primary">{t('nav.login')}</Link>
+                                <Link to="/register" className="btn btn-outline">{t('nav.register')}</Link>
                             </div>
                         )}
                     </div>
