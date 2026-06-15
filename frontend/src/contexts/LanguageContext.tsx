@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 export type Language = 'ua' | 'en';
 
 type TranslationDictionary = Record<string, string>;
 
-const translations: Record<Language, TranslationDictionary> = {
+export const translations: Record<Language, TranslationDictionary> = {
     ua: {
         // Navbar
         'nav.catalog': 'Каталог',
@@ -401,6 +401,15 @@ const translations: Record<Language, TranslationDictionary> = {
         'admin.catEditBtn': 'Редагувати',
         
         'errors.serverDown': 'Сервер недоступний. Переконайтеся, що бекенд працює.',
+        'errors.profileIncomplete': 'Ваш профіль не верифіковано або не заповнено повністю. Будь ласка, заповніть дані та пройдіть верифікацію для створення оголошення.',
+        'errors.requiredField': 'Будь ласка, заповніть це поле.',
+        'errors.badCredentials': 'Невірний логін або пароль.',
+        'errors.userNotFound': 'Користувача не знайдено.',
+        'errors.emailTaken': 'Користувач з таким email вже існує.',
+        'errors.accessDenied': 'У вас немає прав для виконання цієї дії.',
+        'errors.itemNotFound': 'Оголошення не знайдено.',
+        'errors.bookingNotFound': 'Бронювання не знайдено.',
+        'errors.sessionExpired': 'Сесія закінчилася. Будь ласка, увійдіть знову.',
     },
     en: {
         // Navbar
@@ -798,6 +807,15 @@ const translations: Record<Language, TranslationDictionary> = {
         'admin.catEditBtn': 'Edit',
         
         'errors.serverDown': 'Server is unavailable. Please ensure the backend is running.',
+        'errors.profileIncomplete': 'Your profile is incomplete or unverified. Please fill in your profile and get verified to create an item.',
+        'errors.requiredField': 'Please fill out this field.',
+        'errors.badCredentials': 'Invalid email or password.',
+        'errors.userNotFound': 'User not found.',
+        'errors.emailTaken': 'User with this email already exists.',
+        'errors.accessDenied': 'You do not have permission to perform this action.',
+        'errors.itemNotFound': 'Item not found.',
+        'errors.bookingNotFound': 'Booking not found.',
+        'errors.sessionExpired': 'Session expired. Please log in again.',
     }
 };
 
@@ -837,6 +855,29 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
         return text;
     };
+
+    useEffect(() => {
+        const handleInvalid = (e: Event) => {
+            const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+            if (target && target.validity && target.validity.valueMissing) {
+                target.setCustomValidity(t('errors.requiredField'));
+            }
+        };
+        const handleInput = (e: Event) => {
+            const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+            if (target && target.setCustomValidity) {
+                target.setCustomValidity('');
+            }
+        };
+
+        document.addEventListener('invalid', handleInvalid, true);
+        document.addEventListener('input', handleInput, true);
+
+        return () => {
+            document.removeEventListener('invalid', handleInvalid, true);
+            document.removeEventListener('input', handleInput, true);
+        };
+    }, [language]);
 
     return (
         <LanguageContext.Provider value={{ language, setLanguage, t }}>
