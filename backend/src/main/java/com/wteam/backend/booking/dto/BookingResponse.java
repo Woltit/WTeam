@@ -14,5 +14,6 @@ public record BookingResponse(
         BigDecimal totalPrice,
         BigDecimal depositTotal,
         BigDecimal pricePerDaySnapshot,
-        BookingStatus status
+        BookingStatus status,
+        String cancellationReason
 ) {}

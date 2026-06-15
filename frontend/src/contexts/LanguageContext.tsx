@@ -245,6 +245,16 @@ const translations: Record<Language, TranslationDictionary> = {
         'bookings.depositLabel': 'Застава:',
         'bookings.totalUnit': ' загалом',
         'bookings.itemDetails': 'Деталі товару',
+        'bookings.cancelTitle': 'Скасувати бронювання',
+        'bookings.cancelReasonLabel': 'Вкажіть причину скасування (необов\'язково):',
+        'bookings.cancelPlaceholder': 'Причина скасування...',
+        'bookings.cancelConfirm': 'Підтвердити скасування',
+        'bookings.cancelBack': 'Назад',
+        'bookings.alertApproveSuccess': 'Бронювання успішно підтверджено!',
+        'bookings.alertRejectSuccess': 'Бронювання відхилено!',
+        'bookings.alertCancelSuccess': 'Бронювання успішно скасовано!',
+        'bookings.alertCompleteSuccess': 'Бронювання успішно завершено!',
+        'bookings.actionError': 'Не вдалося оновити статус бронювання.',
 
         // ChatsPage extra
         'chats.loadError': 'Не вдалося завантажити чати.',
@@ -525,6 +535,16 @@ const translations: Record<Language, TranslationDictionary> = {
         'bookings.depositLabel': 'Deposit:',
         'bookings.totalUnit': ' total',
         'bookings.itemDetails': 'Item Details',
+        'bookings.cancelTitle': 'Cancel Booking',
+        'bookings.cancelReasonLabel': 'Please provide a reason for cancellation (optional):',
+        'bookings.cancelPlaceholder': 'Reason for cancellation...',
+        'bookings.cancelConfirm': 'Confirm Cancellation',
+        'bookings.cancelBack': 'Back',
+        'bookings.alertApproveSuccess': 'Booking successfully approved!',
+        'bookings.alertRejectSuccess': 'Booking rejected!',
+        'bookings.alertCancelSuccess': 'Booking successfully cancelled!',
+        'bookings.alertCompleteSuccess': 'Booking successfully completed!',
+        'bookings.actionError': 'Failed to update booking status.',
 
         // ChatsPage extra
         'chats.loadError': 'Failed to load chats.',

@@ -104,10 +104,7 @@ public class Booking extends BaseEntityFull {
             throw new IllegalArgumentException("End date cannot be before start date");
         }
 
-        long days = java.time.temporal.ChronoUnit.DAYS.between(this.startDate, this.endDate);
-        if (days == 0) {
-            days = 1;
-        }
+        long days = java.time.temporal.ChronoUnit.DAYS.between(this.startDate, this.endDate) + 1;
 
         BigDecimal totalDays = BigDecimal.valueOf(days);
 
