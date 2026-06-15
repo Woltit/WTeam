@@ -44,7 +44,7 @@ const ItemDetailPage = () => {
             })
             .catch(() => setError('Item not found.'))
             .finally(() => setLoading(false));
-        bookingsApi.getUnavailableDates(id)
+        bookingsApi.getUnavailableDates(Number(itemId))
             .then(setUnavailableDates)
             .catch(() => {});
     }, [itemId]);

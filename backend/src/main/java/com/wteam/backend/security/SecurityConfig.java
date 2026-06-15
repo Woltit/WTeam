@@ -82,6 +82,10 @@ public class SecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         // Swagger
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // публічні дані
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/*/reviews").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/profile/public/**").permitAll()
                         // всі інші запити вимагають обов'язкової аутентифікації
                         .anyRequest().authenticated()
                 )

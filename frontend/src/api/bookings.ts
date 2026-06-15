@@ -67,4 +67,9 @@ const updateBookingStatus = async (
     return response.data;
 };
 
-export default { getAllBookings, getMyBookings, getOwnerBookings, createBooking, updateBookingStatus };
+const getUnavailableDates = async (itemId: number) => {
+    const response = await api.get<UnavailableDateRange[]>(`/bookings/items/${itemId}/unavailable-dates`);
+    return response.data;
+};
+
+export default { getAllBookings, getMyBookings, getOwnerBookings, createBooking, updateBookingStatus, getUnavailableDates };

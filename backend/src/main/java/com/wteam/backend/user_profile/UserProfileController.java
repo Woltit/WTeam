@@ -29,7 +29,6 @@ public class UserProfileController {
     }
 
     @GetMapping("/public/{userId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PublicProfileResponse> getPublicProfile(@PathVariable Long userId) {
         return ResponseEntity.ok(userProfileService.getPublicProfile(userId));
     }

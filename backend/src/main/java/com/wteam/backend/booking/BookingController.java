@@ -4,7 +4,7 @@ import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.booking.dto.BookingStatusUpdateRequest;
 import com.wteam.backend.booking.dto.UnavailableDateRange;
-import com.wteam.backend.security.SecurityUser;
+import java.util.List;
 import com.wteam.backend.security.annotation.CurrentUser;
 import com.wteam.backend.security.dto.UserPrincipalDto;
 import jakarta.validation.Valid;
