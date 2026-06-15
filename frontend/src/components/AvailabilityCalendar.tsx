@@ -9,7 +9,12 @@ interface Props {
     depositAmount: number;
 }
 
-const toStr = (d: Date): string => d.toISOString().split('T')[0];
+const toStr = (d: Date): string => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+};
 
 const DAY_NAMES: Record<'ua' | 'en', string[]> = {
     ua: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
@@ -48,7 +53,7 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
             return;
         }
 
-        if (date <= start) {
+        if (date < start) {
             setStart(date);
             setEnd(null);
             return;
@@ -66,7 +71,7 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
     };
 
     const previewEnd =
-        step === 'end' && start && hover && hover > start && !rangeHasUnavail(start, hover)
+        step === 'end' && start && hover && hover >= start && !rangeHasUnavail(start, hover)
             ? hover
             : null;
 
@@ -87,7 +92,7 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
     const monthLabel = viewDate.toLocaleString(language === 'ua' ? 'uk-UA' : 'en-US', { month: 'long', year: 'numeric' });
     const activeEnd = end ?? previewEnd;
     const dayCount = start && activeEnd
-        ? Math.ceil((new Date(activeEnd).getTime() - new Date(start).getTime()) / 86400000)
+        ? Math.ceil((new Date(activeEnd).getTime() - new Date(start).getTime()) / 86400000) + 1
         : 0;
 
     const dayNames = DAY_NAMES[language] || DAY_NAMES.ua;

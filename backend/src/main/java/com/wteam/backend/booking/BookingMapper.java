@@ -23,7 +23,8 @@ public class BookingMapper {
                 booking.getTotalPrice(),
                 booking.getDepositTotal(),
                 booking.getPricePerDaySnapshot(),
-                booking.getStatus()
+                booking.getStatus(),
+                booking.getCancellationReason()
         );
     }
 }

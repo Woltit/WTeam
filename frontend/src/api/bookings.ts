@@ -25,6 +25,7 @@ export interface BookingResponse {
     depositTotal: number;
     pricePerDaySnapshot: number;
     status: BookingStatus;
+    cancellationReason?: string;
 }
 
 interface Page<T> {
@@ -72,4 +73,35 @@ const getUnavailableDates = async (itemId: number) => {
     return response.data;
 };
 
-export default { getAllBookings, getMyBookings, getOwnerBookings, createBooking, updateBookingStatus, getUnavailableDates };
+const approveBooking = async (bookingId: number) => {
+    const response = await api.patch<BookingResponse>(`/bookings/${bookingId}/approve`);
+    return response.data;
+};
+
+const rejectBooking = async (bookingId: number) => {
+    const response = await api.patch<BookingResponse>(`/bookings/${bookingId}/reject`);
+    return response.data;
+};
+
+const cancelBooking = async (bookingId: number, cancellationReason?: string) => {
+    const response = await api.patch<BookingResponse>(`/bookings/${bookingId}/cancel`, { cancellationReason });
+    return response.data;
+};
+
+const completeBooking = async (bookingId: number) => {
+    const response = await api.patch<BookingResponse>(`/bookings/${bookingId}/complete`);
+    return response.data;
+};
+
+export default {
+    getAllBookings,
+    getMyBookings,
+    getOwnerBookings,
+    createBooking,
+    updateBookingStatus,
+    getUnavailableDates,
+    approveBooking,
+    rejectBooking,
+    cancelBooking,
+    completeBooking,
+};

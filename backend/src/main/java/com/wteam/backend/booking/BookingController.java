@@ -1,5 +1,6 @@
 package com.wteam.backend.booking;
 
+import com.wteam.backend.booking.dto.BookingCancelRequest;
 import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.booking.dto.BookingStatusUpdateRequest;
@@ -72,5 +73,41 @@ public class BookingController {
                 request.status(),
                 request.cancellationReason()
         ));
+    }
+
+    @PatchMapping("/{bookingId}/approve")
+    public ResponseEntity<BookingResponse> approveBooking(
+            @PathVariable Long bookingId,
+            @CurrentUser UserPrincipalDto currentUser
+    ) {
+        return ResponseEntity.ok(bookingService.approveBooking(bookingId, currentUser.id()));
+    }
+
+    @PatchMapping("/{bookingId}/reject")
+    public ResponseEntity<BookingResponse> rejectBooking(
+            @PathVariable Long bookingId,
+            @CurrentUser UserPrincipalDto currentUser
+    ) {
+        return ResponseEntity.ok(bookingService.rejectBooking(bookingId, currentUser.id()));
+    }
+
+    @PatchMapping("/{bookingId}/cancel")
+    public ResponseEntity<BookingResponse> cancelBooking(
+            @PathVariable Long bookingId,
+            @RequestBody(required = false) BookingCancelRequest request,
+            @CurrentUser UserPrincipalDto currentUser
+    ) {
+        String reason = request != null && request.cancellationReason() != null
+                ? request.cancellationReason()
+                : "Cancelled by user";
+        return ResponseEntity.ok(bookingService.cancelBooking(bookingId, currentUser.id(), reason));
+    }
+
+    @PatchMapping("/{bookingId}/complete")
+    public ResponseEntity<BookingResponse> completeBooking(
+            @PathVariable Long bookingId,
+            @CurrentUser UserPrincipalDto currentUser
+    ) {
+        return ResponseEntity.ok(bookingService.completeBooking(bookingId, currentUser.id()));
     }
 }
