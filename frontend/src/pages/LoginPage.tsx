@@ -25,7 +25,7 @@ function LoginPage() {
             await login({ email, password });
             navigate('/');
         } catch (err: unknown) {
-            setError(getApiErrorMessage(err, t('login.error')));
+            setError(getApiErrorMessage(err, t('login.error'), t('errors.serverDown')));
         } finally {
             setLoading(false);
         }

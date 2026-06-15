@@ -7,6 +7,7 @@ import bookingsApi, { type BookingResponse, type BookingStatus } from '../api/bo
 import adminApi, { type AdminStatsResponse } from '../api/admin';
 import type { UserResponse, Role, VerificationStatus, PendingProfileResponse } from '../types/user';
 import type { ItemResponse } from '../types/item';
+import { useLanguage } from '../contexts/LanguageContext';
 import type { CategoryResponse, CategoryRequest } from '../types/category';
 
 type Tab = 'stats' | 'users' | 'items' | 'verifications' | 'categories' | 'bookings';
@@ -15,15 +16,11 @@ const BOOKING_STATUSES: BookingStatus[] = [
     'PENDING', 'APPROVED', 'REJECTED', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTE',
 ];
 
-const verificationLabel: Record<VerificationStatus, string> = {
-    UNVERIFIED: 'Не верифіковано',
-    PENDING: 'Очікує',
-    VERIFIED: 'Верифіковано',
-    REJECTED: 'Відхилено',
-};
+
 
 // ── Stats Tab ────────────────────────────────────────────
 const StatsTab = () => {
+    const { t } = useLanguage();
     const [stats, setStats] = useState<AdminStatsResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -47,29 +44,29 @@ const StatsTab = () => {
                 <div className="stat-card">
                     <span className="stat-card-icon">👤</span>
                     <span className="stat-card-value">{stats.totalUsers}</span>
-                    <span className="stat-card-label">Користувачів</span>
+                    <span className="stat-card-label">{t('admin.statsUsers')}</span>
                 </div>
                 <div className="stat-card">
                     <span className="stat-card-icon">📦</span>
                     <span className="stat-card-value">{stats.totalItems}</span>
-                    <span className="stat-card-label">Оголошень</span>
+                    <span className="stat-card-label">{t('admin.statsItems')}</span>
                 </div>
                 <div className="stat-card">
                     <span className="stat-card-icon">🔄</span>
                     <span className="stat-card-value">{stats.activeBookings}</span>
-                    <span className="stat-card-label">Активних оренд</span>
+                    <span className="stat-card-label">{t('admin.statsActiveRents')}</span>
                 </div>
                 <div className="stat-card">
                     <span className="stat-card-icon">✅</span>
                     <span className="stat-card-value">{stats.completedBookings}</span>
-                    <span className="stat-card-label">Завершених оренд</span>
+                    <span className="stat-card-label">{t('admin.statsCompletedRents')}</span>
                 </div>
             </div>
 
             <div className="stats-section">
-                <h2 className="section-heading">Популярні категорії</h2>
+                <h2 className="section-heading">{t('admin.statsPopCategories')}</h2>
                 {stats.topCategories.length === 0
-                    ? <p style={{ color: 'var(--text)' }}>Немає даних.</p>
+                    ? <p style={{ color: 'var(--text)' }}>{t('admin.statsNoData')}.</p>
                     : stats.topCategories.map(c => (
                         <div key={c.categoryName} className="stats-bar-row">
                             <span className="stats-bar-label">{c.categoryName}</span>
@@ -89,6 +86,7 @@ const StatsTab = () => {
 
 // ── Users Tab ────────────────────────────────────────────
 const UsersTab = () => {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<UserResponse[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
@@ -125,9 +123,9 @@ const UsersTab = () => {
     return (
         <div className="admin-tab">
             <form className="admin-search" onSubmit={handleSearch}>
-                <input className="form-input" placeholder="Пошук за email…" value={search} onChange={e => setSearch(e.target.value)} />
-                <button className="btn btn-outline btn-sm" type="submit">Знайти</button>
-                <button className="btn btn-outline btn-sm" type="button" onClick={() => { setSearch(''); load(); }}>Скинути</button>
+                <input className="form-input" placeholder={t('admin.usersSearchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
+                <button className="btn btn-outline btn-sm" type="submit">{t('admin.usersSearchBtn')}</button>
+                <button className="btn btn-outline btn-sm" type="button" onClick={() => { setSearch(''); load(); }}>{t('admin.usersResetBtn')}</button>
             </form>
 
             {msg && <div className="alert alert-error">{msg}</div>}
@@ -137,8 +135,8 @@ const UsersTab = () => {
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th><th>Email</th><th>Ім&apos;я</th><th>Роль</th>
-                                <th>Акаунт</th><th>Верифікація</th><th>Дії</th>
+                                <th>{t('admin.usersColId')}</th><th>{t('admin.usersColEmail')}</th><th>{t('admin.usersColName')}</th><th>{t('admin.usersColRole')}</th>
+                                <th>{t('admin.usersColAccount')}</th><th>{t('admin.usersColVerification')}</th><th>{t('admin.usersColActions')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -156,39 +154,39 @@ const UsersTab = () => {
                                     </td>
                                     <td>
                                         <span className={`badge ${u.isActive ? 'badge-success' : 'badge-error'}`}>
-                                            {u.isActive ? 'Активний' : 'Заблокований'}
+                                            {u.isActive ? t('admin.usersActive') : t('admin.usersBlocked')}
                                         </span>
                                         {!u.isActive && u.blockReason && (
-                                            <div className="admin-hint" title={u.blockReason}>Причина: {u.blockReason}</div>
+                                            <div className="admin-hint" title={u.blockReason}>{t('admin.usersBlockReason').replace('{reason}', u.blockReason)}</div>
                                         )}
                                     </td>
                                     <td>
                                         <span className={`badge ${u.profile?.verificationStatus === 'VERIFIED' ? 'badge-success' : 'badge-neutral'}`}>
-                                            {verificationLabel[u.profile?.verificationStatus ?? 'UNVERIFIED']}
+                                            {t('verificationStatus.' + (u.profile?.verificationStatus ?? 'UNVERIFIED'))}
                                         </span>
                                     </td>
                                     <td className="action-cell">
                                         {!u.isActive && (
                                             <button className="btn btn-outline btn-xs"
                                                 onClick={() => doAction(() => usersApi.activateUser(u.id))}>
-                                                Активувати
+                                                {t('admin.usersActivateBtn')}
                                             </button>
                                         )}
                                         {u.isActive && (
                                             <button className="btn btn-warning btn-xs"
                                                 onClick={() => {
-                                                    const reason = prompt('Причина блокування:');
+                                                    const reason = prompt(t('admin.usersPromptBlockReason'));
                                                     if (reason) doAction(() => usersApi.blockUser(u.id, { reason }));
                                                 }}>
-                                                Заблокувати
+                                                {t('admin.usersBlockBtn')}
                                             </button>
                                         )}
                                         <button className="btn btn-danger btn-xs"
                                             onClick={() => {
-                                                if (confirm(`Видалити користувача ${u.email}?`))
+                                                if (confirm(t('admin.usersConfirmDelete').replace('{email}', u.email)))
                                                     doAction(() => usersApi.deleteUser(u.id));
                                             }}>
-                                            Видалити
+                                            {t('admin.usersDeleteBtn')}
                                         </button>
                                     </td>
                                 </tr>
@@ -210,6 +208,7 @@ const UsersTab = () => {
 
 // ── Items Tab ────────────────────────────────────────────
 const ItemsTab = () => {
+    const { t } = useLanguage();
     const [items, setItems] = useState<ItemResponse[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
@@ -227,7 +226,7 @@ const ItemsTab = () => {
     useEffect(() => { load(); }, []);
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Видалити це оголошення?')) return;
+        if (!confirm(t('admin.itemsConfirmDelete'))) return;
         try { await itemsApi.deleteItem(id); setMsg(''); load(page); } catch { setMsg('Не вдалося видалити.'); }
     };
 
@@ -247,8 +246,8 @@ const ItemsTab = () => {
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th><th>Назва</th><th>Власник</th><th>Місто</th>
-                                <th>Статус</th><th>Верифікація</th><th>Ціна/день</th><th>Дії</th>
+                                <th>{t('admin.itemsColId')}</th><th>{t('admin.itemsColTitle')}</th><th>{t('admin.itemsColOwner')}</th><th>{t('admin.itemsColCity')}</th>
+                                <th>{t('admin.itemsColStatus')}</th><th>{t('admin.itemsColVerification')}</th><th>{t('admin.itemsColPrice')}</th><th>{t('admin.usersColActions')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -261,7 +260,7 @@ const ItemsTab = () => {
                                     <td><span className="badge badge-neutral">{item.status}</span></td>
                                     <td>
                                         <span className={`badge ${item.isVerified ? 'badge-success' : 'badge-warning'}`}>
-                                            {item.isVerified ? 'Так' : 'Ні'}
+                                            {item.isVerified ? t('admin.itemsYes') : t('admin.itemsNo')}
                                         </span>
                                     </td>
                                     <td>₴{item.pricePerDay}</td>
@@ -270,9 +269,9 @@ const ItemsTab = () => {
                                             className={`btn btn-xs ${item.isVerified ? 'btn-outline' : 'btn-success'}`}
                                             onClick={() => toggleVerified(item)}
                                         >
-                                            {item.isVerified ? 'Скасувати' : 'Схвалити'}
+                                            {item.isVerified ? t('admin.itemsRevokeBtn') : t('admin.itemsApproveBtn')}
                                         </button>
-                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(item.id)}>Видалити</button>
+                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(item.id)}>{t('admin.usersDeleteBtn')}</button>
                                     </td>
                                 </tr>
                             ))}
@@ -293,6 +292,7 @@ const ItemsTab = () => {
 
 // ── Verifications Tab ────────────────────────────────────
 const VerificationsTab = () => {
+    const { t } = useLanguage();
     const [profiles, setProfiles] = useState<PendingProfileResponse[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
@@ -321,12 +321,12 @@ const VerificationsTab = () => {
         <div className="admin-tab">
             {msg && <div className="alert alert-error">{msg}</div>}
             {loading ? <div className="spinner" /> : profiles.length === 0
-                ? <div className="empty-state"><div className="empty-icon">✅</div><p>Немає запитів на верифікацію.</p></div>
+                ? <div className="empty-state"><div className="empty-icon">✅</div><p>{t('admin.verifNoRequests')}</p></div>
                 : (
                     <div className="admin-table-wrap">
                         <table className="admin-table">
                             <thead>
-                                <tr><th>ID</th><th>Email</th><th>Ім&apos;я</th><th>Телефон</th><th>Дата народж.</th><th>Статус</th><th>Дії</th></tr>
+                                <tr><th>ID</th><th>Email</th><th>Ім&apos;я</th><th>{t('admin.verifColPhone')}</th><th>{t('admin.verifColBirth')}</th><th>{t('admin.verifColStatus')}</th><th>{t('admin.usersColActions')}</th></tr>
                             </thead>
                             <tbody>
                                 {profiles.map(p => (
@@ -336,10 +336,10 @@ const VerificationsTab = () => {
                                         <td>{p.firstName} {p.lastName} {p.middleName ?? ''}</td>
                                         <td>{p.phoneNumber ?? '—'}</td>
                                         <td>{p.birthDate ? String(p.birthDate) : '—'}</td>
-                                        <td><span className="badge badge-warning">{verificationLabel[p.verificationStatus]}</span></td>
+                                        <td><span className="badge badge-warning">{t('verificationStatus.' + p.verificationStatus)}</span></td>
                                         <td className="action-cell">
-                                            <button className="btn btn-success btn-xs" onClick={() => updateStatus(p.userId, 'VERIFIED')}>Схвалити</button>
-                                            <button className="btn btn-danger btn-xs" onClick={() => updateStatus(p.userId, 'REJECTED')}>Відхилити</button>
+                                            <button className="btn btn-success btn-xs" onClick={() => updateStatus(p.userId, 'VERIFIED')}>{t('admin.itemsApproveBtn')}</button>
+                                            <button className="btn btn-danger btn-xs" onClick={() => updateStatus(p.userId, 'REJECTED')}>{t('admin.verifRejectBtn')}</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -360,6 +360,7 @@ const VerificationsTab = () => {
 
 // ── Categories Tab ───────────────────────────────────────
 const CategoriesTab = () => {
+    const { t } = useLanguage();
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [msg, setMsg] = useState('');
@@ -396,7 +397,7 @@ const CategoriesTab = () => {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Видалити категорію?')) return;
+        if (!confirm(t('admin.catConfirmDelete'))) return;
         try { await categoriesApi.deleteCategory(id); setMsg(''); load(); } catch { setMsg('Не вдалося видалити.'); }
     };
 
@@ -408,7 +409,7 @@ const CategoriesTab = () => {
             {msg && <div className="alert alert-error">{msg}</div>}
 
             <button className="btn btn-primary btn-sm" style={{ marginBottom: '1rem' }} onClick={openCreate}>
-                + Нова категорія
+                {t('admin.catNewBtn')}
             </button>
 
             {showForm && (
@@ -417,28 +418,28 @@ const CategoriesTab = () => {
                     <form className="item-form" onSubmit={handleSave}>
                         <div className="form-row">
                             <div className="form-group">
-                                <label className="form-label" htmlFor="cf-name">Назва *</label>
+                                <label className="form-label" htmlFor="cf-name">{t('admin.catNameLabel')}</label>
                                 <input id="cf-name" className="form-input" value={form.name}
                                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
                             </div>
                             <div className="form-group">
-                                <label className="form-label" htmlFor="cf-slug">Slug *</label>
+                                <label className="form-label" htmlFor="cf-slug">{t('admin.catSlugLabel')}</label>
                                 <input id="cf-slug" className="form-input" value={form.slug}
                                     onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} required />
                             </div>
                         </div>
                         <div className="form-row">
                             <div className="form-group">
-                                <label className="form-label" htmlFor="cf-icon">URL іконки</label>
+                                <label className="form-label" htmlFor="cf-icon">{t('admin.catIconLabel')}</label>
                                 <input id="cf-icon" className="form-input" value={form.iconUrl ?? ''}
                                     onChange={e => setForm(f => ({ ...f, iconUrl: e.target.value || null }))} />
                             </div>
                             <div className="form-group">
-                                <label className="form-label" htmlFor="cf-parent">Батьківська категорія</label>
+                                <label className="form-label" htmlFor="cf-parent">{t('admin.catParentLabel')}</label>
                                 <select id="cf-parent" className="form-input"
                                     value={form.parentId ?? ''}
                                     onChange={e => setForm(f => ({ ...f, parentId: e.target.value ? Number(e.target.value) : null }))}>
-                                    <option value="">Немає (верхній рівень)</option>
+                                    <option value="">{t('admin.catNoParent')}</option>
                                     {flat(categories)
                                         .filter(({ cat }) => cat.id !== editing?.id)
                                         .map(({ cat, depth }) => (
@@ -448,8 +449,8 @@ const CategoriesTab = () => {
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.75rem' }}>
-                            <button type="submit" className="btn btn-primary btn-sm">Зберегти</button>
-                            <button type="button" className="btn btn-outline btn-sm" onClick={() => setShowForm(false)}>Скасувати</button>
+                            <button type="submit" className="btn btn-primary btn-sm">{t('admin.catSaveBtn')}</button>
+                            <button type="button" className="btn btn-outline btn-sm" onClick={() => setShowForm(false)}>{t('admin.itemsRevokeBtn')}</button>
                         </div>
                     </form>
                 </div>
@@ -458,7 +459,7 @@ const CategoriesTab = () => {
             {loading ? <div className="spinner" /> : (
                 <div className="admin-table-wrap">
                     <table className="admin-table">
-                        <thead><tr><th>ID</th><th>Назва</th><th>Slug</th><th>Підкатегорії</th><th>Дії</th></tr></thead>
+                        <thead><tr><th>{t('admin.itemsColId')}</th><th>{t('admin.itemsColTitle')}</th><th>{t('admin.catSlugLabel')}</th><th>{t('admin.catColSubcats')}</th><th>{t('admin.usersColActions')}</th></tr></thead>
                         <tbody>
                             {flat(categories).map(({ cat, depth }) => (
                                 <tr key={cat.id}>
@@ -467,8 +468,8 @@ const CategoriesTab = () => {
                                     <td><code>{cat.slug}</code></td>
                                     <td>{cat.subcategories.length}</td>
                                     <td className="action-cell">
-                                        <button className="btn btn-outline btn-xs" onClick={() => openEdit(cat)}>Редагувати</button>
-                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(cat.id)}>Видалити</button>
+                                        <button className="btn btn-outline btn-xs" onClick={() => openEdit(cat)}>{t('admin.catEditBtn')}</button>
+                                        <button className="btn btn-danger btn-xs" onClick={() => handleDelete(cat.id)}>{t('admin.usersDeleteBtn')}</button>
                                     </td>
                                 </tr>
                             ))}
@@ -482,6 +483,7 @@ const CategoriesTab = () => {
 
 // ── Bookings Tab ─────────────────────────────────────────
 const BookingsTab = () => {
+    const { t } = useLanguage();
     const [bookings, setBookings] = useState<BookingResponse[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
@@ -501,7 +503,7 @@ const BookingsTab = () => {
     const changeStatus = async (booking: BookingResponse, status: BookingStatus) => {
         let cancellationReason: string | undefined;
         if (status === 'CANCELLED') {
-            cancellationReason = prompt('Причина скасування:') ?? undefined;
+            cancellationReason = prompt(t('admin.bookPromptCancel')) ?? undefined;
             if (!cancellationReason) return;
         }
         try {
@@ -515,14 +517,14 @@ const BookingsTab = () => {
         <div className="admin-tab">
             {msg && <div className="alert alert-error">{msg}</div>}
             {loading ? <div className="spinner" /> : bookings.length === 0
-                ? <div className="empty-state"><div className="empty-icon">📅</div><p>Бронювань поки немає.</p></div>
+                ? <div className="empty-state"><div className="empty-icon">📅</div><p>{t('admin.bookNoData')}</p></div>
                 : (
                     <div className="admin-table-wrap">
                         <table className="admin-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th><th>Оголошення</th><th>Орендар</th>
-                                    <th>Період</th><th>Сума</th><th>Статус</th><th>Дії</th>
+                                    <th>{t('admin.usersColId')}</th><th>{t('admin.bookColItem')}</th><th>{t('admin.bookColRenter')}</th>
+                                    <th>{t('admin.bookColPeriod')}</th><th>{t('admin.bookColTotal')}</th><th>{t('admin.itemsColStatus')}</th><th>{t('admin.usersColActions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -564,21 +566,22 @@ const BookingsTab = () => {
 
 // ── Main Admin Page ───────────────────────────────────────
 const AdminPage = () => {
+    const { t } = useLanguage();
     const [tab, setTab] = useState<Tab>('stats');
 
     const tabs: { key: Tab; label: string }[] = [
-        { key: 'stats', label: '📊 Статистика' },
-        { key: 'users', label: '👤 Користувачі' },
-        { key: 'items', label: '📦 Оголошення' },
-        { key: 'verifications', label: '✅ Верифікація' },
-        { key: 'categories', label: '🗂 Категорії' },
-        { key: 'bookings', label: '📅 Бронювання' },
+        { key: 'stats', label: t('admin.tabStats') },
+        { key: 'users', label: t('admin.tabUsers') },
+        { key: 'items', label: t('admin.tabItems') },
+        { key: 'verifications', label: t('admin.tabVerifications') },
+        { key: 'categories', label: t('admin.tabCategories') },
+        { key: 'bookings', label: t('admin.tabBookings') },
     ];
 
     return (
         <div className="page">
             <div className="page-header">
-                <h1 className="page-title">Панель адміністратора</h1>
+                <h1 className="page-title">{t('admin.title')}</h1>
             </div>
             <div className="admin-tabs">
                 {tabs.map(t => (
