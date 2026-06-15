@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ItemReviewService {
     private final ItemReviewRepository itemReviewRepository;
+    private final com.wteam.backend.user_review.UserReviewRepository userReviewRepository;
     private final com.wteam.backend.booking.BookingRepository bookingRepository;
     private final com.wteam.backend.user_review.ReviewManagerService reviewManagerService;
 
@@ -42,6 +43,17 @@ public class ItemReviewService {
         review.setStatus(com.wteam.backend.common.enums.ReviewStatus.PENDING);
 
         review = itemReviewRepository.save(review);
+
+        // Duplicate the review for the Owner so the Owner gets a UserReview (targetRole = OWNER)
+        com.wteam.backend.user_review.UserReview userReviewForOwner = new com.wteam.backend.user_review.UserReview();
+        userReviewForOwner.setTargetUser(booking.getItem().getOwner());
+        userReviewForOwner.setReviewer(booking.getRenter());
+        userReviewForOwner.setBooking(booking);
+        userReviewForOwner.setTargetRole(com.wteam.backend.common.enums.TargetRole.OWNER);
+        userReviewForOwner.setRating(request.getRating());
+        userReviewForOwner.setComment(request.getComment());
+        userReviewForOwner.setStatus(com.wteam.backend.common.enums.ReviewStatus.PENDING);
+        userReviewRepository.save(userReviewForOwner);
 
         reviewManagerService.checkAndPublishReviewsIfComplete(bookingId);
 

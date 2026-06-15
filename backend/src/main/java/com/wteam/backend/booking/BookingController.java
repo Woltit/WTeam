@@ -3,6 +3,7 @@ package com.wteam.backend.booking;
 import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.booking.dto.BookingStatusUpdateRequest;
+import com.wteam.backend.security.SecurityUser;
 import com.wteam.backend.security.annotation.CurrentUser;
 import com.wteam.backend.security.dto.UserPrincipalDto;
 import jakarta.validation.Valid;
@@ -48,10 +49,10 @@ public class BookingController {
 
     @GetMapping("/owner")
     public ResponseEntity<Page<BookingResponse>> getOwnerBookings(
-            @AuthenticationPrincipal SecurityUser currentUser,
+            @CurrentUser UserPrincipalDto currentUser,
             Pageable pageable
     ) {
-        return ResponseEntity.ok(bookingService.findAllByOwnerId(currentUser.getId(), pageable));
+        return ResponseEntity.ok(bookingService.findAllByOwnerId(currentUser.id(), pageable));
     }
 
     @PatchMapping("/{bookingId}/status")
