@@ -10,6 +10,11 @@ export type BookingStatus =
     | 'CANCELLED'
     | 'DISPUTE';
 
+export interface UnavailableDateRange {
+    startDate: string;
+    endDate: string;
+}
+
 export interface BookingResponse {
     id: number;
     itemId: number;
@@ -57,4 +62,9 @@ const updateBookingStatus = async (
     return response.data;
 };
 
-export default { getAllBookings, getMyBookings, createBooking, updateBookingStatus };
+const getUnavailableDates = async (itemId: number): Promise<UnavailableDateRange[]> => {
+    const response = await api.get<UnavailableDateRange[]>(`/bookings/items/${itemId}/unavailable-dates`);
+    return response.data;
+};
+
+export default { getAllBookings, getMyBookings, createBooking, updateBookingStatus, getUnavailableDates };
