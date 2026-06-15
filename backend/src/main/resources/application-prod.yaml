@@ -5,12 +5,12 @@ spring:
       on-profile: prod
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${CLOUD_HOST}:${CLOUD_PORT}/${CLOUD_DB_NAME}?sslmode=require
+    username: ${CLOUD_USERNAME}
+    password: ${CLOUD_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: ${CLOUD_CONNECTION_LIMIT:10}
       minimum-idle: 2
       idle-timeout: 30000
       connection-timeout: 20000

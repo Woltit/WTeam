@@ -1,6 +1,10 @@
-CREATE TYPE device_type AS ENUM ('WEB', 'ANDROID', 'IOS');
+DO $$ BEGIN
+    CREATE TYPE device_type AS ENUM ('WEB', 'ANDROID', 'IOS');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TABLE user_device_tokens (
+CREATE TABLE IF NOT EXISTS user_device_tokens (
     id          BIGSERIAL   PRIMARY KEY,
     user_id     BIGINT      NOT NULL REFERENCES users(id)
         ON DELETE CASCADE,
@@ -13,4 +17,4 @@ CREATE TABLE user_device_tokens (
         DEFAULT NOW()
 );
 
-CREATE INDEX idx_user_device_tokens_user_id ON user_device_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_device_tokens_user_id ON user_device_tokens(user_id);

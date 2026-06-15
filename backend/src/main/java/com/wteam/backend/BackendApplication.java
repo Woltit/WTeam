@@ -15,7 +15,7 @@ public class BackendApplication {
     /**
      * Main.
      *
-     * @param args the args
+     * @param args the args-d
      */
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
