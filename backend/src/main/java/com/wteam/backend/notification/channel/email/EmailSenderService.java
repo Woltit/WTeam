@@ -31,7 +31,7 @@ public class EmailSenderService implements NotificationSender {
     private final UserRepository userRepository;
     private final NotificationMessageGenerator messageGenerator;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail.from}")
     private String fromEmail;
 
     @Override
