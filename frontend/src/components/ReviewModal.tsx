@@ -77,34 +77,34 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
     const modal = (
         <div
             onClick={handleBackdropClick}
-            className="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            className="modal-backdrop"
         >
-            <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl max-w-lg w-full mx-4 relative">
+            <div className="modal-content">
                 {/* ── Close Button ─────────────────────────── */}
                 <button
                     onClick={onClose}
-                    className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                    className="modal-close-btn"
                     aria-label={t('review.close')}
                 >
                     <X className="w-6 h-6" />
                 </button>
 
                 {/* ── Title ───────────────────────────────── */}
-                <h2 className="text-2xl font-bold text-white mb-8">
+                <h2 className="modal-title">
                     {type === 'item' ? t('review.rateItem') : t('review.rateRenter')}
                 </h2>
 
                 {/* ── Error Alert ─────────────────────────── */}
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/40 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm">
+                    <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
                     {/* ── Star Rating ─────────────────────── */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-slate-300 mb-3">
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label className="modal-label">
                             {type === 'item' ? t('review.itemRating') : t('review.renterRating')}
                         </label>
                         <div className="flex gap-1">
@@ -133,12 +133,12 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
                     </div>
 
                     {/* ── Comment ─────────────────────────── */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-slate-300 mb-3">
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label className="modal-label">
                             {t('review.commentLabel')}
                         </label>
                         <textarea
-                            className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none transition-all"
+                            className="modal-textarea"
                             rows={4}
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
@@ -147,19 +147,19 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, booki
                     </div>
 
                     {/* ── Action Buttons ──────────────────── */}
-                    <div className="flex gap-4 mt-6">
+                    <div className="modal-actions">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="flex-1 border border-slate-600 text-slate-300 hover:bg-slate-700 rounded-xl py-3 font-semibold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="btn btn-outline flex-1"
                         >
                             {t('review.cancel')}
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 bg-indigo-600 text-white hover:bg-indigo-500 rounded-xl py-3 font-semibold text-sm shadow-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="btn btn-primary flex-1"
                         >
                             {isSubmitting ? t('review.submitting') : t('review.submit')}
                         </button>
