@@ -7,6 +7,10 @@ import com.wteam.backend.user_profile.dto.PendingProfileResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
+import com.wteam.backend.cloudinary.ImageService;
+import com.wteam.backend.exception.cloudinary.ImageUploadException;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +37,9 @@ class UserProfileServiceTest {
 
     @Mock
     private UserProfileMapper userProfileMapper;
+
+    @Mock
+    private ImageService imageService;
 
     @InjectMocks
     private UserProfileService userProfileService;
@@ -119,9 +126,45 @@ class UserProfileServiceTest {
     }
 
     @Test
-    @DisplayName("uploadAvatar should throw UnsupportedOperationException")
-    void uploadAvatar_shouldThrowUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> userProfileService.uploadAvatar(1L, null));
+    @DisplayName("uploadAvatar should upload image and save avatar url when profile exists")
+    void uploadAvatar_whenProfileExists_shouldUploadAndSave() throws IOException {
+        Long userId = 1L;
+        MultipartFile file = mock(MultipartFile.class);
+        UserProfile profile = new UserProfile();
+        String expectedUrl = "http://cloudinary.com/avatar.jpg";
+
+        when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(profile));
+        when(imageService.uploadImage(file)).thenReturn(expectedUrl);
+
+        userProfileService.uploadAvatar(userId, file);
+
+        assertEquals(expectedUrl, profile.getAvatarUrl());
+        verify(userProfileRepository).save(profile);
+    }
+
+    @Test
+    @DisplayName("uploadAvatar should throw ProfileNotFoundException when profile does not exist")
+    void uploadAvatar_whenProfileDoesNotExist_shouldThrowProfileNotFoundException() {
+        Long userId = 1L;
+        MultipartFile file = mock(MultipartFile.class);
+
+        when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ProfileNotFoundException.class, () -> userProfileService.uploadAvatar(userId, file));
+        verifyNoInteractions(imageService);
+    }
+
+    @Test
+    @DisplayName("uploadAvatar should throw ImageUploadException when image upload fails with IOException")
+    void uploadAvatar_whenUploadFails_shouldThrowImageUploadException() throws IOException {
+        Long userId = 1L;
+        MultipartFile file = mock(MultipartFile.class);
+        UserProfile profile = new UserProfile();
+
+        when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(profile));
+        when(imageService.uploadImage(file)).thenThrow(new IOException("Connection failed"));
+
+        assertThrows(ImageUploadException.class, () -> userProfileService.uploadAvatar(userId, file));
     }
 
     @Test

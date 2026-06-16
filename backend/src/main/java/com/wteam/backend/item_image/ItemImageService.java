@@ -69,6 +69,7 @@ public class ItemImageService {
             throw new ItemImageAccessDeniedException("You are not the owner of this item");
         }
 
+        itemImage.getItem().getImages().remove(itemImage);
         itemImageRepository.delete(itemImage);
     }
 }

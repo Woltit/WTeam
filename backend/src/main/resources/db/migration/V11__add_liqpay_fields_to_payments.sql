@@ -1,0 +1,3 @@
+ALTER TABLE payments
+ADD COLUMN currency VARCHAR(3) DEFAULT 'UAH' NOT NULL,
+ADD COLUMN provider_transaction_id VARCHAR(255);

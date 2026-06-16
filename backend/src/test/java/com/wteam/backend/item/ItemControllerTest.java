@@ -5,6 +5,7 @@ import com.wteam.backend.common.enums.ItemCondition;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.item.dto.ItemRequest;
 import com.wteam.backend.item.dto.ItemResponse;
+import com.wteam.backend.item_image.ItemImageService;
 import com.wteam.backend.security.SecurityUser;
 import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.security.jwt.JwtService;
@@ -44,6 +45,7 @@ class ItemControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean ItemService itemService;
+    @MockitoBean ItemImageService itemImageService;
     @MockitoBean JwtService jwtService;
     @MockitoBean UserDetailsService userDetailsService;
     @MockitoBean CustomOAuth2UserService customOAuth2UserService;

@@ -27,9 +27,15 @@ public class Payment {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Column(nullable = false, length = 3)
+    private String currency = "UAH";
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
+
+    @Column(name = "provider_transaction_id")
+    private String providerTransactionId;
 
     @CreationTimestamp
     private Instant createdAt;

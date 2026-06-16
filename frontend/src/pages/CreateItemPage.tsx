@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import itemsApi from '../api/items';
 import categoriesApi from '../api/categories';
-import type { ItemRequest, ItemCondition } from '../types/item';
+import type { ItemRequest, ItemCondition, ItemImageResponse } from '../types/item';
 import type { CategoryResponse } from '../types/category';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -10,11 +10,13 @@ const CONDITIONS: ItemCondition[] = ['IDEAL', 'GOOD', 'NORM', 'BAD', 'NEEDS_REPA
 
 interface ItemFormProps {
     initial?: Partial<ItemRequest>;
+    existingImages?: ItemImageResponse[];
+    onDeleteExistingImage?: (imageId: number) => Promise<void>;
     onSubmit: (data: ItemRequest, images: File[], mainImageIndex: number) => Promise<void>;
     submitLabel: string;
 }
 
-export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps) => {
+export const ItemForm = ({ initial = {}, existingImages = [], onDeleteExistingImage, onSubmit, submitLabel }: ItemFormProps) => {
     const { t } = useLanguage();
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
     const [form, setForm] = useState<Omit<ItemRequest, 'tags' | 'pricePerDay' | 'pricePerWeek' | 'depositAmount' | 'categoryId'> & { 
@@ -152,6 +154,27 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
 
             <div className="form-group">
                 <label className="form-label" htmlFor="if-images">{t('itemForm.imagesLabel') || 'Images'}</label>
+                
+                {existingImages.length > 0 && (
+                    <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
+                            {t('itemForm.existingImages') || 'Existing images'}:
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {existingImages.map(img => (
+                                <div key={img.id} style={{ position: 'relative' }}>
+                                    <img src={img.imageUrl} alt="existing" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
+                                    {onDeleteExistingImage && (
+                                        <button type="button" onClick={() => onDeleteExistingImage(img.id)}
+                                            style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', borderRadius: '50%', width: '20px', height: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}
+                                        >✖</button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <input id="if-images" type="file" multiple accept="image/*" className="form-input" 
                     onChange={e => {
                         const newFiles = Array.from(e.target.files || []);

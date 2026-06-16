@@ -50,7 +50,7 @@ public class UserReviewService {
         }
 
         if (userReviewRepository.findByBookingIdAndReviewerIdAndTargetUserId(bookingId, reviewerId, targetUser.getId()).isPresent()) {
-            throw new ReviewAlreadyExistsException("Review already exists");
+            throw new ReviewAlreadyExistsException("You have already left a review for this user in this booking");
         }
 
         UserReview review = new UserReview();

@@ -40,6 +40,17 @@ const EditItemPage = () => {
         navigate(`/items/${itemId}`);
     };
 
+    const handleDeleteExistingImage = async (imageId: number) => {
+        if (!confirm(t('itemForm.confirmDeleteImage') || 'Are you sure you want to delete this image?')) return;
+        try {
+            await itemsApi.deleteItemImage(imageId);
+            setItem(prev => prev ? { ...prev, images: prev.images?.filter(i => i.id !== imageId) } : prev);
+        } catch (err) {
+            console.error('Failed to delete image', err);
+            alert(t('itemForm.deleteImageFailed') || 'Failed to delete image');
+        }
+    };
+
     if (loading) return <div className="page-loader"><div className="spinner" /></div>;
     if (error || !item) return <div className="page"><div className="alert alert-error">{error || t('itemDetail.notFound')}</div></div>;
 
@@ -65,7 +76,13 @@ const EditItemPage = () => {
                 <p className="page-subtitle">{t('itemForm.editSubtitle', { title: item.title })}</p>
             </div>
             <div className="form-card">
-                <ItemForm initial={initial} onSubmit={handleSubmit} submitLabel={t('itemForm.submitEdit')} />
+                <ItemForm 
+                    initial={initial} 
+                    existingImages={item.images}
+                    onDeleteExistingImage={handleDeleteExistingImage}
+                    onSubmit={handleSubmit} 
+                    submitLabel={t('itemForm.submitEdit')} 
+                />
             </div>
         </div>
     );

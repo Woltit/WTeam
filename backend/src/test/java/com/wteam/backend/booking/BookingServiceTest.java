@@ -4,6 +4,7 @@ import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.common.enums.BookingStatus;
 import com.wteam.backend.exception.booking.ItemNotAvailableException;
+import com.wteam.backend.exception.booking.InvalidBookingStateException;
 import com.wteam.backend.exception.item.ItemNotFoundException;
 import com.wteam.backend.item.Item;
 import com.wteam.backend.item.ItemRepository;
@@ -189,8 +190,8 @@ class BookingServiceTest {
     }
 
     @Test
-    @DisplayName("cancelBooking should throw IllegalStateException when booking is already CANCELLED")
-    void cancelBooking_whenAlreadyCancelled_throwsIllegalState() {
+    @DisplayName("cancelBooking should throw InvalidBookingStateException when booking is already CANCELLED")
+    void cancelBooking_whenAlreadyCancelled_throwsInvalidBookingStateException() {
         User owner = user(3L);
         User renter = user(2L);
         Item item = item(1L, owner, BigDecimal.TEN, BigDecimal.ONE);
@@ -198,7 +199,7 @@ class BookingServiceTest {
 
         when(bookingRepository.findById(10L)).thenReturn(Optional.of(booking));
 
-        assertThrows(IllegalStateException.class,
+        assertThrows(InvalidBookingStateException.class,
                 () -> bookingService.cancelBooking(10L, 2L, "reason"));
     }
 

@@ -36,7 +36,7 @@ public class ItemReviewService {
         }
 
         if (itemReviewRepository.findByBookingIdAndReviewerId(bookingId, reviewerId).isPresent()) {
-            throw new ReviewAlreadyExistsException("Review already exists");
+            throw new ReviewAlreadyExistsException("You have already left an item review for this booking");
         }
 
         ItemReview review = new ItemReview();
