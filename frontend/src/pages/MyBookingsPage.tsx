@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { ReviewModal } from '../components/ReviewModal';
 import bookingsApi from '../api/bookings';
 import itemsApi from '../api/items';
+import paymentsApi from '../api/payments';
 import type { BookingResponse, BookingStatus } from '../api/bookings';
 import type { ItemResponse } from '../types/item';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -114,6 +115,15 @@ const MyBookingsPage = () => {
             await bookingsApi.completeBooking(bookingId);
             alert(t('bookings.alertCompleteSuccess'));
             fetchBookings();
+        } catch {
+            alert(t('bookings.actionError'));
+        }
+    };
+
+    const handlePay = async (bookingId: number) => {
+        try {
+            const url = await paymentsApi.createPaymentUrl(bookingId);
+            window.location.href = url;
         } catch {
             alert(t('bookings.actionError'));
         }
@@ -359,12 +369,22 @@ const MyBookingsPage = () => {
                                                 </div>
 
                                                 {activeTab === 'renter' && (booking.status === 'PENDING' || booking.status === 'APPROVED' || booking.status === 'IN_PROGRESS') && (
-                                                    <button 
-                                                        className="btn btn-danger btn-sm w-full justify-center" 
-                                                        onClick={() => setCancellingBookingId(booking.id)}
-                                                    >
-                                                        {t('bookings.actionCancel')}
-                                                    </button>
+                                                    <div className="flex flex-col gap-2 w-full">
+                                                        {booking.status === 'APPROVED' && (
+                                                            <button 
+                                                                className="btn btn-success btn-sm w-full justify-center" 
+                                                                onClick={() => handlePay(booking.id)}
+                                                            >
+                                                                Оплатити (LiqPay)
+                                                            </button>
+                                                        )}
+                                                        <button 
+                                                            className="btn btn-danger btn-sm w-full justify-center" 
+                                                            onClick={() => setCancellingBookingId(booking.id)}
+                                                        >
+                                                            {t('bookings.actionCancel')}
+                                                        </button>
+                                                    </div>
                                                 )}
 
                                                 {activeTab === 'owner' && booking.status === 'PENDING' && (

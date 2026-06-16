@@ -34,8 +34,6 @@ const EditItemPage = () => {
         await itemsApi.updateItem(Number(itemId), data);
         if (images && images.length > 0) {
             for (let i = 0; i < images.length; i++) {
-                // Since the user selected a new image as main, we pass true if it is the mainImageIndex.
-                // Our backend service correctly removes isMain from existing images if isMain=true is passed.
                 await itemsApi.uploadItemImage(Number(itemId), images[i], i === mainImageIndex);
             }
         }

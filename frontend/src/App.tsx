@@ -15,6 +15,7 @@ import ChatPage from './pages/ChatPage';
 import AiPage from './pages/AiPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import MyItemsPage from './pages/MyItemsPage';
+import PayStubPage from './pages/PayStubPage';
 
 function App() {
     return (
@@ -91,6 +92,7 @@ function App() {
                     }
                 />
                 <Route path="/ai" element={<AiPage />} />
+                <Route path="/pay-stub/:paymentId" element={<PayStubPage />} />
             </Route>
         </Routes>
     );

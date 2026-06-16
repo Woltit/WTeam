@@ -25,6 +25,8 @@ const ItemDetailPage = () => {
     const [booking, setBooking] = useState(false);
     const [bookingError, setBookingError] = useState('');
     const [unavailableDates, setUnavailableDates] = useState<UnavailableDateRange[]>([]);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
 
     useEffect(() => {
         if (!itemId) return;
@@ -85,10 +87,34 @@ const ItemDetailPage = () => {
         <div className="page">
             <div className="item-detail">
                 {item.images && item.images.length > 0 ? (
-                    <div className="item-detail-img-gallery" style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem' }}>
-                        {item.images.map(img => (
-                            <img key={img.id} src={img.imageUrl} alt="item" style={{ height: '300px', objectFit: 'cover', borderRadius: '12px' }} />
-                        ))}
+                    <div className="item-detail-img-gallery" style={{ display: 'flex', flexDirection: 'column', paddingBottom: '1rem' }}>
+                        <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => { 
+                            const mainImg = item.images!.find(i => i.isMain) || item.images![0];
+                            setLightboxIndex(item.images!.indexOf(mainImg)); 
+                            setLightboxOpen(true); 
+                        }}>
+                            <img 
+                                src={(item.images.find(i => i.isMain) || item.images[0]).imageUrl} 
+                                alt="main item" 
+                                style={{ width: '100%', height: '400px', objectFit: 'cover', borderRadius: '12px' }} 
+                            />
+                        </div>
+                        {item.images.length > 1 && (
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                                {item.images.map((img, idx) => (
+                                    <img 
+                                        key={img.id} 
+                                        src={img.imageUrl} 
+                                        alt="item thumb" 
+                                        onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
+                                        style={{ 
+                                            height: '80px', width: '80px', objectFit: 'cover', borderRadius: '8px', 
+                                            cursor: 'pointer', border: '1px solid #ddd'
+                                        }} 
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="item-detail-img-placeholder">
@@ -235,6 +261,26 @@ const ItemDetailPage = () => {
                     </div>
                 </div>
             </div>
+            {lightboxOpen && item?.images && item.images.length > 0 && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <button onClick={() => setLightboxOpen(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' }}>✖</button>
+                    {item.images.length > 1 && (
+                        <button 
+                            onClick={() => setLightboxIndex(prev => prev > 0 ? prev - 1 : item.images!.length - 1)} 
+                            style={{ position: 'absolute', left: '20px', background: 'none', border: 'none', color: 'white', fontSize: '4rem', cursor: 'pointer' }}>
+                            ‹
+                        </button>
+                    )}
+                    <img src={item.images[lightboxIndex].imageUrl} style={{ maxHeight: '90vh', maxWidth: '90vw', objectFit: 'contain' }} alt="lightbox" />
+                    {item.images.length > 1 && (
+                        <button 
+                            onClick={() => setLightboxIndex(prev => prev < item.images!.length - 1 ? prev + 1 : 0)} 
+                            style={{ position: 'absolute', right: '20px', background: 'none', border: 'none', color: 'white', fontSize: '4rem', cursor: 'pointer' }}>
+                            ›
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

@@ -154,8 +154,9 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
                 <label className="form-label" htmlFor="if-images">{t('itemForm.imagesLabel') || 'Images'}</label>
                 <input id="if-images" type="file" multiple accept="image/*" className="form-input" 
                     onChange={e => {
-                        setImages(Array.from(e.target.files || []));
-                        setMainImageIndex(0);
+                        const newFiles = Array.from(e.target.files || []);
+                        setImages(prev => [...prev, ...newFiles]);
+                        e.target.value = ''; // Reset input to allow selecting same files again
                     }} />
                 {images.length > 0 && (
                     <div style={{ marginTop: '0.5rem' }}>
@@ -164,15 +165,32 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {images.map((file, idx) => (
-                                <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-                                    <input 
-                                        type="radio" 
-                                        name="mainImage" 
-                                        checked={mainImageIndex === idx} 
-                                        onChange={() => setMainImageIndex(idx)}
-                                    />
-                                    {file.name}
-                                </label>
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, cursor: 'pointer' }}>
+                                        <input 
+                                            type="radio" 
+                                            name="mainImage" 
+                                            checked={mainImageIndex === idx} 
+                                            onChange={() => setMainImageIndex(idx)}
+                                        />
+                                        <span style={{ wordBreak: 'break-all' }}>{file.name}</span>
+                                    </label>
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            setImages(prev => prev.filter((_, i) => i !== idx));
+                                            if (mainImageIndex === idx) setMainImageIndex(0);
+                                            else if (mainImageIndex > idx) setMainImageIndex(m => m - 1);
+                                        }}
+                                        style={{ 
+                                            background: 'none', border: 'none', color: '#ef4444', 
+                                            cursor: 'pointer', fontSize: '1rem', padding: '0.2rem' 
+                                        }}
+                                        title="Remove image"
+                                    >
+                                        ✖
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     </div>
