@@ -14,6 +14,7 @@ import ChatsPage from './pages/ChatsPage';
 import ChatPage from './pages/ChatPage';
 import AiPage from './pages/AiPage';
 import MyBookingsPage from './pages/MyBookingsPage';
+import MyItemsPage from './pages/MyItemsPage';
 
 function App() {
     return (
@@ -54,6 +55,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <MyBookingsPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/my-items"
+                    element={
+                        <ProtectedRoute>
+                            <MyItemsPage />
                         </ProtectedRoute>
                     }
                 />

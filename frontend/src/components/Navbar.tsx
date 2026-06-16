@@ -35,6 +35,9 @@ const Navbar = () => {
                         <NavLink to="/my-bookings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                             {t('nav.myBookings')}
                         </NavLink>
+                        <NavLink to="/my-items" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                            {t('nav.myItems')}
+                        </NavLink>
                         <NavLink to="/items/create" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                             {t('nav.addListing')}
                         </NavLink>

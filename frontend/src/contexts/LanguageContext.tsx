@@ -11,6 +11,7 @@ export const translations: Record<Language, TranslationDictionary> = {
         'nav.aiHelper': '✨ AI Помічник',
         'nav.chats': 'Чати',
         'nav.myBookings': 'Мої бронювання',
+        'nav.myItems': 'Мої оголошення',
         'nav.addListing': 'Додати оголошення',
         'nav.profile': 'Профіль',
         'nav.admin': 'Адмін',
@@ -127,6 +128,7 @@ export const translations: Record<Language, TranslationDictionary> = {
         'profile.error': 'Помилка оновлення профілю.',
 
         // MyBookingsPage
+        'myItems.title': 'Мої оголошення',
         'bookings.title': 'Мої бронювання',
         'bookings.tabRents': 'Я орендую',
         'bookings.tabOffers': 'Мої пропозиції',
@@ -417,6 +419,7 @@ export const translations: Record<Language, TranslationDictionary> = {
         'nav.aiHelper': '✨ AI Assistant',
         'nav.chats': 'Chats',
         'nav.myBookings': 'My Bookings',
+        'nav.myItems': 'My Items',
         'nav.addListing': 'Add Listing',
         'nav.profile': 'Profile',
         'nav.admin': 'Admin',
@@ -533,6 +536,7 @@ export const translations: Record<Language, TranslationDictionary> = {
         'profile.error': 'Failed to update profile.',
 
         // MyBookingsPage
+        'myItems.title': 'My Items',
         'bookings.title': 'My Bookings',
         'bookings.tabRents': 'My Rents',
         'bookings.tabOffers': 'My Offers',
