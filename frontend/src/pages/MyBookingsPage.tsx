@@ -151,13 +151,16 @@ const MyBookingsPage = () => {
                 embedTo: "#liqpay_checkout",
                 language: language === 'ua' ? 'uk' : 'en',
                 mode: "popup"
-            }).on("liqpay.callback", function(res: any){
+            }).on("liqpay.callback", async function(res: any){
                 console.log(res.status);
                 if (res.status === 'success' || res.status === 'wait_compensate') {
+                    // Manual verification fallback for localhost
+                    try { await paymentsApi.verifyPaymentStatus(bookingId); } catch(e){}
                     alert(t('bookings.paySuccess') || 'Payment successful!');
                     fetchBookings();
                 }
-            }).on("liqpay.close", function(){
+            }).on("liqpay.close", async function(){
+                try { await paymentsApi.verifyPaymentStatus(bookingId); } catch(e){}
                 fetchBookings(); // refresh in case it succeeded but callback was missed
             });
         } catch {

@@ -89,4 +89,56 @@ public class PaymentService {
             throw new RuntimeException("Error processing LiqPay callback", e);
         }
     }
+
+    @Transactional
+    public void verifyPaymentStatus(Long bookingId) {
+        Payment payment = paymentRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            return;
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("action", "status");
+        params.put("version", 3);
+        params.put("order_id", payment.getProviderTransactionId());
+
+        String data = liqPayService.createData(params);
+        String signature = liqPayService.createSignature(data);
+
+        org.springframework.util.MultiValueMap<String, String> body = new org.springframework.util.LinkedMultiValueMap<>();
+        body.add("data", data);
+        body.add("signature", signature);
+
+        try {
+            String responseStr = org.springframework.web.client.RestClient.create()
+                    .post()
+                    .uri("https://www.liqpay.ua/api/request")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(body)
+                    .retrieve()
+                    .body(String.class);
+
+            com.fasterxml.jackson.databind.JsonNode jsonNode = new com.fasterxml.jackson.databind.ObjectMapper().readTree(responseStr);
+            String status = jsonNode.has("status") ? jsonNode.get("status").asText() : "";
+
+            if ("success".equals(status) || "wait_compensate".equals(status)) {
+                payment.setStatus(PaymentStatus.SUCCESS);
+                Booking booking = payment.getBooking();
+                booking.setStatus(BookingStatus.PAID);
+                bookingRepository.save(booking);
+            } else if ("error".equals(status) || "failure".equals(status)) {
+                payment.setStatus(PaymentStatus.FAILED);
+            } else if ("reversed".equals(status)) {
+                payment.setStatus(PaymentStatus.REFUNDED);
+                Booking booking = payment.getBooking();
+                booking.setStatus(BookingStatus.CANCELLED);
+                bookingRepository.save(booking);
+            }
+            paymentRepository.save(payment);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to verify payment status with LiqPay", e);
+        }
+    }
 }
