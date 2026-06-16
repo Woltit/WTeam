@@ -11,23 +11,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Контролер для обробки запитів автентифікації, таких як реєстрація, вхід та оновлення токена.
  */
+@Tag(name = "Автентифікація", description = "API для реєстрації, входу та управління токенами")
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
 
-    /**
-     * Реєструє нового користувача в системі.
-     *
-     * @param registerRequest дані для реєстрації
-     * @return відповідь з токеном доступу та токеном оновлення
-     */
+    @Operation(summary = "Реєстрація", description = "Реєструє нового користувача в системі")
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterRequest registerRequest
@@ -37,12 +35,7 @@ public class AuthController {
                 .body(authService.register(registerRequest));
     }
 
-    /**
-     * Автентифікує користувача та повертає токени доступу та оновлення.
-     *
-     * @param loginRequest облікові дані для входу
-     * @return відповідь з токеном доступу та токеном оновлення
-     */
+    @Operation(summary = "Вхід", description = "Автентифікує користувача за email/паролем та повертає JWT токени")
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest loginRequest
@@ -50,12 +43,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
-    /**
-     * Оновлює токен доступу, використовуючи наданий токен оновлення.
-     *
-     * @param refreshTokenRequest запит на оновлення токена
-     * @return відповідь з новим токеном доступу та токеном оновлення
-     */
+    @Operation(summary = "Оновлення токена", description = "Оновлює токен доступу за допомогою Refresh токена")
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(
             @Valid @RequestBody RefreshTokenRequest refreshTokenRequest

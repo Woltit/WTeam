@@ -13,11 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.wteam.backend.item_image.ItemImageService;
 import com.wteam.backend.item_image.dto.ItemImageResponse;
 
+@Tag(name = "Товари", description = "API для управління речами, які здаються в оренду, та їхніми фотографіями")
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -25,11 +28,13 @@ public class ItemController {
     private final ItemService itemService;
     private final ItemImageService itemImageService;
 
+    @Operation(summary = "Отримати доступні товари", description = "Повертає список товарів, які наразі доступні для оренди (видимі для всіх).")
     @GetMapping("/available")
     public ResponseEntity<Page<ItemResponse>> getAllItemsWhichAreAvailable(Pageable pageable) {
         return ResponseEntity.ok(itemService.getAllItemsWhichAreAvailable(pageable));
     }
 
+    @Operation(summary = "Мої товари", description = "Повертає список товарів, які створив поточний користувач.")
     @GetMapping("/my")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<ItemResponse>> getMyItems(
@@ -39,17 +44,20 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getMyItems(user.id(), pageable));
     }
 
+    @Operation(summary = "Отримати товар за ID", description = "Повертає детальну інформацію про конкретний товар.")
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemResponse> getItemById(@PathVariable Long itemId) {
         return ResponseEntity.ok(itemService.getItemById(itemId));
     }
 
+    @Operation(summary = "Всі товари (Адмін)", description = "Тільки для адміністраторів. Повертає список абсолютно всіх товарів у системі.")
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ItemResponse>> getAllItems(Pageable pageable) {
         return ResponseEntity.ok(itemService.getAllItems(pageable));
     }
 
+    @Operation(summary = "Створити товар", description = "Додає нову річ для оренди.")
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ItemResponse> createItem(
@@ -61,6 +69,7 @@ public class ItemController {
                 .body(itemService.createItem(user.id(), request));
     }
 
+    @Operation(summary = "Оновити товар", description = "Редагує інформацію про товар. Доступно власнику або адміністратору.")
     @PutMapping("/{itemId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ItemResponse> updateItem(
@@ -71,6 +80,7 @@ public class ItemController {
         return ResponseEntity.ok(itemService.updateItem(itemId, user.id(), request));
     }
 
+    @Operation(summary = "Видалити товар", description = "Видаляє товар з системи. Доступно власнику або адміністратору.")
     @DeleteMapping("/{itemId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteItem(
@@ -84,6 +94,7 @@ public class ItemController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Верифікувати товар (Адмін)", description = "Встановлює статус перевірки (verified) для товару.")
     @PatchMapping("/{itemId}/verification")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ItemResponse> setItemVerification(
@@ -93,6 +104,7 @@ public class ItemController {
         return ResponseEntity.ok(itemService.setItemVerified(itemId, verified));
     }
 
+    @Operation(summary = "Завантажити фото товару", description = "Додає фотографію до товару. Можна вказати, чи є вона головною.")
     @PostMapping("/{itemId}/images")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ItemImageResponse> uploadItemImage(
@@ -104,6 +116,7 @@ public class ItemController {
         return ResponseEntity.ok(itemImageService.uploadItemImage(itemId, user.id(), file, isMain));
     }
 
+    @Operation(summary = "Видалити фото товару", description = "Видаляє конкретну фотографію товару.")
     @DeleteMapping("/images/{imageId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteItemImage(
@@ -114,6 +127,7 @@ public class ItemController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Зробити фото головним", description = "Встановлює вибране фото як головне (обкладинка) для товару.")
     @PutMapping("/images/{imageId}/main")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> setMainItemImage(

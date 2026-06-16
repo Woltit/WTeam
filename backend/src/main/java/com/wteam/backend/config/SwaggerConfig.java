@@ -9,11 +9,17 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(title = "RentGo API", version = "v1"),
+        info = @Info(
+                title = "WTeam API", 
+                version = "v1",
+                description = "Документація REST API для платформи оренди речей WTeam. " +
+                              "Для тестування захищених ендпоінтів використовуйте кнопку 'Authorize' і введіть свій JWT токен."
+        ),
         security = @SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(
         name = "bearerAuth",
+        description = "Введіть JWT токен (без слова Bearer)",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT"

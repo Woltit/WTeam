@@ -7,21 +7,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Категорії", description = "API для управління категоріями товарів")
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
 
+    @Operation(summary = "Отримати всі категорії", description = "Повертає дерево категорій (з підкатегоріями). Доступно для всіх.")
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
         return ResponseEntity.ok(categoryService.getCategoryTree());
     }
 
+    @Operation(summary = "Створити категорію", description = "Тільки для адміністраторів. Створює нову категорію.")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> createCategory(
@@ -32,6 +37,7 @@ public class CategoryController {
                 .body(categoryService.createCategory(request));
     }
 
+    @Operation(summary = "Оновити категорію", description = "Тільки для адміністраторів. Оновлює існуючу категорію за ID.")
     @PutMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> updateCategory(
@@ -41,6 +47,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.updateCategory(categoryId, request));
     }
 
+    @Operation(summary = "Видалити категорію", description = "Тільки для адміністраторів. Видаляє категорію за ID.")
     @DeleteMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
