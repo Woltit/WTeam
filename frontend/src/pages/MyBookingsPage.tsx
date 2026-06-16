@@ -167,8 +167,10 @@ const MyBookingsPage = () => {
                 try { await paymentsApi.verifyPaymentStatus(bookingId); } catch(e){}
                 fetchBookings(); // refresh in case it succeeded but callback was missed
             });
-        } catch {
-            toast.error(t('bookings.actionError'));
+        } catch (err: any) {
+            console.error("LiqPay error: ", err);
+            const errorMsg = err.response?.data?.message || err.message || t('bookings.actionError');
+            toast.error(`Помилка: ${errorMsg}`);
         }
     };
 
