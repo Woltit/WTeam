@@ -211,7 +211,9 @@ const ItemDetailPage = () => {
                                             ? <><span className="spinner-sm" /> {t('itemDetail.bookingInProgress')}</>
                                             : startDate && endDate
                                             ? t('itemDetail.bookAndMessage')
-                                            : t('itemDetail.selectDatesPrompt')}
+                                            : startDate
+                                            ? t('cal.selectEnd', { start: startDate })
+                                            : t('cal.selectStart')}
                                     </button>
                                 </form>
                             </div>

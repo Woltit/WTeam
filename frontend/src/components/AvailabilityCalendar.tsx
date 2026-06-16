@@ -50,18 +50,21 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
             setStart(date);
             setEnd(null);
             setStep('end');
+            onRangeSelect(date, '');
             return;
         }
 
         if (date < start) {
             setStart(date);
             setEnd(null);
+            onRangeSelect(date, '');
             return;
         }
 
         if (rangeHasUnavail(start, date)) {
             setStart(date);
             setEnd(null);
+            onRangeSelect(date, '');
             return;
         }
 
@@ -145,13 +148,7 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
                 <span className="cal-legend-item"><span className="cal-swatch cal-swatch-sel" />{t('cal.selected')}</span>
             </div>
 
-            <p className="cal-hint">
-                {!start
-                    ? t('cal.selectStart')
-                    : !end
-                    ? t('cal.selectEnd', { start })
-                    : `${start} → ${end}`}
-            </p>
+
 
             {start && end && dayCount > 0 && (
                 <div className="booking-price-preview">
