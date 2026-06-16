@@ -120,27 +120,46 @@ const MyBookingsPage = () => {
         }
     };
 
+    const loadLiqPayScript = (): Promise<void> => {
+        return new Promise((resolve) => {
+            if ((window as any).LiqPayCheckout) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://static.liqpay.ua/libjs/checkout.js';
+            script.onload = () => resolve();
+            document.body.appendChild(script);
+        });
+    };
+
     const handlePay = async (bookingId: number) => {
         try {
             const { data, signature } = await paymentsApi.createPaymentCheckout(bookingId);
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = 'https://www.liqpay.ua/api/3/checkout';
+            await loadLiqPayScript();
             
-            const dataInput = document.createElement('input');
-            dataInput.type = 'hidden';
-            dataInput.name = 'data';
-            dataInput.value = data;
+            let container = document.getElementById('liqpay_checkout');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'liqpay_checkout';
+                document.body.appendChild(container);
+            }
             
-            const signatureInput = document.createElement('input');
-            signatureInput.type = 'hidden';
-            signatureInput.name = 'signature';
-            signatureInput.value = signature;
-            
-            form.appendChild(dataInput);
-            form.appendChild(signatureInput);
-            document.body.appendChild(form);
-            form.submit();
+            (window as any).LiqPayCheckout.init({
+                data: data,
+                signature: signature,
+                embedTo: "#liqpay_checkout",
+                language: language === 'ua' ? 'uk' : 'en',
+                mode: "popup"
+            }).on("liqpay.callback", function(res: any){
+                console.log(res.status);
+                if (res.status === 'success' || res.status === 'wait_compensate') {
+                    alert(t('bookings.paySuccess') || 'Payment successful!');
+                    fetchBookings();
+                }
+            }).on("liqpay.close", function(res: any){
+                fetchBookings(); // refresh in case it succeeded but callback was missed
+            });
         } catch {
             alert(t('bookings.actionError'));
         }

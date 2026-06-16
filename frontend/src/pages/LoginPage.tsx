@@ -7,9 +7,12 @@ import { getApiErrorMessage } from '../utils/apiError';
 import ThemeToggle from '../components/ThemeToggle';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Eye, EyeOff } from 'lucide-react';
+
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { t } = useLanguage();
@@ -60,15 +63,34 @@ function LoginPage() {
                     </div>
                     <div className="form-group">
                         <label className="form-label" htmlFor="password">{t('login.password')}</label>
-                        <input
-                             id="password"
-                             type="password"
-                             className="form-input"
-                             placeholder="••••••••"
-                             value={password}
-                             onChange={e => setPassword(e.target.value)}
-                             required
-                         />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                 id="password"
+                                 type={showPassword ? "text" : "password"}
+                                 className="form-input"
+                                 style={{ paddingRight: '2.5rem' }}
+                                 placeholder="••••••••"
+                                 value={password}
+                                 onChange={e => setPassword(e.target.value)}
+                                 required
+                             />
+                             <button
+                                 type="button"
+                                 onClick={() => setShowPassword(!showPassword)}
+                                 style={{
+                                     position: 'absolute',
+                                     right: '0.75rem',
+                                     top: '50%',
+                                     transform: 'translateY(-50%)',
+                                     background: 'none',
+                                     border: 'none',
+                                     cursor: 'pointer',
+                                     color: 'var(--text-muted)'
+                                 }}
+                             >
+                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                             </button>
+                        </div>
                     </div>
                     <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
                         {loading ? <span className="spinner-sm" /> : t('login.submit')}
