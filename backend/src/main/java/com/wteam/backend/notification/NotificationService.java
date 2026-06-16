@@ -11,6 +11,7 @@ import com.wteam.backend.notification.template.NotificationMessageGenerator;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -35,7 +37,11 @@ public class NotificationService {
         NotificationChannel channel = event.channel();
         Map<String, Object> payload = event.payload();
 
-        User user = userRepository.getReferenceById(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            log.warn("Cannot process notification event: user with ID {} does not exist. Ignoring event.", userId);
+            return;
+        }
 
         NotificationMessage notificationMessage = messageGenerator.generate(type, payload);
 

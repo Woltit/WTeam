@@ -38,4 +38,11 @@ export interface ItemResponse {
     isVerified: boolean
     createdAt: string
     updatedAt: string
+    images?: ItemImageResponse[]
+}
+
+export interface ItemImageResponse {
+    id: number
+    imageUrl: string
+    isMain: boolean
 }

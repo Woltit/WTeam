@@ -10,7 +10,7 @@ const CONDITIONS: ItemCondition[] = ['IDEAL', 'GOOD', 'NORM', 'BAD', 'NEEDS_REPA
 
 interface ItemFormProps {
     initial?: Partial<ItemRequest>;
-    onSubmit: (data: ItemRequest) => Promise<void>;
+    onSubmit: (data: ItemRequest, images: File[]) => Promise<void>;
     submitLabel: string;
 }
 
@@ -35,6 +35,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
         city: initial.city ?? '',
         address: initial.address ?? '',
     });
+    const [images, setImages] = useState<File[]>([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -60,7 +61,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
                 pricePerWeek: form.pricePerWeek === '' ? null : Number(form.pricePerWeek),
                 depositAmount: Number(form.depositAmount),
                 tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-            } as any);
+            } as any, images);
         } catch (err: unknown) {
             const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
             setError(msg ?? t('itemForm.somethingWentWrong'));
@@ -146,7 +147,16 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
                 </div>
             </div>
 
-
+            <div className="form-group">
+                <label className="form-label" htmlFor="if-images">{t('itemForm.imagesLabel', 'Images')}</label>
+                <input id="if-images" type="file" multiple accept="image/*" className="form-input" 
+                    onChange={e => setImages(Array.from(e.target.files || []))} />
+                {images.length > 0 && (
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#666' }}>
+                        {images.length} {t('itemForm.imagesSelected', 'images selected')}
+                    </div>
+                )}
+            </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? <span className="spinner-sm" /> : submitLabel}
@@ -159,8 +169,13 @@ const CreateItemPage = () => {
     const navigate = useNavigate();
     const { t } = useLanguage();
 
-    const handleSubmit = async (data: ItemRequest) => {
+    const handleSubmit = async (data: ItemRequest, images: File[]) => {
         const item = await itemsApi.createItem(data);
+        if (images && images.length > 0) {
+            for (let i = 0; i < images.length; i++) {
+                await itemsApi.uploadItemImage(item.id, images[i], i === 0);
+            }
+        }
         navigate(`/items/${item.id}`);
     };
 

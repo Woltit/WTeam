@@ -84,9 +84,17 @@ const ItemDetailPage = () => {
     return (
         <div className="page">
             <div className="item-detail">
-                <div className="item-detail-img-placeholder">
-                    <span className="item-detail-icon">📦</span>
-                </div>
+                {item.images && item.images.length > 0 ? (
+                    <div className="item-detail-img-gallery" style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+                        {item.images.map(img => (
+                            <img key={img.id} src={img.imageUrl} alt="item" style={{ height: '300px', objectFit: 'cover', borderRadius: '12px' }} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="item-detail-img-placeholder">
+                        <span className="item-detail-icon">📦</span>
+                    </div>
+                )}
 
                 <div className="item-detail-content">
                     <div className="item-detail-header">

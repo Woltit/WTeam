@@ -3,16 +3,19 @@ package com.wteam.backend.item;
 import com.wteam.backend.item.dto.ItemRequest;
 import com.wteam.backend.item.dto.ItemResponse;
 import com.wteam.backend.user_profile.UserProfileMapper;
+import com.wteam.backend.item_image.ItemImageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class ItemMapper {
     private final UserProfileMapper userProfileMapper;
+    private final ItemImageMapper itemImageMapper;
 
     public ItemResponse toItemResponse(Item item) {
         if (item == null) {
@@ -44,7 +47,8 @@ public class ItemMapper {
                 item.getLongitude(),
                 item.isVerified(),
                 item.getCreatedAt(),
-                item.getUpdatedAt()
+                item.getUpdatedAt(),
+                item.getImages() != null ? item.getImages().stream().map(itemImageMapper::toResponse).collect(Collectors.toList()) : null
         );
     }
 

@@ -43,6 +43,20 @@ const deleteItem = async (itemId: number) => {
     await api.delete(`/items/${itemId}`);
 };
 
+const uploadItemImage = async (itemId: number, file: File, isMain: boolean = false) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('isMain', isMain.toString());
+    const response = await api.post(`/items/${itemId}/images`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
+const deleteItemImage = async (imageId: number) => {
+    await api.delete(`/items/images/${imageId}`);
+};
+
 const setItemVerified = async (itemId: number, verified: boolean) => {
     const response = await api.patch<ItemResponse>(`/items/${itemId}/verification`, null, {
         params: { verified },
@@ -50,4 +64,4 @@ const setItemVerified = async (itemId: number, verified: boolean) => {
     return response.data;
 };
 
-export default { getAvailableItems, getMyItems, getItemById, getAllItems, createItem, updateItem, deleteItem, setItemVerified };
+export default { getAvailableItems, getMyItems, getItemById, getAllItems, createItem, updateItem, deleteItem, setItemVerified, uploadItemImage, deleteItemImage };

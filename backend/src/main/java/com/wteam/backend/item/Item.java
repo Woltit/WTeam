@@ -12,6 +12,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import com.wteam.backend.item_image.ItemImage;
 
 import static com.wteam.backend.common.validation.ValidationConstants.Item.TITLE_MAX_LENGTH;
 
@@ -150,4 +153,11 @@ public class Item extends BaseEntityFull {
     @Column(name = "total_reviews")
     @Builder.Default
     private Integer totalReviews = 0;
+
+    /**
+     * Зображення товару.
+     */
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ItemImage> images = new ArrayList<>();
 }

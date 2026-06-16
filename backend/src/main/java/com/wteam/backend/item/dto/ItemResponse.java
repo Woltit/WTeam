@@ -7,6 +7,7 @@ import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import com.wteam.backend.item_image.dto.ItemImageResponse;
 
 public record ItemResponse(
         Long id,
@@ -27,5 +28,6 @@ public record ItemResponse(
         BigDecimal longitude,
         boolean isVerified,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        List<ItemImageResponse> images
 ) {}

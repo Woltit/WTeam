@@ -13,12 +13,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.wteam.backend.cloudinary.ImageService;
+import com.wteam.backend.exception.cloudinary.ImageUploadException;
 
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
+    private final ImageService imageService;
 
     @Transactional(readOnly = true)
     public UserProfileResponse getProfile(Long userId) {
@@ -44,11 +47,16 @@ public class UserProfileService {
         return userProfileMapper.toProfileResponse(userProfileRepository.save(userProfile));
     }
 
-    // TODO: потім зберегти в AWS S3 чи інше місце
     @Transactional
     public void uploadAvatar(Long userId, MultipartFile file) {
-//        UserProfile userProfile = getUserProfile(userId);
-        throw new UnsupportedOperationException();
+        try {
+            UserProfile userProfile = getUserProfile(userId);
+            String avatarUrl = imageService.uploadImage(file);
+            userProfile.setAvatarUrl(avatarUrl);
+            userProfileRepository.save(userProfile);
+        } catch (java.io.IOException e) {
+            throw new ImageUploadException("Failed to upload avatar", e);
+        }
     }
 
     @Transactional(readOnly = true)

@@ -30,8 +30,15 @@ const EditItemPage = () => {
             .finally(() => setLoading(false));
     }, [itemId, user, navigate, t]);
 
-    const handleSubmit = async (data: ItemRequest) => {
+    const handleSubmit = async (data: ItemRequest, images: File[]) => {
         await itemsApi.updateItem(Number(itemId), data);
+        if (images && images.length > 0) {
+            for (let i = 0; i < images.length; i++) {
+                // If it's a new upload on edit, maybe append it as non-main unless item has no images?
+                // For simplicity, just upload them
+                await itemsApi.uploadItemImage(Number(itemId), images[i], false);
+            }
+        }
         navigate(`/items/${itemId}`);
     };
 

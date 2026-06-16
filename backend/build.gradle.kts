@@ -112,6 +112,7 @@ dependencies {
     implementation("com.google.firebase:firebase-admin:$firebaseAdminVersion")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
+    implementation("com.cloudinary:cloudinary-http44:1.39.0")
 
     compileOnly("org.projectlombok:lombok")
 

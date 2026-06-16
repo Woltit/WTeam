@@ -14,12 +14,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.wteam.backend.item_image.ItemImageService;
+import com.wteam.backend.item_image.dto.ItemImageResponse;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
+    private final ItemImageService itemImageService;
 
     @GetMapping("/available")
     public ResponseEntity<Page<ItemResponse>> getAllItemsWhichAreAvailable(Pageable pageable) {
@@ -87,5 +91,26 @@ public class ItemController {
             @RequestParam boolean verified
     ) {
         return ResponseEntity.ok(itemService.setItemVerified(itemId, verified));
+    }
+
+    @PostMapping("/{itemId}/images")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ItemImageResponse> uploadItemImage(
+            @PathVariable Long itemId,
+            @CurrentUser UserPrincipalDto user,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "isMain", defaultValue = "false") boolean isMain
+    ) {
+        return ResponseEntity.ok(itemImageService.uploadItemImage(itemId, user.id(), file, isMain));
+    }
+
+    @DeleteMapping("/images/{imageId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteItemImage(
+            @PathVariable Long imageId,
+            @CurrentUser UserPrincipalDto user
+    ) {
+        itemImageService.deleteItemImage(imageId, user.id());
+        return ResponseEntity.noContent().build();
     }
 }
