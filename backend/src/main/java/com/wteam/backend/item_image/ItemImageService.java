@@ -38,6 +38,17 @@ public class ItemImageService {
             throw new ItemImageAccessDeniedException("You are not the owner of this item");
         }
 
+        if (isMain) {
+            item.getImages().forEach(img -> img.setMain(false));
+            // Since we added CascadeType.ALL on Item.images, modifying them here will be saved when the transaction commits, 
+            // but we need to ensure itemRepository saves the item, or we save itemImages directly.
+            // itemImageRepository.saveAll(item.getImages()); // optional if transaction doesn't flush automatically
+            for (ItemImage img : item.getImages()) {
+                img.setMain(false);
+                itemImageRepository.save(img);
+            }
+        }
+
         try {
             String imageUrl = imageService.uploadImage(file);
             ItemImage itemImage = ItemImage.builder()

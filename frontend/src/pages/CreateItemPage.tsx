@@ -10,7 +10,7 @@ const CONDITIONS: ItemCondition[] = ['IDEAL', 'GOOD', 'NORM', 'BAD', 'NEEDS_REPA
 
 interface ItemFormProps {
     initial?: Partial<ItemRequest>;
-    onSubmit: (data: ItemRequest, images: File[]) => Promise<void>;
+    onSubmit: (data: ItemRequest, images: File[], mainImageIndex: number) => Promise<void>;
     submitLabel: string;
 }
 
@@ -34,8 +34,11 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
         depositAmount: initial.depositAmount ?? '',
         city: initial.city ?? '',
         address: initial.address ?? '',
+        latitude: initial.latitude ?? 0,
+        longitude: initial.longitude ?? 0,
     });
     const [images, setImages] = useState<File[]>([]);
+    const [mainImageIndex, setMainImageIndex] = useState(0);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -61,7 +64,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
                 pricePerWeek: form.pricePerWeek === '' ? null : Number(form.pricePerWeek),
                 depositAmount: Number(form.depositAmount),
                 tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-            } as any, images);
+            } as any, images, mainImageIndex);
         } catch (err: unknown) {
             const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
             setError(msg ?? t('itemForm.somethingWentWrong'));
@@ -148,12 +151,30 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
             </div>
 
             <div className="form-group">
-                <label className="form-label" htmlFor="if-images">{t('itemForm.imagesLabel', 'Images')}</label>
+                <label className="form-label" htmlFor="if-images">{t('itemForm.imagesLabel') || 'Images'}</label>
                 <input id="if-images" type="file" multiple accept="image/*" className="form-input" 
-                    onChange={e => setImages(Array.from(e.target.files || []))} />
+                    onChange={e => {
+                        setImages(Array.from(e.target.files || []));
+                        setMainImageIndex(0);
+                    }} />
                 {images.length > 0 && (
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#666' }}>
-                        {images.length} {t('itemForm.imagesSelected', 'images selected')}
+                    <div style={{ marginTop: '0.5rem' }}>
+                        <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
+                            {images.length} {t('itemForm.imagesSelected') || 'images selected'} - {t('itemForm.selectMain') || 'Select main image'}:
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {images.map((file, idx) => (
+                                <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                                    <input 
+                                        type="radio" 
+                                        name="mainImage" 
+                                        checked={mainImageIndex === idx} 
+                                        onChange={() => setMainImageIndex(idx)}
+                                    />
+                                    {file.name}
+                                </label>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
@@ -169,11 +190,11 @@ const CreateItemPage = () => {
     const navigate = useNavigate();
     const { t } = useLanguage();
 
-    const handleSubmit = async (data: ItemRequest, images: File[]) => {
+    const handleSubmit = async (data: ItemRequest, images: File[], mainImageIndex: number) => {
         const item = await itemsApi.createItem(data);
         if (images && images.length > 0) {
             for (let i = 0; i < images.length; i++) {
-                await itemsApi.uploadItemImage(item.id, images[i], i === 0);
+                await itemsApi.uploadItemImage(item.id, images[i], i === mainImageIndex);
             }
         }
         navigate(`/items/${item.id}`);

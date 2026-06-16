@@ -30,13 +30,13 @@ const EditItemPage = () => {
             .finally(() => setLoading(false));
     }, [itemId, user, navigate, t]);
 
-    const handleSubmit = async (data: ItemRequest, images: File[]) => {
+    const handleSubmit = async (data: ItemRequest, images: File[], mainImageIndex: number) => {
         await itemsApi.updateItem(Number(itemId), data);
         if (images && images.length > 0) {
             for (let i = 0; i < images.length; i++) {
-                // If it's a new upload on edit, maybe append it as non-main unless item has no images?
-                // For simplicity, just upload them
-                await itemsApi.uploadItemImage(Number(itemId), images[i], false);
+                // Since the user selected a new image as main, we pass true if it is the mainImageIndex.
+                // Our backend service correctly removes isMain from existing images if isMain=true is passed.
+                await itemsApi.uploadItemImage(Number(itemId), images[i], i === mainImageIndex);
             }
         }
         navigate(`/items/${itemId}`);
