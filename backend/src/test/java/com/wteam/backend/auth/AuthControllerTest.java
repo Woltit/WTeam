@@ -6,13 +6,13 @@ import com.wteam.backend.auth.dto.LoginRequest;
 import com.wteam.backend.auth.dto.RefreshTokenRequest;
 import com.wteam.backend.auth.dto.RegisterRequest;
 import com.wteam.backend.exception.user.UserAlreadyExistsException;
+import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.security.jwt.JwtService;
 import com.wteam.backend.security.oauth2.CustomOAuth2UserService;
 import com.wteam.backend.security.oauth2.CustomOidcUserService;
 import com.wteam.backend.security.oauth2.OAuth2SuccessHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.wteam.backend.security.TestSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -26,7 +26,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
 @Import(TestSecurityConfig.class)

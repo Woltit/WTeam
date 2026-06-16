@@ -3,7 +3,8 @@ package com.wteam.backend.category.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import static com.wteam.backend.common.validation.ValidationConstants.Category.*;
+import static com.wteam.backend.common.validation.ValidationConstants.Category.NAME_MAX_LENGTH;
+import static com.wteam.backend.common.validation.ValidationConstants.Category.SLUG_MAX_LENGTH;
 
 public record CategoryRequest(
         Long parentId,

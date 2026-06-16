@@ -5,11 +5,11 @@ import com.wteam.backend.common.enums.BookingStatus;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.exception.booking.ItemNotAvailableException;
 import com.wteam.backend.security.SecurityUser;
+import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.security.jwt.JwtService;
 import com.wteam.backend.security.oauth2.CustomOAuth2UserService;
 import com.wteam.backend.security.oauth2.CustomOidcUserService;
 import com.wteam.backend.security.oauth2.OAuth2SuccessHandler;
-import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,8 +31,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(BookingController.class)
 @Import(TestSecurityConfig.class)
@@ -62,7 +64,7 @@ class BookingControllerTest {
         return new BookingResponse(1L, 10L, 1L,
                 LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 5),
                 new BigDecimal("400"), new BigDecimal("200"), new BigDecimal("100"),
-                BookingStatus.PENDING);
+                BookingStatus.PENDING, "");
     }
 
     @Test

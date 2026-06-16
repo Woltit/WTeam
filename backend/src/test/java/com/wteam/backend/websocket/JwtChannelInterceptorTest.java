@@ -1,9 +1,9 @@
 package com.wteam.backend.websocket;
 
+import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.security.SecurityUser;
 import com.wteam.backend.security.jwt.JwtService;
 import com.wteam.backend.user.User;
-import com.wteam.backend.common.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

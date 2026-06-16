@@ -6,11 +6,11 @@ import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.item.dto.ItemRequest;
 import com.wteam.backend.item.dto.ItemResponse;
 import com.wteam.backend.security.SecurityUser;
+import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.security.jwt.JwtService;
 import com.wteam.backend.security.oauth2.CustomOAuth2UserService;
 import com.wteam.backend.security.oauth2.CustomOidcUserService;
 import com.wteam.backend.security.oauth2.OAuth2SuccessHandler;
-import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,15 +27,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ItemController.class)
 @Import(TestSecurityConfig.class)

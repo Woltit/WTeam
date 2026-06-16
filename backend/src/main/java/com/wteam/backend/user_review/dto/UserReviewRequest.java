@@ -1,6 +1,5 @@
 package com.wteam.backend.user_review.dto;
 
-import com.wteam.backend.common.enums.TargetRole;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

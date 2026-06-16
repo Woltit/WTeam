@@ -5,11 +5,11 @@ import com.wteam.backend.ai_session.dto.AiQueryRequest;
 import com.wteam.backend.ai_session.dto.AiQueryResponse;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.security.SecurityUser;
+import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.security.jwt.JwtService;
 import com.wteam.backend.security.oauth2.CustomOAuth2UserService;
 import com.wteam.backend.security.oauth2.CustomOidcUserService;
 import com.wteam.backend.security.oauth2.OAuth2SuccessHandler;
-import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +30,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AiSessionController.class)
 @Import(TestSecurityConfig.class)

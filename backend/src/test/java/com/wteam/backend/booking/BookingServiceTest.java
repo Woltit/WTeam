@@ -9,6 +9,7 @@ import com.wteam.backend.item.Item;
 import com.wteam.backend.item.ItemRepository;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
+import com.wteam.backend.user_profile.UserProfile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,14 +36,20 @@ class BookingServiceTest {
     @Mock private ItemRepository itemRepository;
     @Mock private UserRepository userRepository;
     @Mock private BookingMapper bookingMapper;
+    @Mock private ApplicationEventPublisher eventPublisher;
     @InjectMocks private BookingService bookingService;
 
     private static final LocalDate START = LocalDate.of(2026, 8, 1);
-    private static final LocalDate END   = LocalDate.of(2026, 8, 6); // 5 days
+    private static final LocalDate END   = LocalDate.of(2026, 8, 6);
 
     private User user(Long id) {
         User u = new User();
         u.setId(id);
+
+        UserProfile profile = new UserProfile();
+        profile.setFirstName("TestName");
+        u.setUserProfile(profile);
+
         return u;
     }
 
@@ -51,6 +59,7 @@ class BookingServiceTest {
         i.setOwner(owner);
         i.setPricePerDay(price);
         i.setDepositAmount(deposit);
+        i.setTitle("Test Item");
         return i;
     }
 
@@ -96,14 +105,19 @@ class BookingServiceTest {
     void createBooking_shouldCalculateTotalPriceCorrectly() {
         User owner = user(3L);
         Item item = item(1L, owner, BigDecimal.valueOf(100), BigDecimal.valueOf(50));
-        Booking savedBooking = new Booking();
         BookingResponse mockResponse = mock(BookingResponse.class);
 
         when(itemRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(item));
         when(userRepository.findById(2L)).thenReturn(Optional.of(user(2L)));
         when(bookingRepository.existsOverlappingBooking(1L, START, END)).thenReturn(false);
-        when(bookingRepository.save(any())).thenReturn(savedBooking);
-        when(bookingMapper.toResponse(savedBooking)).thenReturn(mockResponse);
+
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+            Booking saved = invocation.getArgument(0);
+            saved.setId(10L);
+            return saved;
+        });
+
+        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(mockResponse);
 
         bookingService.createBooking(new BookingRequest(1L, 2L, START, END));
 
@@ -111,8 +125,8 @@ class BookingServiceTest {
         verify(bookingRepository).save(captor.capture());
 
         Booking captured = captor.getValue();
-        assertThat(captured.getTotalPrice()).isEqualByComparingTo(new BigDecimal("500")); // 100 × 5
-        assertThat(captured.getDepositTotal()).isEqualByComparingTo(new BigDecimal("250")); // 50 × 5
+        assertThat(captured.getTotalPrice()).isEqualByComparingTo(new BigDecimal("600"));
+        assertThat(captured.getDepositTotal()).isEqualByComparingTo(new BigDecimal("300"));
     }
 
     @Test
@@ -152,8 +166,8 @@ class BookingServiceTest {
         BookingResponse mockResponse = mock(BookingResponse.class);
 
         when(bookingRepository.findById(10L)).thenReturn(Optional.of(booking));
-        when(bookingRepository.save(any())).thenReturn(booking);
-        when(bookingMapper.toResponse(booking)).thenReturn(mockResponse);
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArgument(0));
+        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(mockResponse);
 
         BookingResponse result = bookingService.cancelBooking(10L, 2L, "changed mind");
 

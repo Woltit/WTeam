@@ -8,7 +8,6 @@ import com.wteam.backend.item.Item;
 import com.wteam.backend.item.ItemRepository;
 import com.wteam.backend.item_review.ItemReview;
 import com.wteam.backend.item_review.ItemReviewRepository;
-import com.wteam.backend.user_profile.UserProfile;
 import com.wteam.backend.user_profile.UserProfileRepository;
 import com.wteam.backend.user_review.UserReview;
 import com.wteam.backend.user_review.UserReviewRepository;

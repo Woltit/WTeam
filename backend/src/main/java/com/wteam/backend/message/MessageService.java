@@ -2,11 +2,11 @@ package com.wteam.backend.message;
 
 import com.wteam.backend.chat_room.ChatRoom;
 import com.wteam.backend.chat_room.ChatRoomService;
+import com.wteam.backend.exception.user.UserNotFoundException;
 import com.wteam.backend.message.dto.MessageRequest;
 import com.wteam.backend.message.dto.MessageResponse;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
-import com.wteam.backend.exception.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

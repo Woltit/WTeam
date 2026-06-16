@@ -5,10 +5,7 @@ import com.wteam.backend.common.entity.BaseEntityPart;
 import com.wteam.backend.item.Item;
 import com.wteam.backend.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -74,5 +71,6 @@ public class ItemReview extends BaseEntityPart {
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false)
+    @Builder.Default
     private com.wteam.backend.common.enums.ReviewStatus status = com.wteam.backend.common.enums.ReviewStatus.PENDING;
 }
