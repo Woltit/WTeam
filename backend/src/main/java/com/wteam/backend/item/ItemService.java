@@ -46,6 +46,12 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ItemResponse> getMyItems(Long userId, Pageable pageable) {
+        return itemRepository.findAllByOwnerId(userId, pageable)
+                .map(itemMapper::toItemResponse);
+    }
+
+    @Transactional(readOnly = true)
     public ItemResponse getItemById(Long itemId) {
         return itemRepository.findById(itemId)
                 .map(itemMapper::toItemResponse)

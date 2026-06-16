@@ -26,6 +26,15 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getAllItemsWhichAreAvailable(pageable));
     }
 
+    @GetMapping("/my")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<ItemResponse>> getMyItems(
+            @CurrentUser UserPrincipalDto user,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(itemService.getMyItems(user.id(), pageable));
+    }
+
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemResponse> getItemById(@PathVariable Long itemId) {
         return ResponseEntity.ok(itemService.getItemById(itemId));

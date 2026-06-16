@@ -272,6 +272,14 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
+.form-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--text-h) !important;
+}
+
 .form-textarea { resize: vertical; min-height: 100px; }
 
 .form-row {
@@ -1509,6 +1517,14 @@ code {
 
 [data-theme="dark"] .form-input:focus {
   border-color: var(--accent);
+}
+
+[data-theme="dark"] .form-input:-webkit-autofill,
+[data-theme="dark"] .form-input:-webkit-autofill:hover,
+[data-theme="dark"] .form-input:-webkit-autofill:focus,
+[data-theme="dark"] .form-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+  -webkit-text-fill-color: var(--text-h) !important;
 }
 
 [data-theme="dark"] .admin-table th {
