@@ -112,6 +112,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("com.cloudinary:cloudinary-http44:1.39.0")
+    implementation("com.stripe:stripe-java:24.22.0")
 
     compileOnly("org.projectlombok:lombok")
 

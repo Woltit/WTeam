@@ -74,8 +74,31 @@ const MyBookingsPage = () => {
     }, [activeTab, t]);
 
     useEffect(() => {
-        fetchBookings();
-    }, [fetchBookings]);
+        // Handle Stripe redirect status
+        const queryParams = new URLSearchParams(window.location.search);
+        const paymentStatus = queryParams.get('payment');
+        const bookingId = queryParams.get('bookingId');
+        
+        if (paymentStatus === 'success') {
+            toast.success(t('bookings.paySuccess') || 'Оплата успішна!');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Manual verification fallback for localhost where webhooks might not reach
+            if (bookingId) {
+                paymentsApi.verifyPaymentStatus(Number(bookingId))
+                    .then(() => fetchBookings())
+                    .catch(() => fetchBookings());
+            } else {
+                fetchBookings();
+            }
+        } else if (paymentStatus === 'cancel') {
+            toast.error(t('bookings.payCancel') || 'Оплату скасовано.');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            fetchBookings();
+        } else {
+            fetchBookings();
+        }
+    }, [fetchBookings, t]);
 
     const handleTabChange = (tab: 'renter' | 'owner') => {
         setActiveTab(tab);
@@ -121,54 +144,12 @@ const MyBookingsPage = () => {
         }
     };
 
-    const loadLiqPayScript = (): Promise<void> => {
-        return new Promise((resolve) => {
-            if ((window as any).LiqPayCheckout) {
-                resolve();
-                return;
-            }
-            (window as any).LiqPayCheckoutCallback = function() {
-                resolve();
-            };
-            const script = document.createElement('script');
-            script.src = 'https://static.liqpay.ua/libjs/checkout.js';
-            script.async = true;
-            document.body.appendChild(script);
-        });
-    };
-
     const handlePay = async (bookingId: number) => {
         try {
-            const { data, signature } = await paymentsApi.createPaymentCheckout(bookingId);
-            await loadLiqPayScript();
-            
-            let container = document.getElementById('liqpay_checkout');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'liqpay_checkout';
-                document.body.appendChild(container);
-            }
-            
-            (window as any).LiqPayCheckout.init({
-                data: data,
-                signature: signature,
-                embedTo: "#liqpay_checkout",
-                language: language === 'ua' ? 'uk' : 'en',
-                mode: "popup"
-            }).on("liqpay.callback", async function(res: any){
-                console.log(res.status);
-                if (res.status === 'success' || res.status === 'wait_compensate') {
-                    // Manual verification fallback for localhost
-                    try { await paymentsApi.verifyPaymentStatus(bookingId); } catch(e){}
-                    toast.success(t('bookings.paySuccess') || 'Payment successful!');
-                    fetchBookings();
-                }
-            }).on("liqpay.close", async function(){
-                try { await paymentsApi.verifyPaymentStatus(bookingId); } catch(e){}
-                fetchBookings(); // refresh in case it succeeded but callback was missed
-            });
+            const { url } = await paymentsApi.createPaymentCheckout(bookingId);
+            window.location.href = url;
         } catch (err: any) {
-            console.error("LiqPay error: ", err);
+            console.error("Stripe error: ", err);
             const errorMsg = err.response?.data?.message || err.message || t('bookings.actionError');
             toast.error(`Помилка: ${errorMsg}`);
         }
@@ -428,7 +409,7 @@ const MyBookingsPage = () => {
                                                                 className="btn btn-success btn-sm w-full justify-center" 
                                                                 onClick={() => handlePay(booking.id)}
                                                             >
-                                                                Оплатити (LiqPay)
+                                                                Оплатити (Stripe)
                                                             </button>
                                                         )}
                                                         <button 

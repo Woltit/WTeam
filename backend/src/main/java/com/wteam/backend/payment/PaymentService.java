@@ -1,15 +1,24 @@
 package com.wteam.backend.payment;
 
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.StripeObject;
+import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
+import com.stripe.param.checkout.SessionCreateParams;
 import com.wteam.backend.booking.Booking;
 import com.wteam.backend.booking.BookingRepository;
 import com.wteam.backend.common.enums.BookingStatus;
-import com.wteam.backend.payment.dto.LiqPayCheckoutResponse;
+import com.wteam.backend.payment.dto.StripeCheckoutResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -17,12 +26,13 @@ import java.util.UUID;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
-    private final LiqPayService liqPayService;
-    private final LiqPayConfig liqPayConfig;
+    private final StripeConfig stripeConfig;
 
-    
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     @Transactional
-    public LiqPayCheckoutResponse createPaymentCheckout(Long bookingId) {
+    public StripeCheckoutResponse createPaymentCheckout(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
@@ -33,70 +43,91 @@ public class PaymentService {
         Payment payment = paymentRepository.findByBookingId(bookingId).orElse(new Payment());
         payment.setBooking(booking);
         payment.setAmount(booking.getTotalPrice());
-        
+
         if (payment.getProviderTransactionId() == null || payment.getStatus() == PaymentStatus.FAILED || payment.getStatus() == PaymentStatus.REFUNDED) {
             String orderId = "WTEAM_" + bookingId + "_" + UUID.randomUUID().toString().substring(0, 8);
             payment.setProviderTransactionId(orderId);
         }
-        
+
         payment.setStatus(PaymentStatus.PENDING);
         paymentRepository.save(payment);
-        
-        String orderId = payment.getProviderTransactionId();
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("version", 3);
-        params.put("action", "pay");
-        params.put("amount", payment.getAmount());
-        params.put("currency", payment.getCurrency());
-        params.put("description", "Оплата оренди " + booking.getItem().getTitle());
-        params.put("order_id", orderId);
-        params.put("server_url", liqPayConfig.getServerUrl());
+        try {
+            // Convert to smallest currency unit (e.g. cents for USD, kopecks for UAH)
+            long amountInSmallestUnit = payment.getAmount().multiply(new BigDecimal("100")).longValue();
 
-        String data = liqPayService.createData(params);
-        String signature = liqPayService.createSignature(data);
+            SessionCreateParams params = SessionCreateParams.builder()
+                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .setSuccessUrl(frontendUrl + "/my-bookings?payment=success&bookingId=" + bookingId)
+                    .setCancelUrl(frontendUrl + "/my-bookings?payment=cancel")
+                    .setClientReferenceId(payment.getProviderTransactionId())
+                    .addLineItem(
+                            SessionCreateParams.LineItem.builder()
+                                    .setQuantity(1L)
+                                    .setPriceData(
+                                            SessionCreateParams.LineItem.PriceData.builder()
+                                                    .setCurrency(payment.getCurrency().toLowerCase())
+                                                    .setUnitAmount(amountInSmallestUnit)
+                                                    .setProductData(
+                                                            SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                                    .setName("Оренда: " + booking.getItem().getTitle())
+                                                                    .build()
+                                                    )
+                                                    .build()
+                                    )
+                                    .build()
+                    )
+                    .build();
 
-        return new LiqPayCheckoutResponse(data, signature);
+            Session session = Session.create(params);
+            
+            // Optionally store the Stripe Session ID if needed
+            payment.setProviderTransactionId(session.getId());
+            paymentRepository.save(payment);
+
+            return new StripeCheckoutResponse(session.getUrl());
+        } catch (StripeException e) {
+            throw new RuntimeException("Failed to create Stripe checkout session", e);
+        }
     }
 
     @Transactional
-    public void processLiqPayCallback(String data, String signature) {
-        String expectedSignature = liqPayService.createSignature(data);
-        if (!expectedSignature.equals(signature)) {
-            throw new IllegalArgumentException("Invalid LiqPay signature");
-        }
-
+    public void processStripeWebhook(String payload, String sigHeader) {
         try {
-            String decodedData = new String(java.util.Base64.getDecoder().decode(data), java.nio.charset.StandardCharsets.UTF_8);
-            com.fasterxml.jackson.databind.JsonNode jsonNode = new com.fasterxml.jackson.databind.ObjectMapper().readTree(decodedData);
-            
-            String orderId = jsonNode.get("order_id").asText();
-            String status = jsonNode.get("status").asText();
+            Event event = Webhook.constructEvent(payload, sigHeader, stripeConfig.getWebhookSecret());
 
-            Payment payment = paymentRepository.findByProviderTransactionId(orderId)
-                    .orElseThrow(() -> new IllegalArgumentException("Payment not found for orderId: " + orderId));
-
-            if ("success".equals(status) || "wait_compensate".equals(status)) {
-                payment.setStatus(PaymentStatus.SUCCESS);
-                Booking booking = payment.getBooking();
-                booking.setStatus(BookingStatus.PAID);
-                bookingRepository.save(booking);
-            } else if ("error".equals(status) || "failure".equals(status)) {
-                payment.setStatus(PaymentStatus.FAILED);
-            } else if ("reversed".equals(status)) {
-                payment.setStatus(PaymentStatus.REFUNDED);
-                Booking booking = payment.getBooking();
-                booking.setStatus(BookingStatus.CANCELLED);
-                bookingRepository.save(booking);
+            if ("checkout.session.completed".equals(event.getType())) {
+                EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
+                if (dataObjectDeserializer.getObject().isPresent()) {
+                    StripeObject stripeObject = dataObjectDeserializer.getObject().get();
+                    if (stripeObject instanceof Session session) {
+                        handleSuccessfulPayment(session.getId());
+                    }
+                }
             }
-            paymentRepository.save(payment);
+        } catch (SignatureVerificationException e) {
+            throw new IllegalArgumentException("Invalid Stripe signature");
         } catch (Exception e) {
-            throw new RuntimeException("Error processing LiqPay callback", e);
+            throw new RuntimeException("Error processing Stripe webhook", e);
+        }
+    }
+
+    private void handleSuccessfulPayment(String sessionId) {
+        Optional<Payment> paymentOpt = paymentRepository.findByProviderTransactionId(sessionId);
+        if (paymentOpt.isPresent()) {
+            Payment payment = paymentOpt.get();
+            payment.setStatus(PaymentStatus.SUCCESS);
+            Booking booking = payment.getBooking();
+            booking.setStatus(BookingStatus.PAID);
+            bookingRepository.save(booking);
+            paymentRepository.save(payment);
         }
     }
 
     @Transactional
     public void verifyPaymentStatus(Long bookingId) {
+        // With Stripe Checkout and Webhooks, manual verification is typically done by fetching the Session.
+        // For local development, if webhooks fail, the frontend might call this on success_url return.
         Payment payment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
 
@@ -104,46 +135,17 @@ public class PaymentService {
             return;
         }
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("action", "status");
-        params.put("version", 3);
-        params.put("order_id", payment.getProviderTransactionId());
-
-        String data = liqPayService.createData(params);
-        String signature = liqPayService.createSignature(data);
-
-        org.springframework.util.MultiValueMap<String, String> body = new org.springframework.util.LinkedMultiValueMap<>();
-        body.add("data", data);
-        body.add("signature", signature);
-
         try {
-            String responseStr = org.springframework.web.client.RestClient.create()
-                    .post()
-                    .uri("https://www.liqpay.ua/api/request")
-                    .contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED)
-                    .body(body)
-                    .retrieve()
-                    .body(String.class);
-
-            com.fasterxml.jackson.databind.JsonNode jsonNode = new com.fasterxml.jackson.databind.ObjectMapper().readTree(responseStr);
-            String status = jsonNode.has("status") ? jsonNode.get("status").asText() : "";
-
-            if ("success".equals(status) || "wait_compensate".equals(status)) {
+            Session session = Session.retrieve(payment.getProviderTransactionId());
+            if ("complete".equals(session.getStatus()) && "paid".equals(session.getPaymentStatus())) {
                 payment.setStatus(PaymentStatus.SUCCESS);
                 Booking booking = payment.getBooking();
                 booking.setStatus(BookingStatus.PAID);
                 bookingRepository.save(booking);
-            } else if ("error".equals(status) || "failure".equals(status)) {
-                payment.setStatus(PaymentStatus.FAILED);
-            } else if ("reversed".equals(status)) {
-                payment.setStatus(PaymentStatus.REFUNDED);
-                Booking booking = payment.getBooking();
-                booking.setStatus(BookingStatus.CANCELLED);
-                bookingRepository.save(booking);
+                paymentRepository.save(payment);
             }
-            paymentRepository.save(payment);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to verify payment status with LiqPay", e);
+        } catch (StripeException e) {
+            throw new RuntimeException("Failed to retrieve Stripe session", e);
         }
     }
 }

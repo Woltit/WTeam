@@ -7,25 +7,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Оплата (LiqPay)", description = "API для роботи з платежами через платіжну систему LiqPay")
+@Tag(name = "Оплата (Stripe)", description = "API для роботи з платежами через платіжну систему Stripe")
 @RestController
-@RequestMapping("/api/v1/payments")
+@RequestMapping("/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @Operation(summary = "Створити чекаут", description = "Генерує data та signature для віджета LiqPay для конкретного бронювання.")
+    @Operation(summary = "Створити чекаут", description = "Генерує Stripe Checkout Session URL для конкретного бронювання.")
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<com.wteam.backend.payment.dto.LiqPayCheckoutResponse> createPaymentCheckout(@RequestParam Long bookingId) {
+    public ResponseEntity<com.wteam.backend.payment.dto.StripeCheckoutResponse> createPaymentCheckout(@RequestParam Long bookingId) {
         return ResponseEntity.ok(paymentService.createPaymentCheckout(bookingId));
     }
 
-    @Operation(summary = "LiqPay Callback", description = "Службовий ендпоінт (вебхук), куди LiqPay надсилає статус платежу.")
-    @PostMapping(value = "/callback", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<String> liqPayCallback(@RequestParam String data, @RequestParam String signature) {
-        paymentService.processLiqPayCallback(data, signature);
+    @Operation(summary = "Stripe Webhook", description = "Службовий ендпоінт, куди Stripe надсилає статус платежу.")
+    @PostMapping(value = "/webhook")
+    public ResponseEntity<String> stripeWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
+        paymentService.processStripeWebhook(payload, sigHeader);
         return ResponseEntity.ok("OK");
     }
 
@@ -37,3 +37,4 @@ public class PaymentController {
         return ResponseEntity.ok().build();
     }
 }
+
