@@ -15,12 +15,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
     private final LiqPayService liqPayService;
     private final LiqPayConfig liqPayConfig;
 
+    
     @Transactional
     public LiqPayCheckoutResponse createPaymentCheckout(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)

@@ -9,6 +9,7 @@ import paymentsApi from '../api/payments';
 import type { BookingResponse, BookingStatus } from '../api/bookings';
 import type { ItemResponse } from '../types/item';
 import { useLanguage } from '../contexts/LanguageContext';
+import { toast } from 'react-hot-toast';
 
 interface IBookingWithItem {
     booking: BookingResponse;
@@ -91,10 +92,10 @@ const MyBookingsPage = () => {
     const handleApprove = async (bookingId: number) => {
         try {
             await bookingsApi.approveBooking(bookingId);
-            alert(t('bookings.alertApproveSuccess'));
+            toast.success(t('bookings.alertApproveSuccess'));
             fetchBookings();
         } catch {
-            alert(t('bookings.actionError'));
+            toast.error(t('bookings.actionError'));
         }
     };
 
@@ -102,10 +103,10 @@ const MyBookingsPage = () => {
         if (!confirm(t('bookings.actionReject') + '?')) return;
         try {
             await bookingsApi.rejectBooking(bookingId);
-            alert(t('bookings.alertRejectSuccess'));
+            toast.success(t('bookings.alertRejectSuccess'));
             fetchBookings();
         } catch {
-            alert(t('bookings.actionError'));
+            toast.error(t('bookings.actionError'));
         }
     };
 
@@ -113,10 +114,10 @@ const MyBookingsPage = () => {
         if (!confirm(t('bookings.actionComplete') + '?')) return;
         try {
             await bookingsApi.completeBooking(bookingId);
-            alert(t('bookings.alertCompleteSuccess'));
+            toast.success(t('bookings.alertCompleteSuccess'));
             fetchBookings();
         } catch {
-            alert(t('bookings.actionError'));
+            toast.error(t('bookings.actionError'));
         }
     };
 
@@ -126,9 +127,12 @@ const MyBookingsPage = () => {
                 resolve();
                 return;
             }
+            (window as any).LiqPayCheckoutCallback = function() {
+                resolve();
+            };
             const script = document.createElement('script');
             script.src = 'https://static.liqpay.ua/libjs/checkout.js';
-            script.onload = () => resolve();
+            script.async = true;
             document.body.appendChild(script);
         });
     };
@@ -156,7 +160,7 @@ const MyBookingsPage = () => {
                 if (res.status === 'success' || res.status === 'wait_compensate') {
                     // Manual verification fallback for localhost
                     try { await paymentsApi.verifyPaymentStatus(bookingId); } catch(e){}
-                    alert(t('bookings.paySuccess') || 'Payment successful!');
+                    toast.success(t('bookings.paySuccess') || 'Payment successful!');
                     fetchBookings();
                 }
             }).on("liqpay.close", async function(){
@@ -164,7 +168,7 @@ const MyBookingsPage = () => {
                 fetchBookings(); // refresh in case it succeeded but callback was missed
             });
         } catch {
-            alert(t('bookings.actionError'));
+            toast.error(t('bookings.actionError'));
         }
     };
 
@@ -174,12 +178,12 @@ const MyBookingsPage = () => {
         setCancelling(true);
         try {
             await bookingsApi.cancelBooking(cancellingBookingId, cancelReason);
-            alert(t('bookings.alertCancelSuccess'));
+            toast.success(t('bookings.alertCancelSuccess'));
             setCancellingBookingId(null);
             setCancelReason('');
             fetchBookings();
         } catch {
-            alert(t('bookings.actionError'));
+            toast.error(t('bookings.actionError'));
         } finally {
             setCancelling(false);
         }

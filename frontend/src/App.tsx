@@ -17,11 +17,14 @@ import MyBookingsPage from './pages/MyBookingsPage';
 import MyItemsPage from './pages/MyItemsPage';
 import PayStubPage from './pages/PayStubPage';
 import DocsPage from './pages/DocsPage';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
     return (
-        <Routes>
-            <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
+        <>
+            <Toaster position="top-center" />
+            <Routes>
+                <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
@@ -97,6 +100,7 @@ function App() {
                 <Route path="/pay-stub/:paymentId" element={<PayStubPage />} />
             </Route>
         </Routes>
+        </>
     );
 
 }

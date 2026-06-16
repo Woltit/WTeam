@@ -7,6 +7,8 @@ import type { ItemRequest } from '../types/item';
 import type { ItemResponse } from '../types/item';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { toast } from 'react-hot-toast';
+
 const EditItemPage = () => {
     const { itemId } = useParams<{ itemId: string }>();
     const navigate = useNavigate();
@@ -37,6 +39,7 @@ const EditItemPage = () => {
                 await itemsApi.uploadItemImage(Number(itemId), images[i], i === mainImageIndex);
             }
         }
+        toast.success(t('itemForm.submitEdit') + ' ' + t('bookings.actionSuccess'));
         navigate(`/items/${itemId}`);
     };
 
@@ -45,9 +48,10 @@ const EditItemPage = () => {
         try {
             await itemsApi.deleteItemImage(imageId);
             setItem(prev => prev ? { ...prev, images: prev.images?.filter(i => i.id !== imageId) } : prev);
+            toast.success(t('bookings.actionSuccess') || 'Image deleted');
         } catch (err) {
             console.error('Failed to delete image', err);
-            alert(t('itemForm.deleteImageFailed') || 'Failed to delete image');
+            toast.error(t('itemForm.deleteImageFailed') || 'Failed to delete image');
         }
     };
 
@@ -61,9 +65,10 @@ const EditItemPage = () => {
                     isMain: img.id === imageId
                 }))
             } : prev);
+            toast.success(t('bookings.actionSuccess') || 'Main image updated');
         } catch (err) {
             console.error('Failed to set main image', err);
-            alert(t('itemForm.actionError') || 'Error setting main image');
+            toast.error(t('itemForm.actionError') || 'Error setting main image');
         }
     };
 
