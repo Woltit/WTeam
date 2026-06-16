@@ -1,4 +1,3 @@
-import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const DocsPage = () => {
@@ -21,7 +20,7 @@ const DocsPage = () => {
             <h3>Для орендодавців (як здавати річ)</h3>
             <ol>
                 <li><strong>Створення оголошення:</strong> Натисніть "Додати оголошення", заповніть деталі, ціни та завантажте фото. Зверніть увагу: ви можете вибрати головне фото за допомогою іконки "★".</li>
-                <li><strong>Управління запитами:</strong> Коли хтось захоче орендувати вашу річ, ви побачите нове бронювання у вкладці "Мої бронювання" -> "Мої пропозиції". Вам потрібно його "Схвалити" або "Відхилити".</li>
+                <li><strong>Управління запитами:</strong> Коли хтось захоче орендувати вашу річ, ви побачите нове бронювання у вкладці "Мої бронювання" &gt; "Мої пропозиції". Вам потрібно його "Схвалити" або "Відхилити".</li>
                 <li><strong>Очікування оплати:</strong> Після вашого схвалення орендар повинен оплатити оренду. Коли оплата пройде, статус зміниться на "PAID".</li>
                 <li><strong>Передача та повернення:</strong> Передайте річ орендарю. Після успішного повернення натисніть кнопку "Завершити", щоб закрити угоду та залишити відгук про орендаря.</li>
             </ol>
@@ -48,7 +47,7 @@ const DocsPage = () => {
             <h3>For Owners (How to rent out an item)</h3>
             <ol>
                 <li><strong>Create a listing:</strong> Click "Add Listing", fill in details, prices, and upload photos. Note: you can select the main photo using the "★" icon.</li>
-                <li><strong>Manage requests:</strong> When someone wants to rent your item, you will see a new booking in the "My Bookings" -> "My Offers" tab. You need to "Approve" or "Reject" it.</li>
+                <li><strong>Manage requests:</strong> When someone wants to rent your item, you will see a new booking in the "My Bookings" &gt; "My Offers" tab. You need to "Approve" or "Reject" it.</li>
                 <li><strong>Wait for payment:</strong> After your approval, the renter must pay for the rental. Once the payment is successful, the status changes to "PAID".</li>
                 <li><strong>Handover and return:</strong> Hand over the item to the renter. After a successful return, click the "Complete" button to close the deal and leave a review for the renter.</li>
             </ol>

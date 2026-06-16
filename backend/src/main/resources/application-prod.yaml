@@ -27,6 +27,16 @@ spring:
   flyway:
     enabled: true
 
+  h2:
+    console:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 server:
   port: ${SERVER_PORT:8080}
 

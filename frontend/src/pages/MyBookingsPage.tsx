@@ -157,7 +157,7 @@ const MyBookingsPage = () => {
                     alert(t('bookings.paySuccess') || 'Payment successful!');
                     fetchBookings();
                 }
-            }).on("liqpay.close", function(res: any){
+            }).on("liqpay.close", function(){
                 fetchBookings(); // refresh in case it succeeded but callback was missed
             });
         } catch {

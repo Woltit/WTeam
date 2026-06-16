@@ -20,6 +20,9 @@ spring:
             client-id: ${OAUTH2_CLIENT_ID}
             client-secret: ${OAUTH2_CLIENT_SECRET}
 
+  jpa:
+    open-in-view: false
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:

@@ -26,8 +26,8 @@ server:
 
 logging:
   level:
-    com.wteam.backend: DEBUG
-    org.springframework: INFO
-    org.springframework.jdbc.core: DEBUG
+    com.wteam.backend: INFO
+    org.springframework: WARN
+    org.springframework.jdbc.core: WARN
     org.apache.kafka: ERROR
     org.springframework.kafka: ERROR
