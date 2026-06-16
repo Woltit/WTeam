@@ -15,6 +15,7 @@ import com.wteam.backend.item.ItemRepository;
 import com.wteam.backend.notification.dto.NotificationEvent;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
+import com.wteam.backend.exception.booking.InvalidBookingStateException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -156,7 +157,7 @@ public class BookingService {
 
 
         if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot change status of a cancelled booking");
+            throw new InvalidBookingStateException("Cannot change status of a cancelled booking");
         }
 
         booking.setStatus(newStatus);
@@ -190,7 +191,7 @@ public class BookingService {
         Booking booking = getBooking(bookingId);
 
         if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot change status of a cancelled booking");
+            throw new InvalidBookingStateException("Cannot change status of a cancelled booking");
         }
 
         booking.setStatus(newStatus);

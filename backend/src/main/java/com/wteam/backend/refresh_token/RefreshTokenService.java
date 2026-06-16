@@ -1,5 +1,6 @@
 package com.wteam.backend.refresh_token;
 
+import com.wteam.backend.exception.auth.ProviderNotFoundException;
 import com.wteam.backend.exception.refresh_token.RefreshTokenInvalidException;
 import com.wteam.backend.exception.refresh_token.RefreshTokenNotFoundException;
 import com.wteam.backend.user.User;
@@ -51,7 +52,7 @@ public class RefreshTokenService {
 
         RefreshTokenService self = selfProvider.getIfAvailable();
         if (self == null) {
-            throw new IllegalStateException("Internal server error: self provider was not found");
+            throw new ProviderNotFoundException("Internal server error: self provider was not found");
         }
 
         return self.generateRefreshToken(user);

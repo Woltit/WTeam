@@ -1,5 +1,10 @@
 package com.wteam.backend.item_review;
 
+import com.wteam.backend.item_review.dto.ItemReviewRequest;
+import com.wteam.backend.item_review.dto.ItemReviewResponse;
+import com.wteam.backend.exception.review.InvalidReviewStateException;
+import com.wteam.backend.exception.review.ReviewAlreadyExistsException;
+import com.wteam.backend.common.enums.BookingStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +23,12 @@ public class ItemReviewService {
     private final com.wteam.backend.user_review.ReviewManagerService reviewManagerService;
 
     @org.springframework.transaction.annotation.Transactional
-    public com.wteam.backend.item_review.dto.ItemReviewResponse submitItemReview(Long bookingId, Long reviewerId, com.wteam.backend.item_review.dto.ItemReviewRequest request) {
+    public ItemReviewResponse submitItemReview(Long bookingId, Long reviewerId, ItemReviewRequest request) {
         com.wteam.backend.booking.Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
-        if (booking.getStatus() != com.wteam.backend.common.enums.BookingStatus.COMPLETED) {
-            throw new IllegalStateException("Reviews can only be left for COMPLETED bookings");
+        if (booking.getStatus() != BookingStatus.COMPLETED) {
+            throw new InvalidReviewStateException("Reviews can only be left for COMPLETED bookings");
         }
 
         if (!booking.getRenter().getId().equals(reviewerId)) {
@@ -31,7 +36,7 @@ public class ItemReviewService {
         }
 
         if (itemReviewRepository.findByBookingIdAndReviewerId(bookingId, reviewerId).isPresent()) {
-            throw new IllegalStateException("Review already exists");
+            throw new ReviewAlreadyExistsException("Review already exists");
         }
 
         ItemReview review = new ItemReview();

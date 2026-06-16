@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.wteam.backend.cloudinary.ImageService;
 import com.wteam.backend.exception.cloudinary.ImageUploadException;
+import com.wteam.backend.exception.user.ProfileAlreadyVerifiedException;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +76,7 @@ public class UserProfileService {
         }
 
         if (userProfile.getVerificationStatus() == VerificationStatus.VERIFIED) {
-            throw new IllegalStateException("Profile is already verified");
+            throw new ProfileAlreadyVerifiedException("Profile is already verified");
         }
 
         userProfile.setVerificationStatus(VerificationStatus.PENDING);

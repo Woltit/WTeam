@@ -7,6 +7,8 @@ import com.wteam.backend.common.enums.ReviewStatus;
 import com.wteam.backend.common.enums.TargetRole;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
+import com.wteam.backend.exception.review.InvalidReviewStateException;
+import com.wteam.backend.exception.review.ReviewAlreadyExistsException;
 import com.wteam.backend.user_review.dto.UserReviewRequest;
 import com.wteam.backend.user_review.dto.UserReviewResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +30,7 @@ public class UserReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
         if (booking.getStatus() != BookingStatus.COMPLETED) {
-            throw new IllegalStateException("Reviews can only be left for COMPLETED bookings");
+            throw new InvalidReviewStateException("Reviews can only be left for COMPLETED bookings");
         }
 
         User reviewer = userRepository.findById(reviewerId)
@@ -48,7 +50,7 @@ public class UserReviewService {
         }
 
         if (userReviewRepository.findByBookingIdAndReviewerIdAndTargetUserId(bookingId, reviewerId, targetUser.getId()).isPresent()) {
-            throw new IllegalStateException("Review already exists");
+            throw new ReviewAlreadyExistsException("Review already exists");
         }
 
         UserReview review = new UserReview();
