@@ -27,6 +27,9 @@ const Navbar = () => {
                 <NavLink to="/ai" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                     {t('nav.aiHelper')}
                 </NavLink>
+                <NavLink to="/docs" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                    {language === 'ua' ? 'Документація' : 'Docs'}
+                </NavLink>
                 {user && (
                     <>
                         <NavLink to="/chats" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>

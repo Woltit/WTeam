@@ -12,7 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 interface IBookingWithItem {
     booking: BookingResponse;
-    item: ItemResponse | null;  
+    item: ItemResponse | null;
 }
 
 interface IPageResponse<T> {
@@ -328,8 +328,16 @@ const MyBookingsPage = () => {
                         <div className="items-grid">
                             {paginatedBookings.map(({ booking, item }) => (
                                 <div key={booking.id} className="item-card">
-                                    <div className="item-card-img-placeholder">
-                                        <span className="item-card-icon">📦</span>
+                                    <div className="item-card-img-placeholder" style={{ padding: 0, overflow: 'hidden' }}>
+                                        {item && item.images && item.images.length > 0 ? (
+                                            <img 
+                                                src={item.images.find(img => img.isMain)?.imageUrl || item.images[0].imageUrl} 
+                                                alt={item.title} 
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                            />
+                                        ) : (
+                                            <span className="item-card-icon">📦</span>
+                                        )}
                                     </div>
                                     <div className="item-card-body">
                                         <div className="item-card-top" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>

@@ -51,6 +51,22 @@ const EditItemPage = () => {
         }
     };
 
+    const handleSetMainImage = async (imageId: number) => {
+        try {
+            await itemsApi.setMainItemImage(imageId);
+            setItem(prev => prev ? {
+                ...prev,
+                images: prev.images?.map(img => ({
+                    ...img,
+                    isMain: img.id === imageId
+                }))
+            } : prev);
+        } catch (err) {
+            console.error('Failed to set main image', err);
+            alert(t('itemForm.actionError') || 'Error setting main image');
+        }
+    };
+
     if (loading) return <div className="page-loader"><div className="spinner" /></div>;
     if (error || !item) return <div className="page"><div className="alert alert-error">{error || t('itemDetail.notFound')}</div></div>;
 
@@ -80,6 +96,7 @@ const EditItemPage = () => {
                     initial={initial} 
                     existingImages={item.images}
                     onDeleteExistingImage={handleDeleteExistingImage}
+                    onSetMainExistingImage={handleSetMainImage}
                     onSubmit={handleSubmit} 
                     submitLabel={t('itemForm.submitEdit')} 
                 />

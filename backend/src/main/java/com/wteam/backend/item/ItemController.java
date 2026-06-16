@@ -113,4 +113,14 @@ public class ItemController {
         itemImageService.deleteItemImage(imageId, user.id());
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/images/{imageId}/main")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> setMainItemImage(
+            @PathVariable Long imageId,
+            @CurrentUser UserPrincipalDto user
+    ) {
+        itemImageService.setMainItemImage(imageId, user.id());
+        return ResponseEntity.ok().build();
+    }
 }

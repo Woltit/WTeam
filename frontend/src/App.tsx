@@ -16,6 +16,7 @@ import AiPage from './pages/AiPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import MyItemsPage from './pages/MyItemsPage';
 import PayStubPage from './pages/PayStubPage';
+import DocsPage from './pages/DocsPage';
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
 
             <Route element={<Layout />}>
                 <Route path="/" element={<BrowsePage />} />
+                <Route path="/docs" element={<DocsPage />} />
                 <Route path="/items/:itemId" element={<ItemDetailPage />} />
                 <Route
                     path="/items/create"

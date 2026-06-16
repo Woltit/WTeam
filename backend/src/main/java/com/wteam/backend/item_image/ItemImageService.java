@@ -72,4 +72,25 @@ public class ItemImageService {
         itemImage.getItem().getImages().remove(itemImage);
         itemImageRepository.delete(itemImage);
     }
+
+    @Transactional
+    public void setMainItemImage(Long imageId, Long userId) {
+        ItemImage itemImage = itemImageRepository.findById(imageId)
+                .orElseThrow(() -> new ItemImageNotFoundException(imageId));
+
+        Item item = itemImage.getItem();
+        if (!item.getOwner().getId().equals(userId)) {
+            throw new ItemImageAccessDeniedException("You are not the owner of this item");
+        }
+
+        // Set all other images of this item to not main
+        for (ItemImage img : item.getImages()) {
+            img.setMain(false);
+            itemImageRepository.save(img);
+        }
+
+        // Set the selected one to main
+        itemImage.setMain(true);
+        itemImageRepository.save(itemImage);
+    }
 }

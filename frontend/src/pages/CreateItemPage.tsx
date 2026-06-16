@@ -12,11 +12,12 @@ interface ItemFormProps {
     initial?: Partial<ItemRequest>;
     existingImages?: ItemImageResponse[];
     onDeleteExistingImage?: (imageId: number) => Promise<void>;
+    onSetMainExistingImage?: (imageId: number) => Promise<void>;
     onSubmit: (data: ItemRequest, images: File[], mainImageIndex: number) => Promise<void>;
     submitLabel: string;
 }
 
-export const ItemForm = ({ initial = {}, existingImages = [], onDeleteExistingImage, onSubmit, submitLabel }: ItemFormProps) => {
+export const ItemForm = ({ initial = {}, existingImages = [], onDeleteExistingImage, onSetMainExistingImage, onSubmit, submitLabel }: ItemFormProps) => {
     const { t } = useLanguage();
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
     const [form, setForm] = useState<Omit<ItemRequest, 'tags' | 'pricePerDay' | 'pricePerWeek' | 'depositAmount' | 'categoryId'> & { 
@@ -163,11 +164,17 @@ export const ItemForm = ({ initial = {}, existingImages = [], onDeleteExistingIm
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                             {existingImages.map(img => (
                                 <div key={img.id} style={{ position: 'relative' }}>
-                                    <img src={img.imageUrl} alt="existing" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
+                                    <img src={img.imageUrl} alt="existing" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: img.isMain ? '2px solid var(--primary)' : 'none' }} />
                                     {onDeleteExistingImage && (
                                         <button type="button" onClick={() => onDeleteExistingImage(img.id)}
                                             style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', borderRadius: '50%', width: '20px', height: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}
                                         >✖</button>
+                                    )}
+                                    {onSetMainExistingImage && !img.isMain && (
+                                        <button type="button" onClick={() => onSetMainExistingImage(img.id)}
+                                            style={{ position: 'absolute', bottom: -5, right: -5, background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '20px', height: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
+                                            title="Set as main"
+                                        >★</button>
                                     )}
                                 </div>
                             ))}

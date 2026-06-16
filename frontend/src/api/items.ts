@@ -64,4 +64,8 @@ const setItemVerified = async (itemId: number, verified: boolean) => {
     return response.data;
 };
 
-export default { getAvailableItems, getMyItems, getItemById, getAllItems, createItem, updateItem, deleteItem, setItemVerified, uploadItemImage, deleteItemImage };
+const setMainItemImage = async (imageId: number) => {
+    await api.put(`/items/images/${imageId}/main`);
+};
+
+export default { getAvailableItems, getMyItems, getItemById, getAllItems, createItem, updateItem, deleteItem, setItemVerified, uploadItemImage, deleteItemImage, setMainItemImage };
