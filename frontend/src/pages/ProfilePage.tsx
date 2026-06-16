@@ -20,7 +20,7 @@ const ProfilePage = () => {
         lastName: '',
         middleName: '',
         birthDate: '',
-        phoneNumber: '',
+        phoneNumber: '+380',
         bio: '',
     });
 
@@ -33,7 +33,7 @@ const ProfilePage = () => {
                     lastName: data.lastName ?? '',
                     middleName: data.middleName ?? '',
                     birthDate: data.birthDate ? String(data.birthDate) : '',
-                    phoneNumber: data.phoneNumber ?? '',
+                    phoneNumber: data.phoneNumber || '+380',
                     bio: data.bio ?? '',
                 });
             })

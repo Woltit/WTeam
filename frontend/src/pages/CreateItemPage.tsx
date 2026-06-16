@@ -17,19 +17,23 @@ interface ItemFormProps {
 export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps) => {
     const { t } = useLanguage();
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
-    const [form, setForm] = useState<Omit<ItemRequest, 'tags'> & { tags: string }>({
-        categoryId: initial.categoryId ?? 0,
+    const [form, setForm] = useState<Omit<ItemRequest, 'tags' | 'pricePerDay' | 'pricePerWeek' | 'depositAmount' | 'categoryId'> & { 
+        tags: string;
+        pricePerDay: number | '';
+        pricePerWeek: number | '';
+        depositAmount: number | '';
+        categoryId: number | '';
+    }>({
+        categoryId: initial.categoryId || '',
         title: initial.title ?? '',
         description: initial.description ?? '',
         tags: (initial.tags ?? []).join(', '),
         condition: initial.condition ?? 'GOOD',
-        pricePerDay: initial.pricePerDay ?? 0,
-        pricePerWeek: initial.pricePerWeek ?? null,
-        depositAmount: initial.depositAmount ?? 0,
+        pricePerDay: initial.pricePerDay ?? '',
+        pricePerWeek: initial.pricePerWeek ?? '',
+        depositAmount: initial.depositAmount ?? '',
         city: initial.city ?? '',
         address: initial.address ?? '',
-        latitude: initial.latitude ?? 0,
-        longitude: initial.longitude ?? 0,
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -51,8 +55,12 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
         try {
             await onSubmit({
                 ...form,
+                categoryId: Number(form.categoryId),
+                pricePerDay: Number(form.pricePerDay),
+                pricePerWeek: form.pricePerWeek === '' ? null : Number(form.pricePerWeek),
+                depositAmount: Number(form.depositAmount),
                 tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-            });
+            } as any);
         } catch (err: unknown) {
             const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
             setError(msg ?? t('itemForm.somethingWentWrong'));
@@ -75,7 +83,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
                     <label className="form-label" htmlFor="if-category">{t('itemForm.category')} *</label>
                     <select id="if-category" className="form-input" value={form.categoryId}
                         onChange={e => set('categoryId', Number(e.target.value))} required>
-                        <option value={0} disabled>{t('itemForm.selectCategory')}</option>
+                        <option value="" disabled>{t('itemForm.selectCategory')}</option>
                         {flatCategories(categories).map(c => (
                             <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
@@ -84,9 +92,9 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
             </div>
 
             <div className="form-group">
-                <label className="form-label" htmlFor="if-desc">{t('itemForm.description')} *</label>
+                <label className="form-label" htmlFor="if-desc">{t('itemForm.description')}</label>
                 <textarea id="if-desc" className="form-input form-textarea" rows={4}
-                    value={form.description ?? ''} onChange={e => set('description', e.target.value)} required
+                    value={form.description ?? ''} onChange={e => set('description', e.target.value)} 
                     placeholder={t('itemForm.descPlaceholder')} />
             </div>
 
@@ -109,19 +117,19 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
 
             <div className="form-row">
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-ppd">{t('itemForm.price')}</label>
+                    <label className="form-label" htmlFor="if-ppd">{t('itemForm.price')} *</label>
                     <input id="if-ppd" type="number" min="0.01" step="0.01" className="form-input"
-                        value={form.pricePerDay} onChange={e => set('pricePerDay', Number(e.target.value))} required />
+                        value={form.pricePerDay} onChange={e => set('pricePerDay', e.target.value === '' ? '' : Number(e.target.value))} required placeholder="0" />
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-ppw">{t('itemForm.priceWeek')}</label>
+                    <label className="form-label" htmlFor="if-ppw">{t('itemForm.priceWeek')} *</label>
                     <input id="if-ppw" type="number" min="0.01" step="0.01" className="form-input"
-                        value={form.pricePerWeek ?? ''} onChange={e => set('pricePerWeek', e.target.value ? Number(e.target.value) : null)} />
+                        value={form.pricePerWeek} onChange={e => set('pricePerWeek', e.target.value === '' ? '' : Number(e.target.value))} required placeholder="0" />
                 </div>
                 <div className="form-group">
-                    <label className="form-label" htmlFor="if-deposit">{t('itemForm.deposit')}</label>
+                    <label className="form-label" htmlFor="if-deposit">{t('itemForm.deposit')} *</label>
                     <input id="if-deposit" type="number" min="0" step="0.01" className="form-input"
-                        value={form.depositAmount} onChange={e => set('depositAmount', Number(e.target.value))} required />
+                        value={form.depositAmount} onChange={e => set('depositAmount', e.target.value === '' ? '' : Number(e.target.value))} required placeholder="0" />
                 </div>
             </div>
 
@@ -138,18 +146,7 @@ export const ItemForm = ({ initial = {}, onSubmit, submitLabel }: ItemFormProps)
                 </div>
             </div>
 
-            <div className="form-row">
-                <div className="form-group">
-                    <label className="form-label" htmlFor="if-lat">{t('itemForm.latitude')}</label>
-                    <input id="if-lat" type="number" step="any" className="form-input"
-                        value={form.latitude ?? ''} onChange={e => set('latitude', Number(e.target.value))} />
-                </div>
-                <div className="form-group">
-                    <label className="form-label" htmlFor="if-lon">{t('itemForm.longitude')}</label>
-                    <input id="if-lon" type="number" step="any" className="form-input"
-                        value={form.longitude ?? ''} onChange={e => set('longitude', Number(e.target.value))} />
-                </div>
-            </div>
+
 
             <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? <span className="spinner-sm" /> : submitLabel}
