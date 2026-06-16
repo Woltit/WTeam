@@ -14,6 +14,11 @@ const getAvailableItems = async (page = 0, size = 12) => {
     return response.data;
 };
 
+const getMyItems = async (page = 0, size = 12) => {
+    const response = await api.get<Page<ItemResponse>>('/items/my', { params: { page, size } });
+    return response.data;
+};
+
 const getItemById = async (itemId: number) => {
     const response = await api.get<ItemResponse>(`/items/${itemId}`);
     return response.data;
@@ -45,4 +50,4 @@ const setItemVerified = async (itemId: number, verified: boolean) => {
     return response.data;
 };
 
-export default { getAvailableItems, getItemById, getAllItems, createItem, updateItem, deleteItem, setItemVerified };
+export default { getAvailableItems, getMyItems, getItemById, getAllItems, createItem, updateItem, deleteItem, setItemVerified };
