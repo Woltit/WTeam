@@ -33,11 +33,16 @@ public class PaymentService {
         Payment payment = paymentRepository.findByBookingId(bookingId).orElse(new Payment());
         payment.setBooking(booking);
         payment.setAmount(booking.getTotalPrice());
+        
+        if (payment.getProviderTransactionId() == null || payment.getStatus() == PaymentStatus.FAILED || payment.getStatus() == PaymentStatus.REFUNDED) {
+            String orderId = "WTEAM_" + bookingId + "_" + UUID.randomUUID().toString().substring(0, 8);
+            payment.setProviderTransactionId(orderId);
+        }
+        
         payment.setStatus(PaymentStatus.PENDING);
-        // Generate a unique provider transaction ID or order ID for LiqPay
-        String orderId = "WTEAM_" + bookingId + "_" + UUID.randomUUID().toString().substring(0, 8);
-        payment.setProviderTransactionId(orderId);
         paymentRepository.save(payment);
+        
+        String orderId = payment.getProviderTransactionId();
 
         Map<String, Object> params = new HashMap<>();
         params.put("version", 3);
