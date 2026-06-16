@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
-@Tag(name = "Reviews", description = "Endpoints for Item and User Reviews")
+@Tag(name = "Відгуки", description = "API для залишення та перегляду відгуків на товари та користувачів")
 public class ReviewController {
 
     private final ItemReviewService itemReviewService;
@@ -28,7 +28,7 @@ public class ReviewController {
 
     @PostMapping("/bookings/{bookingId}/reviews/item")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Submit an Item Review", description = "Submit a review for the item of a completed booking")
+    @Operation(summary = "Залишити відгук на товар", description = "Залишає відгук на річ після успішного завершення оренди")
     public ItemReviewResponse submitItemReview(
             @PathVariable Long bookingId,
             @Valid @RequestBody ItemReviewRequest request,
@@ -39,7 +39,7 @@ public class ReviewController {
 
     @PostMapping("/bookings/{bookingId}/reviews/user")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Submit a User Review", description = "Submit a review for the other party of a completed booking")
+    @Operation(summary = "Залишити відгук на користувача", description = "Залишає відгук на орендодавця або орендаря після успішного завершення оренди")
     public UserReviewResponse submitUserReview(
             @PathVariable Long bookingId,
             @Valid @RequestBody UserReviewRequest request,
@@ -49,13 +49,13 @@ public class ReviewController {
     }
 
     @GetMapping("/items/{itemId}/reviews")
-    @Operation(summary = "Get Item Reviews", description = "Get all published reviews for an item")
+    @Operation(summary = "Відгуки на товар", description = "Отримує всі опубліковані відгуки для конкретного товару")
     public List<ItemReviewResponse> getItemReviews(@PathVariable Long itemId) {
         return itemReviewService.getPublishedReviewsForItem(itemId);
     }
 
     @GetMapping("/users/{userId}/reviews")
-    @Operation(summary = "Get User Reviews", description = "Get all published reviews for a user")
+    @Operation(summary = "Відгуки на користувача", description = "Отримує всі опубліковані відгуки для конкретного користувача")
     public List<UserReviewResponse> getUserReviews(@PathVariable Long userId) {
         return userReviewService.getPublishedReviewsForUser(userId);
     }
