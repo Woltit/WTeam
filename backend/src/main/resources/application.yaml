@@ -73,6 +73,7 @@ openai:
   api-key: ${OPENAI_API_KEY}
 springdoc:
   packagesToScan: com.wteam.backend
-
-
-
+liqpay:
+  public-key: ${LIQPAY_PUBLIC_KEY:sandbox_xxx}
+  private-key: ${LIQPAY_PRIVATE_KEY:sandbox_yyy}
+  server-url: ${LIQPAY_SERVER_URL:http://localhost:8080/api/v1/payments/callback}

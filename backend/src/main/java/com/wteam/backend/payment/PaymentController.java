@@ -16,15 +16,13 @@ public class PaymentController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Map<String, String>> createPaymentUrl(@RequestParam Long bookingId) {
-        String url = paymentService.createPaymentUrl(bookingId);
-        return ResponseEntity.ok(Map.of("payUrl", url));
+    public ResponseEntity<com.wteam.backend.payment.dto.LiqPayCheckoutResponse> createPaymentCheckout(@RequestParam Long bookingId) {
+        return ResponseEntity.ok(paymentService.createPaymentCheckout(bookingId));
     }
 
-    @PostMapping("/callback-stub")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> callbackStub(@RequestParam Long paymentId, @RequestParam boolean success) {
-        paymentService.processCallbackStub(paymentId, success);
+    @PostMapping(value = "/callback", consumes = org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<Void> liqPayCallback(@RequestParam String data, @RequestParam String signature) {
+        paymentService.processLiqPayCallback(data, signature);
         return ResponseEntity.ok().build();
     }
 }

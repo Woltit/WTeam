@@ -1,13 +1,14 @@
 import api from './axios';
 
-export interface PaymentUrlResponse {
-    payUrl: string;
+export interface LiqPayCheckoutResponse {
+    data: string;
+    signature: string;
 }
 
 const paymentsApi = {
-    createPaymentUrl: async (bookingId: number): Promise<string> => {
-        const response = await api.post<PaymentUrlResponse>(`/payments/create?bookingId=${bookingId}`);
-        return response.data.payUrl;
+    createPaymentCheckout: async (bookingId: number): Promise<LiqPayCheckoutResponse> => {
+        const response = await api.post<LiqPayCheckoutResponse>(`/payments/create?bookingId=${bookingId}`);
+        return response.data;
     },
     
     callbackStub: async (paymentId: number, success: boolean): Promise<void> => {

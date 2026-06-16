@@ -122,8 +122,25 @@ const MyBookingsPage = () => {
 
     const handlePay = async (bookingId: number) => {
         try {
-            const url = await paymentsApi.createPaymentUrl(bookingId);
-            window.location.href = url;
+            const { data, signature } = await paymentsApi.createPaymentCheckout(bookingId);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'https://www.liqpay.ua/api/3/checkout';
+            
+            const dataInput = document.createElement('input');
+            dataInput.type = 'hidden';
+            dataInput.name = 'data';
+            dataInput.value = data;
+            
+            const signatureInput = document.createElement('input');
+            signatureInput.type = 'hidden';
+            signatureInput.name = 'signature';
+            signatureInput.value = signature;
+            
+            form.appendChild(dataInput);
+            form.appendChild(signatureInput);
+            document.body.appendChild(form);
+            form.submit();
         } catch {
             alert(t('bookings.actionError'));
         }

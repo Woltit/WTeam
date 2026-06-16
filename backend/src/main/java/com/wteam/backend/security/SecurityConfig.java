@@ -90,6 +90,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/*/reviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profile/public/**").permitAll()
+                        // вебхук для LiqPay
+                        .requestMatchers(HttpMethod.POST, "/payments/callback").permitAll()
                         // всі інші запити вимагають обов'язкової аутентифікації
                         .anyRequest().authenticated()
                 )

@@ -133,7 +133,7 @@ const ChatPage = () => {
                                 {msg.messageText}
                             </div>
                             <div className="chat-time">
-                                {new Date(msg.createdAt).toLocaleTimeString(language === 'ua' ? 'uk-UA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(msg.createdAt.endsWith('Z') ? msg.createdAt : `${msg.createdAt}Z`).toLocaleTimeString(language === 'ua' ? 'uk-UA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                             </div>
                         </div>
                     );
