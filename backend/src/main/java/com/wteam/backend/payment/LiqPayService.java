@@ -16,7 +16,7 @@ import java.util.Map;
 public class LiqPayService {
 
     private final LiqPayConfig liqPayConfig;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String createData(Map<String, Object> params) {
         params.put("public_key", liqPayConfig.getPublicKey());
