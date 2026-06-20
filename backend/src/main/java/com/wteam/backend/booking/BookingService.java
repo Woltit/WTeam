@@ -7,6 +7,7 @@ import com.wteam.backend.common.enums.BookingStatus;
 import com.wteam.backend.common.enums.NotificationChannel;
 import com.wteam.backend.common.enums.NotificationType;
 import com.wteam.backend.exception.booking.BookingNotFoundException;
+import com.wteam.backend.exception.booking.InvalidBookingStateException;
 import com.wteam.backend.exception.booking.ItemNotAvailableException;
 import com.wteam.backend.exception.item.ItemNotFoundException;
 import com.wteam.backend.exception.user.UserNotFoundException;
@@ -15,9 +16,11 @@ import com.wteam.backend.item.ItemRepository;
 import com.wteam.backend.notification.dto.NotificationEvent;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
-import com.wteam.backend.exception.booking.InvalidBookingStateException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
     private final ApplicationEventPublisher eventPublisher;
+    @Lazy private final BookingService self;
 
     @Transactional(readOnly = true)
     public Page<BookingResponse> findAll(Pageable pageable) {
@@ -49,15 +53,15 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public Booking findById(Long id) {
+    public Booking findById(final Long id) {
         return bookingRepository.findById(id)
                 .orElseThrow(() -> new BookingNotFoundException(id));
     }
 
     @Transactional
-    public BookingResponse createBooking(BookingRequest request) {
-        Long itemId   = request.itemId();
-        Long renterId = request.renterId();
+    @CacheEvict(value = "unavailableDates", key = "#request.itemId()")
+    public BookingResponse createBooking(final BookingRequest request, final Long renterId) {
+        Long itemId = request.itemId();
 
         Item item = itemRepository.findByIdForUpdate(itemId)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
@@ -94,22 +98,22 @@ public class BookingService {
 
     @Transactional
     public BookingResponse approveBooking(Long bookingId, Long userId) {
-        return setStatusForBooking(bookingId, userId, BookingStatus.APPROVED, null);
+        return self.setStatusForBooking(bookingId, userId, BookingStatus.APPROVED, null);
     }
 
     @Transactional
     public BookingResponse rejectBooking(Long bookingId, Long userId) {
-        return setStatusForBooking(bookingId, userId, BookingStatus.REJECTED, null);
+        return self.setStatusForBooking(bookingId, userId, BookingStatus.REJECTED, null);
     }
 
     @Transactional
     public BookingResponse cancelBooking(Long bookingId, Long userId, String cancellationReason) {
-        return setStatusForBooking(bookingId, userId, BookingStatus.CANCELLED, cancellationReason);
+        return self.setStatusForBooking(bookingId, userId, BookingStatus.CANCELLED, cancellationReason);
     }
 
     @Transactional
     public BookingResponse completeBooking(Long bookingId, Long userId) {
-        return setStatusForBooking(bookingId, userId, BookingStatus.COMPLETED, null);
+        return self.setStatusForBooking(bookingId, userId, BookingStatus.COMPLETED, null);
     }
 
     @Transactional(readOnly = true)
@@ -133,6 +137,7 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "unavailableDates", key = "#itemId")
     public List<UnavailableDateRange> getUnavailableDates(Long itemId) {
         return bookingRepository.findByActiveBookingsByItemId(itemId)
                 .stream()
@@ -140,20 +145,12 @@ public class BookingService {
                 .toList();
     }
 
-
-    private BookingResponse setStatusForBooking(Long bookingId, Long userId, BookingStatus newStatus, String cancellationReason) {
+    @Transactional
+    @CacheEvict(value = "unavailableDates", key = "#result.itemId")
+    public BookingResponse setStatusForBooking(Long bookingId, Long userId, BookingStatus newStatus, String cancellationReason) {
         Booking booking = getBooking(bookingId);
 
-        boolean isRenter = booking.getRenter().getId().equals(userId);
-        boolean isOwner  = booking.getItem().getOwner().getId().equals(userId);
-
-        if (newStatus == BookingStatus.APPROVED || newStatus == BookingStatus.REJECTED || newStatus == BookingStatus.COMPLETED) {
-            if (!isOwner) {
-                throw new IllegalArgumentException("Only the owner of the item can perform this action");
-            }
-        } else if (newStatus == BookingStatus.CANCELLED && !isRenter && !isOwner) {
-                throw new IllegalArgumentException("Only the renter or owner can cancel the booking");
-        }
+        boolean isRenter = isIsRenter(userId, newStatus, booking);
 
 
         if (booking.getStatus() == BookingStatus.CANCELLED) {
@@ -187,6 +184,7 @@ public class BookingService {
 
 
     @Transactional
+    @CacheEvict(value = "unavailableDates", key = "#result.itemId")
     public BookingResponse adminUpdateStatus(Long bookingId, BookingStatus newStatus, String cancellationReason) {
         Booking booking = getBooking(bookingId);
 
@@ -220,5 +218,19 @@ public class BookingService {
         NotificationEvent notificationEvent = new NotificationEvent(recipientId, notificationType, NotificationChannel.IN_APP, payload);
 
         eventPublisher.publishEvent(notificationEvent);
+    }
+
+    private static boolean isIsRenter(Long userId, BookingStatus newStatus, Booking booking) {
+        boolean isRenter = booking.getRenter().getId().equals(userId);
+        boolean isOwner  = booking.getItem().getOwner().getId().equals(userId);
+
+        if (newStatus == BookingStatus.APPROVED || newStatus == BookingStatus.REJECTED || newStatus == BookingStatus.COMPLETED) {
+            if (!isOwner) {
+                throw new IllegalArgumentException("Only the owner of the item can perform this action");
+            }
+        } else if (newStatus == BookingStatus.CANCELLED && !isRenter && !isOwner) {
+            throw new IllegalArgumentException("Only the renter or owner can cancel the booking");
+        }
+        return isRenter;
     }
 }
