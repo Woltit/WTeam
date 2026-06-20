@@ -9,10 +9,14 @@ import com.wteam.backend.user_device_token.dto.UserDeviceTokenRequest;
 import com.wteam.backend.user_device_token.dto.UserDeviceTokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -22,17 +26,20 @@ public class UserDeviceTokenService {
     private final UserDeviceTokenRepository repository;
     private final UserRepository userRepository;
     private final UserDeviceTokenMapper mapper;
+    private final CacheManager cacheManager;
 
     @Transactional(readOnly = true)
-    public List<UserDeviceTokenResponse> getTokensByUserId(Long userId) {
-        return repository.findByUserId(userId)
+    @Cacheable(value = "userDeviceTokens", key = "#userId")
+    public List<UserDeviceTokenResponse> getTokensByUserId(final Long userId) {
+        return new java.util.ArrayList<>(repository.findByUserId(userId)
                 .stream()
                 .map(mapper::toResponse)
-                .toList();
+                .toList());
     }
 
     @Transactional
-    public UserDeviceTokenResponse saveToken(Long userId, UserDeviceTokenRequest request) {
+    @CacheEvict(value = "userDeviceTokens", key = "#userId")
+    public UserDeviceTokenResponse saveToken(final Long userId, final UserDeviceTokenRequest request) {
         Optional<UserDeviceToken> existingTokenOpt = repository.findByToken(request.token());
 
         if (existingTokenOpt.isPresent()) {
@@ -63,13 +70,20 @@ public class UserDeviceTokenService {
     }
 
     @Transactional
-    public void deleteToken(String token) {
-        repository.deleteByToken(token);
-        log.info("Token deleted: {}", token);
+    public void deleteToken(final String token) {
+        repository.findByToken(token).ifPresent(deviceToken -> {
+            Long userId = deviceToken.getUser().getId();
+            repository.delete(deviceToken);
+
+            Objects.requireNonNull(cacheManager.getCache("userDeviceTokens")).evict(userId);
+
+            log.info("Token deleted: {}", token);
+        });
     }
 
     @Transactional
-    public void deleteTokenForUser(String token, Long userId) {
+    @CacheEvict(value = "userDeviceTokens", key = "#userId")
+    public void deleteTokenForUser(final String token, final Long userId) {
         Optional<UserDeviceToken> tokenOpt = repository.findByToken(token);
 
         UserDeviceToken deviceToken = tokenOpt.orElseThrow(() -> new UserDeviceTokenNotFoundException(token));

@@ -7,14 +7,14 @@ import com.wteam.backend.user_profile.dto.PendingProfileResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

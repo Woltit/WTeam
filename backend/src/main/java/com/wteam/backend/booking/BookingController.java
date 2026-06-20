@@ -3,6 +3,8 @@ package com.wteam.backend.booking;
 import com.wteam.backend.booking.dto.*;
 import com.wteam.backend.security.annotation.CurrentUser;
 import com.wteam.backend.security.dto.UserPrincipalDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,10 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @Tag(name = "Бронювання", description = "API для управління орендою (бронюваннями) речей")
@@ -36,11 +38,15 @@ public class BookingController {
             @Valid @RequestBody BookingRequest request,
             @CurrentUser UserPrincipalDto currentUser
     ) {
-        BookingRequest bookingRequest = new BookingRequest(
-                request.itemId(), currentUser.id(), request.startDate(), request.endDate()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(bookingService.createBooking(bookingRequest));
+        BookingResponse booking = bookingService.createBooking(request, currentUser.id());
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(booking.id())
+                .toUri();
+                
+        return ResponseEntity.created(location)
+                .body(booking);
     }
 
     @Operation(summary = "Отримати недоступні дати", description = "Повертає список дат, на які річ вже заброньована або недоступна.")

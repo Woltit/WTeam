@@ -46,6 +46,14 @@ services:
       - wteam_network
     restart: unless-stopped
 
+  redis:
+    image: 'redis:8-alpine'
+    container_name: 'wteam_redis_container'
+    ports:
+      - '6379:6379'
+    networks:
+      - wteam_network
+    restart: unless-stopped
 
 volumes:
   postgres:

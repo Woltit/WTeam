@@ -78,7 +78,7 @@ class ItemServiceTest {
         Pageable pageable = Pageable.unpaged();
 
         when(itemRepository.findAll(pageable)).thenReturn(itemsPage);
-        when(itemMapper.toItemResponse(item)).thenReturn(response);
+        when(itemMapper.toResponse(item)).thenReturn(response);
 
         Page<ItemResponse> result = itemService.getAllItems(pageable);
 
@@ -96,7 +96,7 @@ class ItemServiceTest {
         Pageable pageable = Pageable.unpaged();
 
         when(itemRepository.findAllByStatusAndIsVerifiedTrue(RentingStatus.AVAILABLE, pageable)).thenReturn(itemsPage);
-        when(itemMapper.toItemResponse(item)).thenReturn(response);
+        when(itemMapper.toResponse(item)).thenReturn(response);
 
         Page<ItemResponse> result = itemService.getAllItemsWhichAreAvailable(pageable);
 
@@ -113,7 +113,7 @@ class ItemServiceTest {
         ItemResponse response = mock(ItemResponse.class);
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-        when(itemMapper.toItemResponse(item)).thenReturn(response);
+        when(itemMapper.toResponse(item)).thenReturn(response);
 
         ItemResponse result = itemService.getItemById(itemId);
 
@@ -142,7 +142,7 @@ class ItemServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(owner));
         when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.of(category));
         when(itemRepository.save(any(Item.class))).thenAnswer(i -> i.getArguments()[0]);
-        when(itemMapper.toItemResponse(any(Item.class))).thenReturn(response);
+        when(itemMapper.toResponse(any(Item.class))).thenReturn(response);
 
         ItemResponse result = itemService.createItem(userId, request);
 
@@ -198,7 +198,7 @@ class ItemServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(itemRepository.save(item)).thenReturn(item);
-        when(itemMapper.toItemResponse(item)).thenReturn(response);
+        when(itemMapper.toResponse(item)).thenReturn(response);
 
         ItemResponse result = itemService.updateItem(itemId, userId, request);
 

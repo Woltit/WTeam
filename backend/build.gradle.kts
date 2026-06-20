@@ -89,6 +89,7 @@ val guavaVersion            = "33.6.0-jre"
 val bucket4jVersion         = "8.19.0"
 val cloudinaryVersion       = "1.39.0"
 val stripeVersion           = "24.22.0"
+val mapStructVersion        = "1.6.3"
 
 extra["snippetsDir"]        = file("build/generated-snippets")
 val springAiVersion by extra("2.0.0")
@@ -124,8 +125,10 @@ dependencies {
     implementation("com.bucket4j:bucket4j_jdk17-core:$bucket4jVersion")
     implementation("com.cloudinary:cloudinary-http44:$cloudinaryVersion")
     implementation("com.stripe:stripe-java:$stripeVersion")
+    implementation("org.mapstruct:mapstruct:$mapStructVersion")
 
     compileOnly("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
@@ -137,6 +140,7 @@ dependencies {
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapStructVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
@@ -156,6 +160,8 @@ dependencies {
     testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation("org.testcontainers:kafka:1.19.7")
 
+    testAnnotationProcessor("org.projectlombok:lombok")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 dependencyManagement {
@@ -167,6 +173,7 @@ dependencyManagement {
 tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-Duser.timezone=UTC")
+    systemProperty("spring.profiles.active", "test")
 }
 
 tasks.test {

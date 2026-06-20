@@ -1,6 +1,7 @@
 package com.wteam.backend.exception;
 
 import com.wteam.backend.exception.base.AppException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,7 +18,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import jakarta.validation.ConstraintViolationException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Глобальний обробник винятків (Global Exception Handler).
@@ -87,8 +90,15 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
-        return buildResponse(HttpStatus.BAD_REQUEST, errorMessage);
+        Map<String, String> validationErrors = new HashMap<>();
+
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
+            validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.ofValidationErrors(HttpStatus.BAD_REQUEST, "Validation failed", validationErrors));
     }
 
     /**

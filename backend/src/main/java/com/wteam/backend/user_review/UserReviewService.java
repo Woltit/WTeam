@@ -5,29 +5,35 @@ import com.wteam.backend.booking.BookingRepository;
 import com.wteam.backend.common.enums.BookingStatus;
 import com.wteam.backend.common.enums.ReviewStatus;
 import com.wteam.backend.common.enums.TargetRole;
-import com.wteam.backend.user.User;
-import com.wteam.backend.user.UserRepository;
+import com.wteam.backend.exception.booking.BookingNotFoundException;
 import com.wteam.backend.exception.review.InvalidReviewStateException;
 import com.wteam.backend.exception.review.ReviewAlreadyExistsException;
+import com.wteam.backend.user.User;
+import com.wteam.backend.user.UserRepository;
 import com.wteam.backend.user_review.dto.UserReviewRequest;
 import com.wteam.backend.user_review.dto.UserReviewResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserReviewService {
-
     private final UserReviewRepository userReviewRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ReviewManagerService reviewManagerService;
+    private final UserReviewMapper userReviewMapper;
 
     @Transactional
+    @CacheEvict(value = "userReviews", key = "#result.targetUserId")
     public UserReviewResponse submitUserReview(Long bookingId, Long reviewerId, UserReviewRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
         if (booking.getStatus() != BookingStatus.COMPLETED) {
             throw new InvalidReviewStateException("Reviews can only be left for COMPLETED bookings");
@@ -78,22 +84,13 @@ public class UserReviewService {
                 .createdAt(review.getCreatedAt())
                 .build();
     }
+
     @Transactional(readOnly = true)
-    public java.util.List<UserReviewResponse> getPublishedReviewsForUser(Long userId) {
-        return userReviewRepository.findAll().stream() // Ideally we should use a proper custom query, but we can do stream for simplicity or add method to repo
-                .filter(r -> r.getTargetUser().getId().equals(userId))
-                .filter(r -> r.getStatus() == ReviewStatus.PUBLISHED)
-                .map(review -> UserReviewResponse.builder()
-                        .id(review.getId())
-                        .targetUserId(review.getTargetUser().getId())
-                        .reviewerId(review.getReviewer().getId())
-                        .bookingId(review.getBooking().getId())
-                        .targetRole(review.getTargetRole())
-                        .rating(review.getRating())
-                        .comment(review.getComment())
-                        .status(review.getStatus())
-                        .createdAt(review.getCreatedAt())
-                        .build())
-                .toList();
+    @Cacheable(value = "userReviews", key = "#userId")
+    public List<UserReviewResponse> getPublishedReviewsForUser(Long userId) {
+        return new java.util.ArrayList<>(userReviewRepository.findByTargetUserIdAndStatus(userId, ReviewStatus.PUBLISHED)
+                .stream()
+                .map(userReviewMapper::toResponse)
+                .toList());
     }
 }

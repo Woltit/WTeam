@@ -2,8 +2,12 @@ package com.wteam.backend.item;
 
 import com.wteam.backend.item.dto.ItemRequest;
 import com.wteam.backend.item.dto.ItemResponse;
+import com.wteam.backend.item_image.ItemImageService;
+import com.wteam.backend.item_image.dto.ItemImageResponse;
 import com.wteam.backend.security.annotation.CurrentUser;
 import com.wteam.backend.security.dto.UserPrincipalDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,12 +17,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.wteam.backend.item_image.ItemImageService;
-import com.wteam.backend.item_image.dto.ItemImageResponse;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @Tag(name = "Товари", description = "API для управління речами, які здаються в оренду, та їхніми фотографіями")
 @RestController
@@ -64,9 +67,14 @@ public class ItemController {
             @CurrentUser UserPrincipalDto user,
             @Valid @RequestBody ItemRequest request
     ) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(itemService.createItem(user.id(), request));
+        ItemResponse item = itemService.createItem(user.id(), request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(item.id())
+                .toUri();
+                
+        return ResponseEntity.created(location).body(item);
     }
 
     @Operation(summary = "Оновити товар", description = "Редагує інформацію про товар. Доступно власнику або адміністратору.")

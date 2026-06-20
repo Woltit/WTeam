@@ -26,7 +26,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class TrustScoreRecalculationListener {
-
     private final BookingRepository bookingRepository;
     private final ItemReviewRepository itemReviewRepository;
     private final UserReviewRepository userReviewRepository;
@@ -65,6 +64,10 @@ public class TrustScoreRecalculationListener {
             weightedSum += (review.getRating() * weight);
         }
 
+        if (totalWeight == 0.0) {
+            throw new IllegalStateException("Total weight cannot be 0");
+        }
+
         double newRating = weightedSum / totalWeight;
         item.setRating(BigDecimal.valueOf(newRating).setScale(2, RoundingMode.HALF_UP));
         item.setTotalReviews(allReviews.size());
@@ -84,6 +87,10 @@ public class TrustScoreRecalculationListener {
             double weight = 1.0 + (i * 0.1);
             totalWeight += weight;
             weightedSum += (review.getRating() * weight);
+        }
+
+        if (totalWeight == 0.0) {
+            throw new IllegalStateException("Total weight cannot be 0");
         }
 
         double newScore = weightedSum / totalWeight;

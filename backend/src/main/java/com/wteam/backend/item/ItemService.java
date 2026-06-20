@@ -12,6 +12,8 @@ import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
 import com.wteam.backend.user_profile.UserProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,25 +38,26 @@ public class ItemService {
     @Transactional(readOnly = true)
     public Page<ItemResponse> getAllItems(Pageable pageable) {
         return itemRepository.findAll(pageable)
-                .map(itemMapper::toItemResponse);
+                .map(itemMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
     public Page<ItemResponse> getAllItemsWhichAreAvailable(Pageable pageable) {
         return itemRepository.findAllByStatusAndIsVerifiedTrue(RentingStatus.AVAILABLE, pageable)
-                .map(itemMapper::toItemResponse);
+                .map(itemMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
     public Page<ItemResponse> getMyItems(Long userId, Pageable pageable) {
         return itemRepository.findAllByOwnerId(userId, pageable)
-                .map(itemMapper::toItemResponse);
+                .map(itemMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "items", key = "#itemId")
     public ItemResponse getItemById(Long itemId) {
         return itemRepository.findById(itemId)
-                .map(itemMapper::toItemResponse)
+                .map(itemMapper::toResponse)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
     }
 
@@ -77,10 +80,11 @@ public class ItemService {
 
         itemMapper.updateItemFromRequest(item, request);
 
-        return itemMapper.toItemResponse(itemRepository.save(item));
+        return itemMapper.toResponse(itemRepository.save(item));
     }
 
     @Transactional
+    @CacheEvict(value = "items", key = "#itemId")
     public ItemResponse updateItem(Long itemId, Long userId, ItemRequest request) {
         Item item = getItem(itemId);
 
@@ -95,10 +99,11 @@ public class ItemService {
         }
 
         itemMapper.updateItemFromRequest(item, request);
-        return itemMapper.toItemResponse(itemRepository.save(item));
+        return itemMapper.toResponse(itemRepository.save(item));
     }
 
     @Transactional
+    @CacheEvict(value = "items", key = "#itemId")
     public void deleteItem(Long itemId, Long userId, boolean isAdmin) {
         Item item = getItem(itemId);
 
@@ -111,10 +116,11 @@ public class ItemService {
     }
 
     @Transactional
+    @CacheEvict(value = "items", key = "#itemId")
     public ItemResponse setItemVerified(Long itemId, boolean verified) {
         Item item = getItem(itemId);
         item.setVerified(verified);
-        return itemMapper.toItemResponse(itemRepository.save(item));
+        return itemMapper.toResponse(itemRepository.save(item));
     }
 
     private Item getItem(Long itemId) {

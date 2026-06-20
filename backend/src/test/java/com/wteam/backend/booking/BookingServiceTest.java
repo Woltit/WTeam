@@ -3,8 +3,8 @@ package com.wteam.backend.booking;
 import com.wteam.backend.booking.dto.BookingRequest;
 import com.wteam.backend.booking.dto.BookingResponse;
 import com.wteam.backend.common.enums.BookingStatus;
-import com.wteam.backend.exception.booking.ItemNotAvailableException;
 import com.wteam.backend.exception.booking.InvalidBookingStateException;
+import com.wteam.backend.exception.booking.ItemNotAvailableException;
 import com.wteam.backend.exception.item.ItemNotFoundException;
 import com.wteam.backend.item.Item;
 import com.wteam.backend.item.ItemRepository;
@@ -38,7 +38,14 @@ class BookingServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private BookingMapper bookingMapper;
     @Mock private ApplicationEventPublisher eventPublisher;
-    @InjectMocks private BookingService bookingService;
+    @Mock private org.springframework.beans.factory.ObjectProvider<BookingService> selfProvider;
+    @InjectMocks
+    private BookingService bookingService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        lenient().when(selfProvider.getObject()).thenReturn(bookingService);
+    }
 
     private static final LocalDate START = LocalDate.of(2026, 8, 1);
     private static final LocalDate END   = LocalDate.of(2026, 8, 6);
@@ -85,9 +92,9 @@ class BookingServiceTest {
         when(userRepository.findById(2L)).thenReturn(Optional.of(user(2L)));
         when(bookingRepository.existsOverlappingBooking(1L, START, END)).thenReturn(true);
 
-        BookingRequest request = new BookingRequest(1L, 2L, START, END);
+        BookingRequest request = new BookingRequest(1L, START, END);
 
-        assertThrows(ItemNotAvailableException.class, () -> bookingService.createBooking(request));
+        assertThrows(ItemNotAvailableException.class, () -> bookingService.createBooking(request, 2L));
         verify(bookingRepository, never()).save(any());
     }
 
@@ -96,9 +103,9 @@ class BookingServiceTest {
     void createBooking_whenItemNotFound_throwsItemNotFoundException() {
         when(itemRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
-        BookingRequest request = new BookingRequest(99L, 2L, START, END);
+        BookingRequest request = new BookingRequest(99L, START, END);
 
-        assertThrows(ItemNotFoundException.class, () -> bookingService.createBooking(request));
+        assertThrows(ItemNotFoundException.class, () -> bookingService.createBooking(request, 2L));
     }
 
     @Test
@@ -120,7 +127,7 @@ class BookingServiceTest {
 
         when(bookingMapper.toResponse(any(Booking.class))).thenReturn(mockResponse);
 
-        bookingService.createBooking(new BookingRequest(1L, 2L, START, END));
+        bookingService.createBooking(new BookingRequest(1L, START, END), 2L);
 
         ArgumentCaptor<Booking> captor = ArgumentCaptor.forClass(Booking.class);
         verify(bookingRepository).save(captor.capture());

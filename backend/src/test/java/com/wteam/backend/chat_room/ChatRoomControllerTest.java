@@ -38,12 +38,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import lombok.RequiredArgsConstructor;
+
 @WebMvcTest(ChatRoomController.class)
 @Import(TestSecurityConfig.class)
 @DisplayName("ChatRoomController WebMvcTest")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ChatRoomControllerTest {
-
-    @Autowired MockMvc mockMvc;
+    private final MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean ChatRoomService chatRoomService;

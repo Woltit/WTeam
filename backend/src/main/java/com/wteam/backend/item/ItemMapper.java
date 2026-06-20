@@ -1,9 +1,10 @@
 package com.wteam.backend.item;
 
+import com.wteam.backend.common.interfaces.Mapper;
 import com.wteam.backend.item.dto.ItemRequest;
 import com.wteam.backend.item.dto.ItemResponse;
-import com.wteam.backend.user_profile.UserProfileMapper;
 import com.wteam.backend.item_image.ItemImageMapper;
+import com.wteam.backend.user_profile.UserProfileMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +14,12 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class ItemMapper {
+public class ItemMapper implements Mapper<ItemRequest, ItemResponse, Item> {
     private final UserProfileMapper userProfileMapper;
     private final ItemImageMapper itemImageMapper;
 
-    public ItemResponse toItemResponse(Item item) {
+    @Override
+    public ItemResponse toResponse(Item item) {
         if (item == null) {
             throw new IllegalArgumentException("Item must not be null");
         }
@@ -68,5 +70,10 @@ public class ItemMapper {
         item.setAddress(request.address());
         item.setLatitude(request.latitude());
         item.setLongitude(request.longitude());
+    }
+
+    @Override
+    public Item toEntity(ItemRequest dto) {
+        return null;
     }
 }

@@ -29,12 +29,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import lombok.RequiredArgsConstructor;
+
 @WebMvcTest(AuthController.class)
 @Import(TestSecurityConfig.class)
 @DisplayName("AuthController WebMvcTest")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class AuthControllerTest {
-
-    @Autowired MockMvc mockMvc;
+    private final MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean AuthService authService;

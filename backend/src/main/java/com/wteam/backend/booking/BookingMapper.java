@@ -1,11 +1,13 @@
 package com.wteam.backend.booking;
 
 import com.wteam.backend.booking.dto.BookingResponse;
+import com.wteam.backend.common.interfaces.Mapper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BookingMapper {
+public class BookingMapper implements Mapper<Void, BookingResponse, Booking> {
 
+    @Override
     public BookingResponse toResponse(Booking booking) {
         if (booking == null) {
             throw new IllegalArgumentException("Booking is null");
@@ -26,5 +28,10 @@ public class BookingMapper {
                 booking.getStatus(),
                 booking.getCancellationReason()
         );
+    }
+
+    @Override
+    public Booking toEntity(Void dto) {
+        return null;
     }
 }

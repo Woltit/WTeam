@@ -1,11 +1,13 @@
 package com.wteam.backend.notification;
 
+import com.wteam.backend.common.interfaces.Mapper;
 import com.wteam.backend.notification.dto.NotificationResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NotificationMapper {
+public class NotificationMapper implements Mapper<Void, NotificationResponse, Notification> {
 
+    @Override
     public NotificationResponse toResponse(Notification notification) {
         return new NotificationResponse(
                 notification.getId(),
@@ -15,5 +17,10 @@ public class NotificationMapper {
                 notification.isRead(),
                 notification.getCreatedAt()
         );
+    }
+
+    @Override
+    public Notification toEntity(Void dto) {
+        return null;
     }
 }

@@ -11,12 +11,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user-device-tokens")
 @RequiredArgsConstructor
 public class UserDeviceTokenController {
     private final UserDeviceTokenService userDeviceTokenService;
+
+    @GetMapping("/me")
+    public ResponseEntity<List<UserDeviceTokenResponse>> getAllUserTokens(
+            @CurrentUser UserPrincipalDto user
+    ) {
+        return ResponseEntity.ok(userDeviceTokenService.getTokensByUserId(user.id()));
+    }
 
     @PostMapping("/me/fcm-token")
     public ResponseEntity<UserDeviceTokenResponse> saveToken(

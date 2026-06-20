@@ -20,22 +20,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Сервіс для керування бронюваннями.
- * <p>
- * Обробляє бізнес-логіку, пов'язану зі створенням, оновленням та отриманням інформації про бронювання товарів.
- * </p>
- */
+import org.springframework.beans.factory.ObjectProvider;
+
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -44,7 +40,11 @@ public class BookingService {
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
     private final ApplicationEventPublisher eventPublisher;
-    @Lazy private final BookingService self;
+    private final ObjectProvider<BookingService> selfProvider;
+
+    private BookingService getSelf() {
+        return selfProvider.getObject();
+    }
 
     @Transactional(readOnly = true)
     public Page<BookingResponse> findAll(Pageable pageable) {
@@ -98,22 +98,22 @@ public class BookingService {
 
     @Transactional
     public BookingResponse approveBooking(Long bookingId, Long userId) {
-        return self.setStatusForBooking(bookingId, userId, BookingStatus.APPROVED, null);
+        return getSelf().setStatusForBooking(bookingId, userId, BookingStatus.APPROVED, null);
     }
 
     @Transactional
     public BookingResponse rejectBooking(Long bookingId, Long userId) {
-        return self.setStatusForBooking(bookingId, userId, BookingStatus.REJECTED, null);
+        return getSelf().setStatusForBooking(bookingId, userId, BookingStatus.REJECTED, null);
     }
 
     @Transactional
     public BookingResponse cancelBooking(Long bookingId, Long userId, String cancellationReason) {
-        return self.setStatusForBooking(bookingId, userId, BookingStatus.CANCELLED, cancellationReason);
+        return getSelf().setStatusForBooking(bookingId, userId, BookingStatus.CANCELLED, cancellationReason);
     }
 
     @Transactional
     public BookingResponse completeBooking(Long bookingId, Long userId) {
-        return self.setStatusForBooking(bookingId, userId, BookingStatus.COMPLETED, null);
+        return getSelf().setStatusForBooking(bookingId, userId, BookingStatus.COMPLETED, null);
     }
 
     @Transactional(readOnly = true)
@@ -139,10 +139,10 @@ public class BookingService {
     @Transactional(readOnly = true)
     @Cacheable(value = "unavailableDates", key = "#itemId")
     public List<UnavailableDateRange> getUnavailableDates(Long itemId) {
-        return bookingRepository.findByActiveBookingsByItemId(itemId)
+        return new ArrayList<>(bookingRepository.findByActiveBookingsByItemId(itemId)
                 .stream()
                 .map(b -> new UnavailableDateRange(b.getStartDate(), b.getEndDate()))
-                .toList();
+                .toList());
     }
 
     @Transactional

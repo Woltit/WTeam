@@ -1,6 +1,9 @@
 package com.wteam.backend.user_profile;
 
+import com.wteam.backend.cloudinary.ImageService;
 import com.wteam.backend.common.enums.VerificationStatus;
+import com.wteam.backend.exception.cloudinary.ImageUploadException;
+import com.wteam.backend.exception.user.ProfileAlreadyVerifiedException;
 import com.wteam.backend.exception.user_profile.ProfileIncompleteException;
 import com.wteam.backend.exception.user_profile.ProfileNotFoundException;
 import com.wteam.backend.user_profile.dto.PendingProfileResponse;
@@ -16,9 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.wteam.backend.cloudinary.ImageService;
-import com.wteam.backend.exception.cloudinary.ImageUploadException;
-import com.wteam.backend.exception.user.ProfileAlreadyVerifiedException;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class UserProfileService {
     @Transactional(readOnly = true)
     @Cacheable(value = "userProfiles", key = "#userId")
     public UserProfileResponse getProfile(Long userId) {
-        return userProfileMapper.toProfileResponse(getUserProfile(userId));
+        return userProfileMapper.toResponse(getUserProfile(userId));
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +47,7 @@ public class UserProfileService {
     public UserProfileResponse updateProfile(Long userId, UserProfileRequest request) {
         UserProfile userProfile = getUserProfile(userId);
         userProfileMapper.updateProfileFromRequest(request, userProfile);
-        return userProfileMapper.toProfileResponse(userProfileRepository.save(userProfile));
+        return userProfileMapper.toResponse(userProfileRepository.save(userProfile));
     }
 
     @Transactional
@@ -58,7 +58,7 @@ public class UserProfileService {
     public UserProfileResponse updateVerificationStatus(Long userId, VerificationStatus status) {
         UserProfile userProfile = getUserProfile(userId);
         userProfile.setVerificationStatus(status);
-        return userProfileMapper.toProfileResponse(userProfileRepository.save(userProfile));
+        return userProfileMapper.toResponse(userProfileRepository.save(userProfile));
     }
 
     @Transactional
@@ -101,7 +101,7 @@ public class UserProfileService {
         }
 
         userProfile.setVerificationStatus(VerificationStatus.PENDING);
-        return userProfileMapper.toProfileResponse(userProfileRepository.save(userProfile));
+        return userProfileMapper.toResponse(userProfileRepository.save(userProfile));
     }
 
     @Transactional(readOnly = true)

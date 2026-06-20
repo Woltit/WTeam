@@ -5,14 +5,14 @@ import com.wteam.backend.security.annotation.CurrentUser;
 import com.wteam.backend.security.dto.UserPrincipalDto;
 import com.wteam.backend.user.dto.BlockUserRequest;
 import com.wteam.backend.user.dto.UserResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Користувачі", description = "API для управління користувачами системи (переважно для адміністраторів)")

@@ -1,0 +1,20 @@
+-- Створення ENUM типів для тестів
+CREATE TYPE role                    AS ENUM ('ADMIN', 'MODER', 'USER');
+CREATE TYPE item_condition          AS ENUM ('IDEAL', 'GOOD', 'NORM', 'BAD', 'NEEDS_REPAIRING');
+CREATE TYPE renting_status          AS ENUM ('AVAILABLE', 'RENTED', 'HIDDEN', 'ARCHIVED');
+CREATE TYPE verification_status     AS ENUM ('UNVERIFIED', 'PENDING', 'VERIFIED', 'REJECTED');
+CREATE TYPE booking_status          AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'PAID', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTE');
+CREATE TYPE transaction_type        AS ENUM ('RENT_PAYMENT', 'DEPOSIT_HOLD', 'DEPOSIT_REFUND', 'COMPENSATION');
+CREATE TYPE transaction_status      AS ENUM ('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED');
+CREATE TYPE document_type           AS ENUM ('PASSPORT', 'ID_CARD');
+CREATE TYPE notification_channel    AS ENUM ('EMAIL', 'PUSH', 'IN_APP');
+CREATE TYPE notification_type       AS ENUM (
+    'BOOKING_REQUEST', 'BOOKING_APPROVED', 'BOOKING_REJECTED',
+    'BOOKING_CANCELLED', 'PAYMENT_RECEIVED', 'REVIEW_LEFT',
+    'VERIFICATION_APPROVED', 'VERIFICATION_REJECTED', 'DISPUTE_OPENED'
+);
+CREATE TYPE delivery_method         AS ENUM ('SELF_PICKUP', 'DELIVERY');
+CREATE TYPE delivery_status         AS ENUM ('PENDING', 'SENT', 'DELIVERED', 'RETURNED');
+CREATE TYPE dispute_status          AS ENUM ('OPEN', 'UNDER_REVIEW', 'RESOLVED', 'CLOSED');
+CREATE TYPE dispute_reason          AS ENUM ('ITEM_DAMAGED', 'ITEM_NOT_RETURNED', 'PAYMENT_ISSUE', 'OTHER');
+CREATE TYPE auth_provider           AS ENUM ('LOCAL', 'GOOGLE', 'APPLE');

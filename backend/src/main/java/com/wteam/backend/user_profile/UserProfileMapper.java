@@ -1,5 +1,6 @@
 package com.wteam.backend.user_profile;
 
+import com.wteam.backend.common.interfaces.Mapper;
 import com.wteam.backend.user_profile.dto.PendingProfileResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
@@ -7,14 +8,15 @@ import com.wteam.backend.user_profile.dto.UserProfileResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserProfileMapper {
+public class UserProfileMapper implements Mapper<UserProfileRequest, UserProfileResponse, UserProfile> {
     /**
      * Конвертує сутність {@link UserProfile} у об'єкт відповіді {@link UserProfileResponse}.
      *
      * @param profile сутність профілю користувача для конвертації.
      * @return об'єкт {@link UserProfileResponse} з публічними даними профілю.
      */
-    public UserProfileResponse toProfileResponse(UserProfile profile) {
+    @Override
+    public UserProfileResponse toResponse(UserProfile profile) {
         return new UserProfileResponse(
                 profile.getLastName(),
                 profile.getFirstName(),
@@ -74,5 +76,10 @@ public class UserProfileMapper {
         profile.setBirthDate(request.birthDate());
         profile.setPhoneNumber(request.phoneNumber());
         profile.setBio(request.bio());
+    }
+
+    @Override
+    public UserProfile toEntity(UserProfileRequest dto) {
+        return null;
     }
 }

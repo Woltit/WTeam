@@ -2,12 +2,12 @@ package com.wteam.backend.item.dto;
 
 import com.wteam.backend.common.enums.ItemCondition;
 import com.wteam.backend.common.enums.RentingStatus;
+import com.wteam.backend.item_image.dto.ItemImageResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import com.wteam.backend.item_image.dto.ItemImageResponse;
 
 public record ItemResponse(
         Long id,

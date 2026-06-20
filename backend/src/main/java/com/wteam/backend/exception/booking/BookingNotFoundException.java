@@ -7,10 +7,6 @@ public class BookingNotFoundException extends ResourceNotFoundException {
         super(message);
     }
 
-    public BookingNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
     public BookingNotFoundException(Long id) {
         super("Booking", id);
     }

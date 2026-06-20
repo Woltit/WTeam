@@ -3,7 +3,8 @@ package com.wteam.backend.user_review;
 import com.wteam.backend.item_review.ItemReviewService;
 import com.wteam.backend.item_review.dto.ItemReviewRequest;
 import com.wteam.backend.item_review.dto.ItemReviewResponse;
-import com.wteam.backend.security.SecurityUser;
+import com.wteam.backend.security.annotation.CurrentUser;
+import com.wteam.backend.security.dto.UserPrincipalDto;
 import com.wteam.backend.user_review.dto.UserReviewRequest;
 import com.wteam.backend.user_review.dto.UserReviewResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +13,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -22,30 +25,40 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Відгуки", description = "API для залишення та перегляду відгуків на товари та користувачів")
 public class ReviewController {
-
     private final ItemReviewService itemReviewService;
     private final UserReviewService userReviewService;
 
     @PostMapping("/bookings/{bookingId}/reviews/item")
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Залишити відгук на товар", description = "Залишає відгук на річ після успішного завершення оренди")
-    public ItemReviewResponse submitItemReview(
+    public ResponseEntity<ItemReviewResponse> submitItemReview(
             @PathVariable Long bookingId,
             @Valid @RequestBody ItemReviewRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal SecurityUser currentUser
+            @Parameter(hidden = true) @CurrentUser UserPrincipalDto currentUser
     ) {
-        return itemReviewService.submitItemReview(bookingId, currentUser.getId(), request);
+        ItemReviewResponse review = itemReviewService.submitItemReview(bookingId, currentUser.id(), request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/items/{itemId}/reviews")
+                .buildAndExpand(review.getItemId())
+                .toUri();
+        return ResponseEntity.created(location).body(review);
     }
 
     @PostMapping("/bookings/{bookingId}/reviews/user")
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Залишити відгук на користувача", description = "Залишає відгук на орендодавця або орендаря після успішного завершення оренди")
-    public UserReviewResponse submitUserReview(
+    public ResponseEntity<UserReviewResponse> submitUserReview(
             @PathVariable Long bookingId,
             @Valid @RequestBody UserReviewRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal SecurityUser currentUser
+            @Parameter(hidden = true) @CurrentUser UserPrincipalDto currentUser
     ) {
-        return userReviewService.submitUserReview(bookingId, currentUser.getId(), request);
+        UserReviewResponse review = userReviewService.submitUserReview(bookingId, currentUser.id(), request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/users/{userId}/reviews")
+                .buildAndExpand(review.targetUserId())
+                .toUri();
+        
+        return ResponseEntity.created(location).body(review);
     }
 
     @GetMapping("/items/{itemId}/reviews")

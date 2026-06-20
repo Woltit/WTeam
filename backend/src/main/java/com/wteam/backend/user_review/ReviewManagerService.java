@@ -15,16 +15,26 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class ReviewManagerService {
     private final ItemReviewRepository itemReviewRepository;
     private final UserReviewRepository userReviewRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final CacheManager cacheManager;
+    @Lazy private final ReviewManagerService self;
 
-    @org.springframework.beans.factory.annotation.Autowired
-    @Lazy
-    private ReviewManagerService self;
+    public ReviewManagerService(
+            ItemReviewRepository itemReviewRepository,
+            UserReviewRepository userReviewRepository,
+            ApplicationEventPublisher eventPublisher,
+            CacheManager cacheManager,
+            @Lazy ReviewManagerService self
+    ) {
+        this.itemReviewRepository = itemReviewRepository;
+        this.userReviewRepository = userReviewRepository;
+        this.eventPublisher = eventPublisher;
+        this.cacheManager = cacheManager;
+        this.self = self;
+    }
 
     /**
      * Checks if both parties (Renter and Owner) have left their reviews for the booking.

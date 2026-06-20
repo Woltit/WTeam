@@ -32,9 +32,13 @@ public class PaymentService {
     private String frontendUrl;
 
     @Transactional
-    public StripeCheckoutResponse createPaymentCheckout(Long bookingId) {
+    public StripeCheckoutResponse createPaymentCheckout(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+        if (!booking.getRenter().getId().equals(userId)) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not the renter of this booking");
+        }
 
         if (booking.getStatus() != BookingStatus.APPROVED) {
             throw new IllegalStateException("Only APPROVED bookings can be paid");
@@ -125,11 +129,15 @@ public class PaymentService {
     }
 
     @Transactional
-    public void verifyPaymentStatus(Long bookingId) {
+    public void verifyPaymentStatus(Long bookingId, Long userId) {
         // With Stripe Checkout and Webhooks, manual verification is typically done by fetching the Session.
         // For local development, if webhooks fail, the frontend might call this on success_url return.
         Payment payment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
+        if (!payment.getBooking().getRenter().getId().equals(userId)) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not the renter of this booking");
+        }
 
         if (payment.getStatus() == PaymentStatus.SUCCESS) {
             return;

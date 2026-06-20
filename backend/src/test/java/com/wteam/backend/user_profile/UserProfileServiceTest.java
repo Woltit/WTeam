@@ -1,16 +1,14 @@
 package com.wteam.backend.user_profile;
 
+import com.wteam.backend.cloudinary.ImageService;
 import com.wteam.backend.common.enums.VerificationStatus;
+import com.wteam.backend.exception.cloudinary.ImageUploadException;
 import com.wteam.backend.exception.user_profile.ProfileIncompleteException;
 import com.wteam.backend.exception.user_profile.ProfileNotFoundException;
 import com.wteam.backend.user_profile.dto.PendingProfileResponse;
 import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
-import com.wteam.backend.cloudinary.ImageService;
-import com.wteam.backend.exception.cloudinary.ImageUploadException;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +52,7 @@ class UserProfileServiceTest {
         UserProfileResponse response = mock(UserProfileResponse.class);
 
         when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(profile));
-        when(userProfileMapper.toProfileResponse(profile)).thenReturn(response);
+        when(userProfileMapper.toResponse(profile)).thenReturn(response);
 
         UserProfileResponse result = userProfileService.getProfile(userId);
 
@@ -95,7 +95,7 @@ class UserProfileServiceTest {
 
         when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(profile));
         when(userProfileRepository.save(profile)).thenReturn(profile);
-        when(userProfileMapper.toProfileResponse(profile)).thenReturn(response);
+        when(userProfileMapper.toResponse(profile)).thenReturn(response);
 
         UserProfileResponse result = userProfileService.updateProfile(userId, request);
 
@@ -115,7 +115,7 @@ class UserProfileServiceTest {
 
         when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(profile));
         when(userProfileRepository.save(profile)).thenReturn(profile);
-        when(userProfileMapper.toProfileResponse(profile)).thenReturn(response);
+        when(userProfileMapper.toResponse(profile)).thenReturn(response);
 
         UserProfileResponse result = userProfileService.updateVerificationStatus(userId, VerificationStatus.VERIFIED);
 

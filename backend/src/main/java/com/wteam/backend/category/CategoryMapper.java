@@ -1,6 +1,7 @@
 package com.wteam.backend.category;
 
 import com.wteam.backend.category.dto.CategoryResponse;
+import com.wteam.backend.common.interfaces.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class CategoryMapper {
+public class CategoryMapper implements Mapper<Void, CategoryResponse, Category> {
 
     public List<CategoryResponse> toCategoryTree(final List<Category> categories) {
         Map<Long, List<Category>> childrenMap = categories.stream()
@@ -38,7 +39,8 @@ public class CategoryMapper {
         );
     }
 
-    public CategoryResponse toCategoryResponse(Category category) {
+    @Override
+    public CategoryResponse toResponse(Category category) {
         return new CategoryResponse(
                 category.getId(),
                 category.getName(),
@@ -47,5 +49,10 @@ public class CategoryMapper {
                 category.getParent() != null ? category.getParent().getId() : null,
                 Collections.emptyList()
         );
+    }
+
+    @Override
+    public Category toEntity(Void dto) {
+        return null;
     }
 }

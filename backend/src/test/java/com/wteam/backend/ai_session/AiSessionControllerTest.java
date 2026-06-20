@@ -33,13 +33,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import lombok.RequiredArgsConstructor;
+
 @WebMvcTest(AiSessionController.class)
 @Import(TestSecurityConfig.class)
 @DisplayName("AiSessionController WebMvcTest")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class AiSessionControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Autowired MockMvc mockMvc;
+    private final MockMvc mockMvc;
 
     @MockitoBean AiSessionService aiSessionService;
     @MockitoBean JwtService jwtService;

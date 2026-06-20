@@ -36,12 +36,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import lombok.RequiredArgsConstructor;
+
 @WebMvcTest(BookingController.class)
 @Import(TestSecurityConfig.class)
 @DisplayName("BookingController WebMvcTest")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class BookingControllerTest {
-
-    @Autowired MockMvc mockMvc;
+    private final MockMvc mockMvc;
 
     @MockitoBean BookingService bookingService;
     @MockitoBean JwtService jwtService;
@@ -70,7 +72,7 @@ class BookingControllerTest {
     @Test
     @DisplayName("POST /bookings → 201 for authenticated user with valid request")
     void createBooking_whenAuthenticated_returns201() throws Exception {
-        when(bookingService.createBooking(any())).thenReturn(sampleResponse());
+        when(bookingService.createBooking(any(), any())).thenReturn(sampleResponse());
 
         String body = """
                 {"itemId":10,"startDate":"2026-08-01","endDate":"2026-08-05"}
@@ -102,7 +104,7 @@ class BookingControllerTest {
     @Test
     @DisplayName("POST /bookings → 409 when the item is not available for requested dates")
     void createBooking_whenDatesOverlap_returns409() throws Exception {
-        when(bookingService.createBooking(any()))
+        when(bookingService.createBooking(any(), any()))
                 .thenThrow(new ItemNotAvailableException(10L,
                         LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 5)));
 

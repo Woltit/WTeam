@@ -23,6 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import com.wteam.backend.common.enums.RentingStatus;
+import java.time.Instant;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -36,12 +38,15 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import lombok.RequiredArgsConstructor;
+
 @WebMvcTest(ItemController.class)
 @Import(TestSecurityConfig.class)
 @DisplayName("ItemController WebMvcTest")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ItemControllerTest {
 
-    @Autowired MockMvc mockMvc;
+    private final MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean ItemService itemService;
@@ -100,7 +105,14 @@ class ItemControllerTest {
     @Test
     @DisplayName("POST /items → 201 for authenticated user with valid item")
     void createItem_whenAuthenticated_returns201() throws Exception {
-        ItemResponse resp = mock(ItemResponse.class);
+        ItemResponse resp = new ItemResponse(
+                1L, 1L, null, 1L, "Drill", "A power drill",
+                List.of("tool"), ItemCondition.IDEAL,
+                BigDecimal.valueOf(50), BigDecimal.valueOf(300),
+                BigDecimal.valueOf(100), RentingStatus.AVAILABLE,
+                "Kyiv", "123 Test St", BigDecimal.valueOf(50.45), BigDecimal.valueOf(30.52),
+                true, Instant.now(), Instant.now(), List.of()
+        );
         when(itemService.createItem(any(), any())).thenReturn(resp);
 
         mockMvc.perform(post("/items")

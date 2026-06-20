@@ -9,10 +9,6 @@ public record BookingRequest(
         @NotNull(message = "Item ID is required")
         Long itemId,
 
-        // renterId часто береться з контексту безпеки (SecurityContext),
-        // але якщо авторизації ще немає, можна передавати в DTO:
-        Long renterId,
-
         @NotNull(message = "Start date is required")
         @FutureOrPresent(message = "Start date cannot be in the past")
         LocalDate startDate,

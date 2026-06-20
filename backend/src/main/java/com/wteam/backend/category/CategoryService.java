@@ -4,6 +4,8 @@ import com.wteam.backend.category.dto.CategoryRequest;
 import com.wteam.backend.category.dto.CategoryResponse;
 import com.wteam.backend.exception.category.CategoryNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +24,14 @@ public class CategoryService {
     private final CategoryMapper categoryMapper;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "categoryTree")
     public List<CategoryResponse> getCategoryTree() {
-        return categoryMapper.toCategoryTree(categoryRepository.findAll());
+        return new java.util.ArrayList<>(categoryMapper.toCategoryTree(categoryRepository.findAll()));
     }
 
     @Transactional
-    public CategoryResponse createCategory(CategoryRequest request) {
+    @CacheEvict(value = "categoryTree", allEntries = true)
+    public CategoryResponse createCategory(final CategoryRequest request) {
         Category parent = null;
 
         Long parentId = request.parentId();
@@ -43,11 +47,12 @@ public class CategoryService {
                 .parent(parent)
                 .build();
 
-        return categoryMapper.toCategoryResponse(categoryRepository.save(category));
+        return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Transactional
-    public CategoryResponse updateCategory(Long categoryId, CategoryRequest request) {
+    @CacheEvict(value = "categoryTree", allEntries = true)
+    public CategoryResponse updateCategory(final Long categoryId, final CategoryRequest request) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException(categoryId));
 
@@ -63,11 +68,12 @@ public class CategoryService {
         category.setSlug(request.slug());
         category.setIconUrl(request.iconUrl());
 
-        return categoryMapper.toCategoryResponse(categoryRepository.save(category));
+        return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Transactional
-    public void deleteCategory(Long categoryId) {
+    @CacheEvict(value = "categoryTree", allEntries = true)
+    public void deleteCategory(final Long categoryId) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new CategoryNotFoundException(categoryId);
         }

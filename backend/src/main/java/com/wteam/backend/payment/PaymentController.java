@@ -18,8 +18,11 @@ public class PaymentController {
     @Operation(summary = "Створити чекаут", description = "Генерує Stripe Checkout Session URL для конкретного бронювання.")
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<com.wteam.backend.payment.dto.StripeCheckoutResponse> createPaymentCheckout(@RequestParam Long bookingId) {
-        return ResponseEntity.ok(paymentService.createPaymentCheckout(bookingId));
+    public ResponseEntity<com.wteam.backend.payment.dto.StripeCheckoutResponse> createPaymentCheckout(
+            @RequestParam Long bookingId,
+            @com.wteam.backend.security.annotation.CurrentUser com.wteam.backend.security.dto.UserPrincipalDto user
+    ) {
+        return ResponseEntity.ok(paymentService.createPaymentCheckout(bookingId, user.id()));
     }
 
     @Operation(summary = "Stripe Webhook", description = "Службовий ендпоінт, куди Stripe надсилає статус платежу.")
@@ -32,8 +35,11 @@ public class PaymentController {
     @Operation(summary = "Перевірити статус", description = "Додаткова перевірка статусу платежу в разі, якщо вебхук не дійшов (наприклад, при локальній розробці).")
     @PostMapping("/verify")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> verifyPaymentStatus(@RequestParam Long bookingId) {
-        paymentService.verifyPaymentStatus(bookingId);
+    public ResponseEntity<Void> verifyPaymentStatus(
+            @RequestParam Long bookingId,
+            @com.wteam.backend.security.annotation.CurrentUser com.wteam.backend.security.dto.UserPrincipalDto user
+    ) {
+        paymentService.verifyPaymentStatus(bookingId, user.id());
         return ResponseEntity.ok().build();
     }
 }

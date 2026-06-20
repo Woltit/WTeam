@@ -1,5 +1,7 @@
 package com.wteam.backend.user;
 
+import com.wteam.backend.common.interfaces.Mapper;
+import com.wteam.backend.user.dto.UserRequest;
 import com.wteam.backend.user.dto.UserResponse;
 import com.wteam.backend.user_profile.UserProfile;
 import com.wteam.backend.user_profile.UserProfileMapper;
@@ -23,9 +25,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class UserMapper {
+public class UserMapper implements Mapper<UserRequest, UserResponse, User> {
     private final UserProfileMapper userProfileMapper;
-
 
     /**
      * Конвертує JPA-сутність {@link User} у вихідний об'єкт відповіді {@link UserResponse}.
@@ -39,6 +40,7 @@ public class UserMapper {
      * @return заповнений об'єкт {@link UserResponse} для відправки клієнту.
      * @throws IllegalArgumentException якщо переданий об'єкт користувача є {@code null}.
      */
+    @Override
     public UserResponse toResponse(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User must not be null");
@@ -52,8 +54,13 @@ public class UserMapper {
                 user.getRole(),
                 user.isActive(),
                 user.getBlockReason(),
-                userProfile != null ? userProfileMapper.toProfileResponse(userProfile) : null,
+                userProfile != null ? userProfileMapper.toResponse(userProfile) : null,
                 user.getCreatedAt()
         );
+    }
+
+    @Override
+    public User toEntity(UserRequest dto) {
+        return null;
     }
 }

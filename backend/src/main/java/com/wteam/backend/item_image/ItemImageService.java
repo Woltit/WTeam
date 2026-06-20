@@ -1,10 +1,10 @@
 package com.wteam.backend.item_image;
 
 import com.wteam.backend.cloudinary.ImageService;
-import com.wteam.backend.exception.item.ItemNotFoundException;
-import com.wteam.backend.exception.item.ItemImageNotFoundException;
-import com.wteam.backend.exception.item.ItemImageAccessDeniedException;
 import com.wteam.backend.exception.cloudinary.ImageUploadException;
+import com.wteam.backend.exception.item.ItemImageAccessDeniedException;
+import com.wteam.backend.exception.item.ItemImageNotFoundException;
+import com.wteam.backend.exception.item.ItemNotFoundException;
 import com.wteam.backend.item.Item;
 import com.wteam.backend.item.ItemRepository;
 import com.wteam.backend.item_image.dto.ItemImageResponse;

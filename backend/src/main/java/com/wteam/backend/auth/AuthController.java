@@ -4,6 +4,8 @@ import com.wteam.backend.auth.dto.AuthResponse;
 import com.wteam.backend.auth.dto.LoginRequest;
 import com.wteam.backend.auth.dto.RefreshTokenRequest;
 import com.wteam.backend.auth.dto.RegisterRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -47,7 +47,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(
             @Valid @RequestBody RefreshTokenRequest refreshTokenRequest
-            ) {
+    ) {
         return ResponseEntity.ok(authService.refreshToken(refreshTokenRequest));
     }
 }

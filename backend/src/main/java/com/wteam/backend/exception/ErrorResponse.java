@@ -3,6 +3,7 @@ package com.wteam.backend.exception;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
+import java.util.Map;
 
 /**
  * The type Error response.
@@ -11,6 +12,7 @@ public record ErrorResponse(
         int status,
         String message,
         String detailedMessage,
+        Map<String, String> validationErrors,
         Instant timestamp
 ) {
     /**
@@ -21,7 +23,7 @@ public record ErrorResponse(
      * @return the error response
      */
     public static ErrorResponse of(HttpStatus status, String message) {
-        return new ErrorResponse(status.value(), message, null, Instant.now());
+        return new ErrorResponse(status.value(), message, null, null, Instant.now());
     }
 
     /**
@@ -33,6 +35,14 @@ public record ErrorResponse(
      * @return the error response
      */
     public static ErrorResponse of(HttpStatus status, String message, String detailedMessage) {
-        return new ErrorResponse(status.value(), message, detailedMessage, Instant.now());
+        return new ErrorResponse(status.value(), message, detailedMessage, null, Instant.now());
+    }
+
+    public static ErrorResponse ofValidationErrors(HttpStatus status, String message, Map<String, String> validationErrors) {
+        return new ErrorResponse(status.value(), message, null, validationErrors, Instant.now());
+    }
+
+    public static ErrorResponse ofValidationErrors(HttpStatus status, String message, String detailedMessage, Map<String, String> validationErrors) {
+        return new ErrorResponse(status.value(), message, detailedMessage, validationErrors, Instant.now());
     }
 }

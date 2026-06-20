@@ -1,12 +1,25 @@
 package com.wteam.backend.item_review;
 
-import com.wteam.backend.item_review.dto.ItemReviewRequest;
-import com.wteam.backend.item_review.dto.ItemReviewResponse;
+import com.wteam.backend.booking.Booking;
+import com.wteam.backend.booking.BookingRepository;
+import com.wteam.backend.common.enums.BookingStatus;
+import com.wteam.backend.common.enums.ReviewStatus;
+import com.wteam.backend.common.enums.TargetRole;
 import com.wteam.backend.exception.review.InvalidReviewStateException;
 import com.wteam.backend.exception.review.ReviewAlreadyExistsException;
-import com.wteam.backend.common.enums.BookingStatus;
+import com.wteam.backend.item_review.dto.ItemReviewRequest;
+import com.wteam.backend.item_review.dto.ItemReviewResponse;
+import com.wteam.backend.user_review.ReviewManagerService;
+import com.wteam.backend.user_review.UserReview;
+import com.wteam.backend.user_review.UserReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Сервіс для керування відгуками на товари.
@@ -18,13 +31,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ItemReviewService {
     private final ItemReviewRepository itemReviewRepository;
-    private final com.wteam.backend.user_review.UserReviewRepository userReviewRepository;
-    private final com.wteam.backend.booking.BookingRepository bookingRepository;
-    private final com.wteam.backend.user_review.ReviewManagerService reviewManagerService;
+    private final UserReviewRepository userReviewRepository;
+    private final BookingRepository bookingRepository;
+    private final ReviewManagerService reviewManagerService;
+    private final ItemReviewMapper itemReviewMapper;
 
-    @org.springframework.transaction.annotation.Transactional
-    public ItemReviewResponse submitItemReview(Long bookingId, Long reviewerId, ItemReviewRequest request) {
-        com.wteam.backend.booking.Booking booking = bookingRepository.findById(bookingId)
+    @Transactional
+    @CacheEvict(value = "itemReviews", key = "#result.itemId")
+    public ItemReviewResponse submitItemReview(final Long bookingId, final Long reviewerId, final ItemReviewRequest request) {
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
         if (booking.getStatus() != BookingStatus.COMPLETED) {
@@ -39,53 +54,39 @@ public class ItemReviewService {
             throw new ReviewAlreadyExistsException("You have already left an item review for this booking");
         }
 
-        ItemReview review = new ItemReview();
+        ItemReview review = itemReviewMapper.toEntity(request);
         review.setItem(booking.getItem());
         review.setBooking(booking);
         review.setReviewer(booking.getRenter());
-        review.setRating(request.getRating());
-        review.setComment(request.getComment());
         review.setStatus(com.wteam.backend.common.enums.ReviewStatus.PENDING);
 
         review = itemReviewRepository.save(review);
 
-        // Duplicate the review for the Owner so the Owner gets a UserReview (targetRole = OWNER)
-        com.wteam.backend.user_review.UserReview userReviewForOwner = new com.wteam.backend.user_review.UserReview();
-        userReviewForOwner.setTargetUser(booking.getItem().getOwner());
-        userReviewForOwner.setReviewer(booking.getRenter());
-        userReviewForOwner.setBooking(booking);
-        userReviewForOwner.setTargetRole(com.wteam.backend.common.enums.TargetRole.OWNER);
-        userReviewForOwner.setRating(request.getRating());
-        userReviewForOwner.setComment(request.getComment());
-        userReviewForOwner.setStatus(com.wteam.backend.common.enums.ReviewStatus.PENDING);
+        UserReview userReviewForOwner = getUserReview(request, booking);
         userReviewRepository.save(userReviewForOwner);
 
         reviewManagerService.checkAndPublishReviewsIfComplete(bookingId);
 
-        return com.wteam.backend.item_review.dto.ItemReviewResponse.builder()
-                .id(review.getId())
-                .itemId(review.getItem().getId())
-                .reviewerId(review.getReviewer().getId())
-                .bookingId(review.getBooking().getId())
-                .rating(review.getRating())
-                .comment(review.getComment())
-                .status(review.getStatus())
-                .createdAt(review.getCreatedAt())
-                .build();
+        return itemReviewMapper.toResponse(review);
     }
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public java.util.List<com.wteam.backend.item_review.dto.ItemReviewResponse> getPublishedReviewsForItem(Long itemId) {
-        return itemReviewRepository.findByItemIdAndStatusOrderByCreatedAtAsc(itemId, com.wteam.backend.common.enums.ReviewStatus.PUBLISHED).stream()
-                .map(review -> com.wteam.backend.item_review.dto.ItemReviewResponse.builder()
-                        .id(review.getId())
-                        .itemId(review.getItem().getId())
-                        .reviewerId(review.getReviewer().getId())
-                        .bookingId(review.getBooking().getId())
-                        .rating(review.getRating())
-                        .comment(review.getComment())
-                        .status(review.getStatus())
-                        .createdAt(review.getCreatedAt())
-                        .build())
-                .toList();
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "itemReviews", key = "#itemId")
+    public List<ItemReviewResponse> getPublishedReviewsForItem(final Long itemId) {
+        return new java.util.ArrayList<>(itemReviewRepository.findByItemIdAndStatusOrderByCreatedAtAsc(itemId, ReviewStatus.PUBLISHED).stream()
+                .map(itemReviewMapper::toResponse)
+                .toList());
+    }
+
+    private static @NonNull UserReview getUserReview(final ItemReviewRequest request, final Booking booking) {
+        UserReview userReviewForOwner = new UserReview();
+        userReviewForOwner.setTargetUser(booking.getItem().getOwner());
+        userReviewForOwner.setReviewer(booking.getRenter());
+        userReviewForOwner.setBooking(booking);
+        userReviewForOwner.setTargetRole(TargetRole.OWNER);
+        userReviewForOwner.setRating(request.getRating());
+        userReviewForOwner.setComment(request.getComment());
+        userReviewForOwner.setStatus(ReviewStatus.PENDING);
+        return userReviewForOwner;
     }
 }

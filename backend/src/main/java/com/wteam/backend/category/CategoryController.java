@@ -2,15 +2,17 @@ package com.wteam.backend.category;
 
 import com.wteam.backend.category.dto.CategoryRequest;
 import com.wteam.backend.category.dto.CategoryResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @Tag(name = "Категорії", description = "API для управління категоріями товарів")
@@ -32,9 +34,14 @@ public class CategoryController {
     public ResponseEntity<CategoryResponse> createCategory(
             @Valid @RequestBody CategoryRequest request
     ) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(categoryService.createCategory(request));
+        CategoryResponse category = categoryService.createCategory(request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(category.id())
+                .toUri();
+        
+        return ResponseEntity.created(location).body(category);
     }
 
     @Operation(summary = "Оновити категорію", description = "Тільки для адміністраторів. Оновлює існуючу категорію за ID.")
