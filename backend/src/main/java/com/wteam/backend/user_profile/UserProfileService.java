@@ -8,6 +8,9 @@ import com.wteam.backend.user_profile.dto.PublicProfileResponse;
 import com.wteam.backend.user_profile.dto.UserProfileRequest;
 import com.wteam.backend.user_profile.dto.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,16 +28,22 @@ public class UserProfileService {
     private final ImageService imageService;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "userProfiles", key = "#userId")
     public UserProfileResponse getProfile(Long userId) {
         return userProfileMapper.toProfileResponse(getUserProfile(userId));
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "publicUserProfiles", key = "#userId")
     public PublicProfileResponse getPublicProfile(Long userId) {
         return userProfileMapper.toPublicProfileResponse(getUserProfile(userId));
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userProfiles", key = "#userId"),
+            @CacheEvict(value = "publicUserProfiles", key = "#userId")
+    })
     public UserProfileResponse updateProfile(Long userId, UserProfileRequest request) {
         UserProfile userProfile = getUserProfile(userId);
         userProfileMapper.updateProfileFromRequest(request, userProfile);
@@ -42,6 +51,10 @@ public class UserProfileService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userProfiles", key = "#userId"),
+            @CacheEvict(value = "publicUserProfiles", key = "#userId")
+    })
     public UserProfileResponse updateVerificationStatus(Long userId, VerificationStatus status) {
         UserProfile userProfile = getUserProfile(userId);
         userProfile.setVerificationStatus(status);
@@ -49,6 +62,10 @@ public class UserProfileService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userProfiles", key = "#userId"),
+            @CacheEvict(value = "publicUserProfiles", key = "#userId")
+    })
     public void uploadAvatar(Long userId, MultipartFile file) {
         try {
             UserProfile userProfile = getUserProfile(userId);
@@ -67,6 +84,10 @@ public class UserProfileService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userProfiles", key = "#userId"),
+            @CacheEvict(value = "publicUserProfiles", key = "#userId")
+    })
     public UserProfileResponse submitForVerification(Long userId) {
         UserProfile userProfile = getUserProfile(userId);
 

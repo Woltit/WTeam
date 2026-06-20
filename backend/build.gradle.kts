@@ -84,8 +84,14 @@ val dotenvVersion           = "4.0.0"
 val apacheCommonsVersion    = "3.20.0"
 val openApiVersion          = "3.0.0"
 val firebaseAdminVersion    = "9.9.0"
+val caffeineVersion         = "3.2.4"
+val guavaVersion            = "33.6.0-jre"
+val bucket4jVersion         = "8.19.0"
+val cloudinaryVersion       = "1.39.0"
+val stripeVersion           = "24.22.0"
 
 extra["snippetsDir"]        = file("build/generated-snippets")
+val springAiVersion by extra("2.0.0")
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-h2console")
@@ -111,8 +117,13 @@ dependencies {
     implementation("com.google.firebase:firebase-admin:$firebaseAdminVersion")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
-    implementation("com.cloudinary:cloudinary-http44:1.39.0")
-    implementation("com.stripe:stripe-java:24.22.0")
+    implementation("org.springframework.boot:spring-boot-starter-session-data-redis")
+    implementation("org.springframework.ai:spring-ai-starter-model-chat-memory-repository-redis")
+    implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
+    implementation("com.google.guava:guava:$guavaVersion")
+    implementation("com.bucket4j:bucket4j_jdk17-core:$bucket4jVersion")
+    implementation("com.cloudinary:cloudinary-http44:$cloudinaryVersion")
+    implementation("com.stripe:stripe-java:$stripeVersion")
 
     compileOnly("org.projectlombok:lombok")
 
@@ -146,6 +157,11 @@ dependencies {
     testImplementation("org.testcontainers:kafka:1.19.7")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.ai:spring-ai-bom:$springAiVersion")
+    }
 }
 
 tasks.withType<Test> {

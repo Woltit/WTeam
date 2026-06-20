@@ -4,6 +4,9 @@ import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.exception.user.UserNotFoundException;
 import com.wteam.backend.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,7 @@ public class UserService {
      * @return the user by userId
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "users", key = "#userId")
     public UserResponse getUserById(Long userId) {
         return userRepository.findById(userId)
                 .map(userMapper::toResponse)
@@ -58,6 +62,7 @@ public class UserService {
      * @return the user by email
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "usersByEmail", key = "#email")
     public UserResponse getUserByEmail(String email) {
         Assert.hasText(email, "Email must not be empty");
 
@@ -73,6 +78,10 @@ public class UserService {
      * @param userId   the userId
      */
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#userId"),
+            @CacheEvict(value = "usersByEmail", key = "#email")
+    })
     public void updateRole(Role role, Long userId) {
         Assert.notNull(role, "Role must not be null");
 
@@ -86,6 +95,10 @@ public class UserService {
      * @param userId the userId
      */
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#userId"),
+            @CacheEvict(value = "usersByEmail", key = "#email")
+    })
     public void deleteUserById(Long userId) {
         userRepository.delete(getUser(userId));
     }
@@ -98,6 +111,10 @@ public class UserService {
      * @param reason  the reason
      */
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#userId"),
+            @CacheEvict(value = "usersByEmail", key = "#email")
+    })
     public void deactivateUser(Long userId, Long adminId, String reason) {
         User user = getUser(userId);
 
@@ -113,6 +130,10 @@ public class UserService {
      * @param userId the userId
      */
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#userId"),
+            @CacheEvict(value = "usersByEmail", key = "#email")
+    })
     public void activateUser(Long userId) {
         User user = getUser(userId);
 

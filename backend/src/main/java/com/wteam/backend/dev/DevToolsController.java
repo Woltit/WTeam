@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/dev-tools")
 @Profile("dev")
 @RequiredArgsConstructor
-@Tag(name = "🛠 Dev Tools")
+@Tag(name = "Dev Tools")
 public class DevToolsController {
-
     private final JdbcTemplate jdbcTemplate;
     private final ReviewPublishScheduler reviewPublishScheduler;
 
