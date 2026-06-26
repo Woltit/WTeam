@@ -120,6 +120,9 @@ public class PaymentService {
         Optional<Payment> paymentOpt = paymentRepository.findByProviderTransactionId(sessionId);
         if (paymentOpt.isPresent()) {
             Payment payment = paymentOpt.get();
+            if (payment.getStatus() == PaymentStatus.SUCCESS) {
+                return;
+            }
             payment.setStatus(PaymentStatus.SUCCESS);
             Booking booking = payment.getBooking();
             booking.setStatus(BookingStatus.PAID);

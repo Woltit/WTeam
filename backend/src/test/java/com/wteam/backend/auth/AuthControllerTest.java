@@ -3,8 +3,8 @@ package com.wteam.backend.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wteam.backend.auth.dto.AuthResponse;
 import com.wteam.backend.auth.dto.LoginRequest;
-import com.wteam.backend.auth.dto.RefreshTokenRequest;
 import com.wteam.backend.auth.dto.RegisterRequest;
+import com.wteam.backend.cookies.CookieService;
 import com.wteam.backend.exception.user.UserAlreadyExistsException;
 import com.wteam.backend.security.TestSecurityConfig;
 import com.wteam.backend.security.jwt.JwtService;
@@ -39,6 +39,7 @@ class AuthControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean AuthService authService;
+    @MockitoBean CookieService cookieService;
     @MockitoBean JwtService jwtService;
     @MockitoBean UserDetailsService userDetailsService;
     @MockitoBean CustomOAuth2UserService customOAuth2UserService;
@@ -117,14 +118,13 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /auth/refresh → 200 with new access accessToken")
     void refresh_whenValidToken_returns200() throws Exception {
-        RefreshTokenRequest req = new RefreshTokenRequest("valid-refresh-token");
         AuthResponse resp = new AuthResponse("new-access-token", "valid-refresh-token");
         when(authService.refreshToken(any())).thenReturn(resp);
 
         mockMvc.perform(post("/auth/refresh")
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                        .cookie(new jakarta.servlet.http.Cookie("refreshToken", "valid-refresh-token"))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("new-access-token"));
     }

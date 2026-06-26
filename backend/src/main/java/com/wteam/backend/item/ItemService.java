@@ -109,7 +109,7 @@ public class ItemService {
         Item item = getItem(itemId);
 
         if (!isAdmin && !item.getOwner().getId().equals(userId)) {
-            throw new IllegalArgumentException("You are not the owner of this item");
+            throw new AccessDeniedException("You are not the owner of this item");
         }
 
         item.setStatus(RentingStatus.ARCHIVED);

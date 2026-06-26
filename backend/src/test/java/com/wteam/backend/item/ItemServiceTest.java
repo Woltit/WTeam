@@ -209,7 +209,7 @@ class ItemServiceTest {
     }
 
     @Test
-    @DisplayName("updateItem should throw IllegalArgumentException if user is not owner")
+    @DisplayName("updateItem should throw AccessDeniedException if user is not owner")
     void updateItem_whenUserNotOwner_shouldThrowException() {
         Long itemId = 1L;
         Long userId = 2L;
@@ -223,7 +223,7 @@ class ItemServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
-        assertThrows(IllegalArgumentException.class, () -> itemService.updateItem(itemId, userId, request));
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> itemService.updateItem(itemId, userId, request));
     }
 
     @Test
@@ -248,7 +248,7 @@ class ItemServiceTest {
     }
 
     @Test
-    @DisplayName("deleteItem should throw IllegalArgumentException if user is not owner")
+    @DisplayName("deleteItem should throw AccessDeniedException if user is not owner")
     void deleteItem_whenUserNotOwner_shouldThrowException() {
         Long itemId = 1L;
         Long userId = 2L;
@@ -261,6 +261,6 @@ class ItemServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
-        assertThrows(IllegalArgumentException.class, () -> itemService.deleteItem(itemId, userId, false));
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> itemService.deleteItem(itemId, userId, false));
     }
 }

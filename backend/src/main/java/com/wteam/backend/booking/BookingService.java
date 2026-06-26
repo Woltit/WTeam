@@ -152,8 +152,10 @@ public class BookingService {
         boolean isRenter = isIsRenter(userId, newStatus, booking);
 
 
-        if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new InvalidBookingStateException("Cannot change status of a cancelled booking");
+        if (booking.getStatus() == BookingStatus.CANCELLED || 
+            booking.getStatus() == BookingStatus.COMPLETED || 
+            booking.getStatus() == BookingStatus.REJECTED) {
+            throw new InvalidBookingStateException("Cannot change status of a " + booking.getStatus() + " booking");
         }
 
         booking.setStatus(newStatus);
@@ -187,8 +189,10 @@ public class BookingService {
     public BookingResponse adminUpdateStatus(Long bookingId, BookingStatus newStatus, String cancellationReason) {
         Booking booking = getBooking(bookingId);
 
-        if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new InvalidBookingStateException("Cannot change status of a cancelled booking");
+        if (booking.getStatus() == BookingStatus.CANCELLED || 
+            booking.getStatus() == BookingStatus.COMPLETED || 
+            booking.getStatus() == BookingStatus.REJECTED) {
+            throw new InvalidBookingStateException("Cannot change status of a " + booking.getStatus() + " booking");
         }
 
         booking.setStatus(newStatus);
