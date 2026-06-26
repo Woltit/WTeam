@@ -4,7 +4,6 @@ import com.wteam.backend.common.enums.ReviewStatus;
 import com.wteam.backend.item_review.ItemReview;
 import com.wteam.backend.item_review.ItemReviewRepository;
 import com.wteam.backend.system_listeners.ReviewPublishedEvent;
-import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;

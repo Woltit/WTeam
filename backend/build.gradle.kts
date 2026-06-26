@@ -1,3 +1,5 @@
+import org.gradle.internal.extensions.stdlib.toDefaultLowerCase
+
 plugins {
     java
     id("org.springframework.boot") version "4.0.6"
@@ -183,4 +185,16 @@ tasks.test {
 tasks.asciidoctor {
     inputs.dir(project.extra["snippetsDir"]!!)
     dependsOn(tasks.test)
+}
+
+tasks.register<Exec>("dopplerRun") {
+    group = "application"
+    description = "Runs the Spring Boot application with Doppler Secrets"
+
+    val osName = System.getProperty("os.name").lowercase();
+    val isWindows = osName.contains("windows");
+
+    val gradlewName = if (isWindows) "gradlew.bat" else "./gradlew";
+
+    commandLine("doppler", "run", "--", gradlewName, "bootRun")
 }

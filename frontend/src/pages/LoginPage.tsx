@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { GOOGLE_OAUTH_URL } from '../constants';
 import { getApiErrorMessage } from '../utils/apiError';
 import ThemeToggle from '../components/ThemeToggle';

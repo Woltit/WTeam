@@ -11,6 +11,7 @@ import com.wteam.backend.security.jwt.JwtService;
 import com.wteam.backend.security.oauth2.CustomOAuth2UserService;
 import com.wteam.backend.security.oauth2.CustomOidcUserService;
 import com.wteam.backend.security.oauth2.OAuth2SuccessHandler;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import lombok.RequiredArgsConstructor;
 
 @WebMvcTest(AuthController.class)
 @Import(TestSecurityConfig.class)

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import chatApi from '../api/chat';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import type { ChatRoomResponse, MessageResponse } from '../types/chat';
 import { useLanguage } from '../contexts/LanguageContext';
 

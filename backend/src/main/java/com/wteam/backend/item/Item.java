@@ -4,6 +4,7 @@ import com.wteam.backend.category.Category;
 import com.wteam.backend.common.entity.BaseEntityFull;
 import com.wteam.backend.common.enums.ItemCondition;
 import com.wteam.backend.common.enums.RentingStatus;
+import com.wteam.backend.item_image.ItemImage;
 import com.wteam.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +15,6 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import com.wteam.backend.item_image.ItemImage;
 
 import static com.wteam.backend.common.validation.ValidationConstants.Item.TITLE_MAX_LENGTH;
 

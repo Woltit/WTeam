@@ -1,5 +1,4 @@
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
-import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 

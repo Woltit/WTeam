@@ -1111,7 +1111,8 @@ a:hover { text-decoration: underline; }
   transition: border-color 0.15s, color 0.15s;
 }
 
-.cal-nav:hover { border-color: var(--accent); color: var(--accent); }
+.cal-nav:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .cal-grid {
   display: grid;

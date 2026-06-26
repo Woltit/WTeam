@@ -16,6 +16,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +90,7 @@ public class ItemService {
         Item item = getItem(itemId);
 
         if (!item.getOwner().getId().equals(userId)) {
-            throw new IllegalArgumentException("You are not the owner of this item");
+            throw new AccessDeniedException("You are not the owner of this item");
         }
 
         if (!item.getCategory().getId().equals(request.categoryId())) {

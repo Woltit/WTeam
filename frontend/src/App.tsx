@@ -18,8 +18,17 @@ import MyItemsPage from './pages/MyItemsPage';
 import PayStubPage from './pages/PayStubPage';
 import DocsPage from './pages/DocsPage';
 import { Toaster } from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { initAuth } from './store/slices/authSlice';
+import { type AppDispatch } from './store/store';
 
 function App() {
+    const dispatch = useDispatch<AppDispatch>();
+    useEffect(() => {
+        dispatch(initAuth());
+    }, [dispatch]);
+
     return (
         <>
             <Toaster position="top-center" />

@@ -171,6 +171,16 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Missing required parameter: " + e.getParameterName());
     }
 
+    @ExceptionHandler(org.springframework.web.bind.MissingRequestCookieException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequestCookieException(org.springframework.web.bind.MissingRequestCookieException e) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Missing required cookie: " + e.getCookieName());
+    }
+
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleObjectOptimisticLockingFailureException(org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Token is no longer valid or has already been used");
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException e) {
         return buildResponse(HttpStatus.NOT_FOUND, "Resource not found: " + e.getResourcePath());
@@ -187,7 +197,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.error("Unhandled exception occurred: ", e);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e.getMessage());
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", null);
     }
 
     /**

@@ -11,13 +11,26 @@ const register = async (data: RegisterRequest) => {
     return response.data;
 };
 
-const refresh = async (refreshToken: string) => {
-    const response = await api.post<AuthResponse>('/auth/refresh', { refreshToken });
-    return response.data;
+let refreshPromise: Promise<AuthResponse> | null = null;
+
+const refresh = async () => {
+    if (!refreshPromise) {
+        refreshPromise = api.post<AuthResponse>('/auth/refresh')
+            .then(res => res.data)
+            .finally(() => {
+                refreshPromise = null;
+            });
+    }
+    return refreshPromise;
 };
+
+const logout = async () => {
+    await api.post('/auth/logout');
+}
 
 export default {
     login,
     register,
     refresh,
+    logout,
 };

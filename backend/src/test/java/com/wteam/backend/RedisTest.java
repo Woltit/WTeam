@@ -1,14 +1,12 @@
 package com.wteam.backend;
 
 import com.wteam.backend.booking.dto.BookingResponse;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
-import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import org.junit.jupiter.api.Test;
 
 public class RedisTest {
     @Test

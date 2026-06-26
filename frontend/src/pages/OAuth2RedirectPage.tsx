@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import usersApi from "../api/users";
 
 const OAuth2RedirectPage = () => {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const accessToken = searchParams.get("accessToken");
@@ -13,14 +15,8 @@ const OAuth2RedirectPage = () => {
       setError("Токен авторизації не знайдено.");
       return;
     }
-    const refreshToken = searchParams.get("refreshToken");
-    if (!refreshToken) {
-      setError("Токен оновлення не знайдено.");
-      return;
-    }
 
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
+    dispatch({ type: "auth/tokensRefreshed", payload: { accessToken } });
 
     window.history.replaceState({}, "", "/oauth2/redirect");
 
@@ -30,11 +26,10 @@ const OAuth2RedirectPage = () => {
         navigate("/");
       })
       .catch(() => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        dispatch({ type: "auth/logout" });
         setError("Не вдалося завантажити профіль. Спробуйте увійти знову.");
       });
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, dispatch]);
 
   if (error) {
     return (

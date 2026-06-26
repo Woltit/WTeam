@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, type FormEvent, type ChangeEvent } from 'react';
 import profileApi from '../api/profile';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import type { UserProfileResponse } from '../types/user';
 import { useLanguage } from '../contexts/LanguageContext';
 

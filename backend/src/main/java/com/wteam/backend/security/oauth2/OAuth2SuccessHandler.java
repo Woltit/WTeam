@@ -1,5 +1,6 @@
 package com.wteam.backend.security.oauth2;
 
+import com.wteam.backend.cookies.CookieService;
 import com.wteam.backend.refresh_token.RefreshTokenService;
 import com.wteam.backend.security.SecurityUser;
 import com.wteam.backend.security.jwt.JwtService;
@@ -28,6 +29,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
+    private final CookieService cookieService;
 
     @Value("${app.frontend.oauth2-redirect-uri}")
     private String redirectUri;
@@ -65,9 +67,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken = jwtService.generateToken(securityUser);
         var refreshToken = refreshTokenService.generateRefreshToken(dbUser);
 
+        cookieService.setRefreshTokenCookie(response, refreshToken.getTokenHash());
+
         String targetUri = UriComponentsBuilder.fromUriString(redirectUri)
                 .queryParam("accessToken", accessToken)
-                .queryParam("refreshToken", refreshToken.getTokenHash())
                 .build()
                 .toUriString();
 

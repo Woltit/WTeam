@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- Налаштування кольорового виводу в консоль з підтримкою MDC (traceId та userId) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %clr([trace=%X{traceId:-none}, user=%X{userId:-system}]){yellow} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Залишаємо ваші рівні логування з application-dev.yaml -->
+    <logger name="com.wteam.backend" level="INFO" />
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.springframework.jdbc.core" level="WARN" />
+    <logger name="org.apache.kafka" level="ERROR" />
+    <logger name="org.springframework.kafka" level="ERROR" />
+</configuration>

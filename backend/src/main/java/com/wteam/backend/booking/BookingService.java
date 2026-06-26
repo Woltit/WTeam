@@ -17,6 +17,7 @@ import com.wteam.backend.notification.dto.NotificationEvent;
 import com.wteam.backend.user.User;
 import com.wteam.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,8 +30,6 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.beans.factory.ObjectProvider;
 
 @Service
 @RequiredArgsConstructor

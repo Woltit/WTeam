@@ -222,7 +222,7 @@ export const translations: Record<Language, TranslationDictionary> = {
         // LoginPage extra
         'login.subtitle': 'Увійдіть, щоб орендувати або здавати речі',
         'login.or': 'або',
-        'login.googleSubmit': 'Увійти через Google',
+        'login.googleSubmit': 'Продовжити з Google',
 
         // RegisterPage extra
         'register.subtitle': 'Створіть акаунт і почніть орендувати',
@@ -630,7 +630,7 @@ export const translations: Record<Language, TranslationDictionary> = {
         // LoginPage extra
         'login.subtitle': 'Log in to rent or list items',
         'login.or': 'or',
-        'login.googleSubmit': 'Sign in with Google',
+        'login.googleSubmit': 'Continue with Google',
 
         // RegisterPage extra
         'register.subtitle': 'Create an account and start renting',

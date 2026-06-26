@@ -100,10 +100,19 @@ const AvailabilityCalendar = ({ unavailableDates, onRangeSelect, pricePerDay, de
 
     const dayNames = DAY_NAMES[language] || DAY_NAMES.ua;
 
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+    const isCurrentOrPastMonth = year < currentYear || (year === currentYear && month <= currentMonth);
+
     return (
         <div className="cal">
             <div className="cal-header">
-                <button className="cal-nav" type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))}>‹</button>
+                <button 
+                    className="cal-nav" 
+                    type="button" 
+                    onClick={() => setViewDate(new Date(year, month - 1, 1))}
+                    disabled={isCurrentOrPastMonth}
+                >‹</button>
                 <span className="cal-month">{monthLabel}</span>
                 <button className="cal-nav" type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))}>›</button>
             </div>

@@ -53,6 +53,11 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
 
+auth:
+  cookie:
+    refresh-path: /api/v1/auth/refresh
+    max-age: 604800
+
 jwt:
   token:
     signing_key: ${JWT_SIGNING_KEY}

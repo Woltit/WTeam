@@ -5,7 +5,7 @@ import bookingsApi, { type UnavailableDateRange } from '../api/bookings';
 import chatApi from '../api/chat';
 import reviewsApi from '../api/reviews';
 import type { UserReviewResponse } from '../api/reviews';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import type { ItemResponse } from '../types/item';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import { useLanguage } from '../contexts/LanguageContext';

@@ -2,6 +2,7 @@ package com.wteam.backend.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wteam.backend.common.enums.ItemCondition;
+import com.wteam.backend.common.enums.RentingStatus;
 import com.wteam.backend.common.enums.Role;
 import com.wteam.backend.item.dto.ItemRequest;
 import com.wteam.backend.item.dto.ItemResponse;
@@ -13,6 +14,7 @@ import com.wteam.backend.security.oauth2.CustomOAuth2UserService;
 import com.wteam.backend.security.oauth2.CustomOidcUserService;
 import com.wteam.backend.security.oauth2.OAuth2SuccessHandler;
 import com.wteam.backend.user.User;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,11 +25,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import com.wteam.backend.common.enums.RentingStatus;
-import java.time.Instant;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -37,8 +38,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import lombok.RequiredArgsConstructor;
 
 @WebMvcTest(ItemController.class)
 @Import(TestSecurityConfig.class)

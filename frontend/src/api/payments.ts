@@ -12,6 +12,10 @@ const paymentsApi = {
     
     verifyPaymentStatus: async (bookingId: number): Promise<void> => {
         await api.post(`/payments/verify?bookingId=${bookingId}`);
+    },
+
+    callbackStub: async (paymentId: number, success: boolean): Promise<void> => {
+        await api.post(`/payments/stub`, { paymentId, success });
     }
 };
 
